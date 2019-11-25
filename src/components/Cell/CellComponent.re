@@ -63,5 +63,12 @@ let make =
     handleClick(Left);
   };
 
-  <div className={Css.merge([Styles.base, stateClass])} onClick> inner </div>;
+  let onContextMenu = e => {
+    ReactEvent.Mouse.preventDefault(e);
+    handleClick(Right);
+  };
+
+  <div className={Css.merge([Styles.base, stateClass])} onClick onContextMenu>
+    inner
+  </div>;
 };

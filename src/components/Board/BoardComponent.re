@@ -67,8 +67,10 @@ let make = (~model: Board.model, ~actionHandler: actionHandler) => {
            );
          <tr key={string_of_int(y)}> {React.array(cellComponents)} </tr>;
        });
+  // swallow this default behaviour so we don't get right clicks in between the cells
+  let onContextMenu = e => ReactEvent.Mouse.preventDefault(e);
 
-  <table className=Style.board>
+  <table className=Style.board onContextMenu>
     <tbody> {React.array(cellComponents)} </tbody>
   </table>;
 };

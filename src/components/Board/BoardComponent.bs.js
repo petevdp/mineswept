@@ -59,8 +59,13 @@ function BoardComponent(Props) {
                       /* handleClick */handleClick
                     ];
             }), model));
+  var onContextMenu = function (e) {
+    e.preventDefault();
+    return /* () */0;
+  };
   return React.createElement("table", {
-              className: board
+              className: board,
+              onContextMenu: onContextMenu
             }, React.createElement("tbody", undefined, cellComponents));
 }
 

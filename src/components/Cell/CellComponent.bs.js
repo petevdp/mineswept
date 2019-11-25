@@ -112,6 +112,10 @@ function CellComponent(Props) {
   var onClick = function (param) {
     return Curry._1(handleClick, /* Left */1);
   };
+  var onContextMenu = function (e) {
+    e.preventDefault();
+    return Curry._1(handleClick, /* Right */0);
+  };
   return React.createElement("div", {
               className: Css.merge(/* :: */[
                     base,
@@ -120,7 +124,8 @@ function CellComponent(Props) {
                       /* [] */0
                     ]
                   ]),
-              onClick: onClick
+              onClick: onClick,
+              onContextMenu: onContextMenu
             }, match[1]);
 }
 
