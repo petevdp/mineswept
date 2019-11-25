@@ -1,10 +1,12 @@
 'use strict';
 
-var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Board$ReasonReactExamples = require("../../gameLogic/Board.bs.js");
 var BoardComponent$ReasonReactExamples = require("../Board/BoardComponent.bs.js");
+var ControlPanelComponent$ReasonReactExamples = require("../ControlPanel/ControlPanelComponent.bs.js");
+
+var ControlPanel = { };
 
 function initBoard(param) {
   return Board$ReasonReactExamples.make(/* tuple */[
@@ -21,45 +23,38 @@ function initBoard(param) {
 
 function GameComponent(Props) {
   var match = React.useReducer((function (state, action) {
-          if (action.tag) {
-            return /* record */[
-                    /* board */state[/* board */0],
-                    /* boardActionHandler */action[0]
-                  ];
-          } else {
-            return /* record */[
-                    /* board */Board$ReasonReactExamples.update(/* tuple */[
+          if (action) {
+            return /* record */[/* board */Board$ReasonReactExamples.update(/* tuple */[
                           action[0],
                           action[1]
-                        ], state[/* board */0]),
-                    /* boardActionHandler */state[/* boardActionHandler */1]
-                  ];
+                        ], state[/* board */0])];
+          } else {
+            return /* record */[/* board */initBoard(/* () */0)];
           }
-        }), /* record */[
-        /* board */initBoard(/* () */0),
-        /* boardActionHandler */(function (param, param$1) {
-            return /* () */0;
-          })
-      ]);
+        }), /* record */[/* board */initBoard(/* () */0)]);
   var dispatch = match[1];
-  var match$1 = match[0];
-  React.useEffect((function () {
-          Curry._1(dispatch, /* RegisterCellActionHandler */Block.__(1, [(function (action, coords) {
-                      return Curry._1(dispatch, /* BoardAction */Block.__(0, [
-                                    action,
-                                    coords
-                                  ]));
-                    })]));
-          return ;
-        }), /* array */[]);
-  return React.createElement(BoardComponent$ReasonReactExamples.make, {
-              model: match$1[/* board */0],
-              actionHandler: match$1[/* boardActionHandler */1]
-            });
+  var boardActionHandler = function (action, coords) {
+    return Curry._1(dispatch, /* BoardAction */[
+                action,
+                coords
+              ]);
+  };
+  var onNewGame = function (param) {
+    return Curry._1(dispatch, /* NewGame */0);
+  };
+  return React.createElement(React.Fragment, {
+              children: null
+            }, React.createElement(ControlPanelComponent$ReasonReactExamples.make, {
+                  onNewGame: onNewGame
+                }), React.createElement(BoardComponent$ReasonReactExamples.make, {
+                  model: match[0][/* board */0],
+                  actionHandler: boardActionHandler
+                }));
 }
 
 var make = GameComponent;
 
+exports.ControlPanel = ControlPanel;
 exports.initBoard = initBoard;
 exports.make = make;
 /* react Not a pure module */
