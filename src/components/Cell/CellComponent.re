@@ -1,15 +1,5 @@
-let str = ReasonReact.string;
-
-type state =
-  | Hidden
-  | Visible
-  | Flagged;
-
-type model = {
-  state,
-  mined: bool,
-  onClick: ReactEvent.Mouse.t => unit,
-};
+open GlobalTypes;
+include Cell;
 
 module Styles = {
   open Css;
@@ -31,8 +21,21 @@ module Styles = {
   };
 };
 
+type click =
+  | Right
+  | Left;
+
+type handleClick = click => unit;
+
+type props = {
+  state,
+  mined: bool,
+  numAdjacent: int,
+  handleClick,
+};
+
 [@react.component]
-let make = (~model as {state, mined, onClick}) => {
+let make = (~state: state, ~mined: bool, ~handleClick: handleClick) => {
   let (stateClass, inner) =
     switch (state, mined) {
     | (Hidden, _) => (Styles.hidden, str(" "))
@@ -45,7 +48,11 @@ let make = (~model as {state, mined, onClick}) => {
         <img className=Styles.bomb src="/assets/bomb.svg" />,
       )
     | (Visible, false) => (Styles.Visible.empty, str(" "))
-    // | Visible, false => Styles.Visible.empty
     };
+
+  let onClick = _ => {
+    handleClick(Left);
+  };
+
   <div className={Css.merge([Styles.base, stateClass])} onClick> inner </div>;
 };

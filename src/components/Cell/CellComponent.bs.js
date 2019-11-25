@@ -1,11 +1,10 @@
 'use strict';
 
 var Css = require("bs-css/src/Css.js");
+var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
-
-function str(prim) {
-  return prim;
-}
+var Cell$ReasonReactExamples = require("../../gameLogic/Cell.bs.js");
+var GlobalTypes$ReasonReactExamples = require("../../GlobalTypes.bs.js");
 
 var cellSize = Css.px(30);
 
@@ -74,18 +73,20 @@ var Styles = {
   Visible: Visible
 };
 
-function Cell(Props) {
-  var match = Props.model;
-  var match$1;
-  switch (match[/* state */0]) {
+function CellComponent(Props) {
+  var state = Props.state;
+  var mined$1 = Props.mined;
+  var handleClick = Props.handleClick;
+  var match;
+  switch (state) {
     case /* Hidden */0 :
-        match$1 = /* tuple */[
+        match = /* tuple */[
           hidden,
-          " "
+          GlobalTypes$ReasonReactExamples.str(" ")
         ];
         break;
     case /* Visible */1 :
-        match$1 = match[/* mined */1] ? /* tuple */[
+        match = mined$1 ? /* tuple */[
             mined,
             React.createElement("img", {
                   className: bomb,
@@ -93,11 +94,11 @@ function Cell(Props) {
                 })
           ] : /* tuple */[
             empty,
-            " "
+            GlobalTypes$ReasonReactExamples.str(" ")
           ];
         break;
     case /* Flagged */2 :
-        match$1 = /* tuple */[
+        match = /* tuple */[
           flagged,
           React.createElement("img", {
                 className: flag,
@@ -107,21 +108,26 @@ function Cell(Props) {
         break;
     
   }
+  var onClick = function (param) {
+    return Curry._1(handleClick, /* Left */1);
+  };
   return React.createElement("div", {
               className: Css.merge(/* :: */[
                     base,
                     /* :: */[
-                      match$1[0],
+                      match[0],
                       /* [] */0
                     ]
                   ]),
-              onClick: match[/* onClick */2]
-            }, match$1[1]);
+              onClick: onClick
+            }, match[1]);
 }
 
-var make = Cell;
+var update = Cell$ReasonReactExamples.update;
 
-exports.str = str;
+var make = CellComponent;
+
+exports.update = update;
 exports.Styles = Styles;
 exports.make = make;
 /* cellSize Not a pure module */
