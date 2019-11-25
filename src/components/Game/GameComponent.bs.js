@@ -1,51 +1,65 @@
 'use strict';
 
+var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Board$ReasonReactExamples = require("../../gameLogic/Board.bs.js");
-var CustomUtils$ReasonReactExamples = require("../../utils/CustomUtils.bs.js");
 var BoardComponent$ReasonReactExamples = require("../Board/BoardComponent.bs.js");
 
-function getCellProps(param, coords, actionHandler) {
-  var handleClick = function (click) {
-    var action = click ? /* Check */0 : /* ToggleFlag */1;
-    return Curry._2(actionHandler, coords, action);
-  };
-  return /* record */[
-          /* state */param[/* state */0],
-          /* mined */param[/* mined */1],
-          /* numAdjacentMines */param[/* numAdjacentMines */2],
-          /* handleClick */handleClick
-        ];
+function initBoard(param) {
+  return Board$ReasonReactExamples.make(/* tuple */[
+              9,
+              9
+            ], /* :: */[
+              /* tuple */[
+                0,
+                0
+              ],
+              /* [] */0
+            ]);
 }
 
 function GameComponent(Props) {
-  var actionHandler = function (coords, action) {
-    console.log("action: ");
-    console.log(coords);
-    console.log(action);
-    return /* () */0;
-  };
-  var board = CustomUtils$ReasonReactExamples.Matrix.map((function (model, coords) {
-          return getCellProps(model, coords, actionHandler);
-        }), Board$ReasonReactExamples.make(/* tuple */[
-            10,
-            10
-          ], /* :: */[
-            /* tuple */[
-              1,
-              1
-            ],
-            /* [] */0
-          ]));
+  var match = React.useReducer((function (state, action) {
+          if (action.tag) {
+            return /* record */[
+                    /* board */state[/* board */0],
+                    /* boardActionHandler */action[0]
+                  ];
+          } else {
+            return /* record */[
+                    /* board */Board$ReasonReactExamples.update(/* tuple */[
+                          action[0],
+                          action[1]
+                        ], state[/* board */0]),
+                    /* boardActionHandler */state[/* boardActionHandler */1]
+                  ];
+          }
+        }), /* record */[
+        /* board */initBoard(/* () */0),
+        /* boardActionHandler */(function (param, param$1) {
+            return /* () */0;
+          })
+      ]);
+  var dispatch = match[1];
+  var match$1 = match[0];
+  React.useEffect((function () {
+          Curry._1(dispatch, /* RegisterCellActionHandler */Block.__(1, [(function (action, coords) {
+                      return Curry._1(dispatch, /* BoardAction */Block.__(0, [
+                                    action,
+                                    coords
+                                  ]));
+                    })]));
+          return ;
+        }), /* array */[]);
   return React.createElement(BoardComponent$ReasonReactExamples.make, {
-              cellModelMatrix: board,
-              actionHandler: actionHandler
+              model: match$1[/* board */0],
+              actionHandler: match$1[/* boardActionHandler */1]
             });
 }
 
 var make = GameComponent;
 
-exports.getCellProps = getCellProps;
+exports.initBoard = initBoard;
 exports.make = make;
 /* react Not a pure module */

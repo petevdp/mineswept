@@ -74,3 +74,13 @@ let make = (~size: size, ~minedCells: list(coords)): model => {
        )
      );
 };
+
+type specifiedCellAction = (Cell.action, coords);
+
+let update = ((action, (x, y)): specifiedCellAction, board: model) => {
+  let cell = board[y][x];
+  let {state, mined} = cell;
+  let {state}: Cell.model = Cell.update(action, {state, mined});
+  board[y][x] = {...cell, state};
+  board;
+};

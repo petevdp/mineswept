@@ -1,47 +1,45 @@
 open GlobalTypes;
 open CustomUtils;
 
-type actionHandler = (coords, Cell.action) => unit;
-
-// type getCellProps =
-//   (model: Cell.model, ~coords: coords, ~actionHandler: actionHandler, ~minedCells: list(coords)) =>
-//   CellComponent.props;
-
-let getCellProps =
-    (
-      {state, mined, numAdjacentMines}: Board.hydratedCellModel,
-      ~coords: coords,
-      ~actionHandler: actionHandler,
-    )
-    : CellComponent.props => {
-  let handleClick: CellComponent.handleClick =
-    click => {
-      let action =
-        switch (click) {
-        | Left => Cell.Check
-        | Right => Cell.ToggleFlag
-        };
-      actionHandler(coords, action);
-    };
-  {state, mined, numAdjacentMines, handleClick};
+type appState = {
+  board: Board.model,
+  boardActionHandler: BoardComponent.actionHandler,
 };
+
+type appAction =
+  | BoardAction(Cell.action, coords)
+  | RegisterCellActionHandler(BoardComponent.actionHandler);
+
+let initBoard = () => Board.make(~size=(9, 9), ~minedCells=[(0, 0)]);
 
 [@react.component]
 let make = () => {
-  let minedCells = [(1, 1)];
+  let ({board, boardActionHandler}, dispatch) =
+    React.useReducer(
+      (state, action) =>
+        switch (action) {
+        | BoardAction(cellAction, coords) => {
+            ...state,
+            board: Board.update((cellAction, coords), state.board),
+          }
+        | RegisterCellActionHandler(handler) => {
+            ...state,
+            boardActionHandler: handler,
+          }
+        },
+      {board: initBoard(), boardActionHandler: (_, _) => ()},
+    );
+  React.useEffect1(
+    () => {
+      dispatch(
+        RegisterCellActionHandler(
+          (action, coords) => dispatch(BoardAction(action, coords)),
+        ),
+      );
+      None;
+    },
+    [||],
+  );
 
-  let actionHandler: actionHandler =
-    (coords, action) => {
-      Js.log("action: ");
-      Js.log(coords);
-      Js.log(action);
-    };
-
-  let board =
-    Board.make(~size=(10, 10), ~minedCells)
-    |> Matrix.map((model, coords) =>
-         getCellProps(model, ~coords, ~actionHandler)
-       );
-
-  <BoardComponent cellModelMatrix=board actionHandler />;
+  <BoardComponent model=board actionHandler=boardActionHandler />;
 };
