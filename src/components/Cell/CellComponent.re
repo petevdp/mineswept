@@ -30,12 +30,18 @@ type handleClick = click => unit;
 type props = {
   state,
   mined: bool,
-  numAdjacent: int,
+  numAdjacentMines: int,
   handleClick,
 };
 
 [@react.component]
-let make = (~state: state, ~mined: bool, ~handleClick: handleClick) => {
+let make =
+    (
+      ~state: state,
+      ~mined: bool,
+      ~numAdjacentMines: int,
+      ~handleClick: handleClick,
+    ) => {
   let (stateClass, inner) =
     switch (state, mined) {
     | (Hidden, _) => (Styles.hidden, str(" "))
@@ -47,7 +53,10 @@ let make = (~state: state, ~mined: bool, ~handleClick: handleClick) => {
         Styles.Visible.mined,
         <img className=Styles.bomb src="/assets/bomb.svg" />,
       )
-    | (Visible, false) => (Styles.Visible.empty, str(" "))
+    | (Visible, false) => (
+        Styles.Visible.empty,
+        str(string_of_int(numAdjacentMines)),
+      )
     };
 
   let onClick = _ => {

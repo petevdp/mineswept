@@ -76,6 +76,7 @@ var Styles = {
 function CellComponent(Props) {
   var state = Props.state;
   var mined$1 = Props.mined;
+  var numAdjacentMines = Props.numAdjacentMines;
   var handleClick = Props.handleClick;
   var match;
   switch (state) {
@@ -94,7 +95,7 @@ function CellComponent(Props) {
                 })
           ] : /* tuple */[
             empty,
-            GlobalTypes$ReasonReactExamples.str(" ")
+            GlobalTypes$ReasonReactExamples.str(String(numAdjacentMines))
           ];
         break;
     case /* Flagged */2 :
