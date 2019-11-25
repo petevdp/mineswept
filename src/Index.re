@@ -25,19 +25,17 @@ let makeContainer = text => {
   content;
 };
 
-// ReactDOMRe.render(
-//   <BlinkingGreeting> {React.string("Hello!")} </BlinkingGreeting>,
-//   makeContainer("Blinking Greeting"),
-// );
-// let matrix: Board.cellModelMatrix = [|[|{state: Cell.Visible}|]|];
-let visibleCell: Cell.model = {state: Cell.Visible, mined: true};
+let onClick = _ => Js.log("clicked!");
+
+let visibleCell: Cell.model = {state: Cell.Visible, mined: true, onClick};
+
 let matrix: Board.cellModelMatrix = Array.make_matrix(10, 10, visibleCell);
 let testMatrix: Board.cellModelMatrix = [|
   [|
-    {state: Cell.Hidden, mined: false},
-    {state: Cell.Visible, mined: true},
-    {state: Cell.Visible, mined: false},
-    {state: Cell.Flagged, mined: false},
+    {state: Cell.Hidden, mined: false, onClick},
+    {state: Cell.Visible, mined: true, onClick},
+    {state: Cell.Visible, mined: false, onClick},
+    {state: Cell.Flagged, mined: false, onClick},
   |],
 |];
 

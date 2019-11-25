@@ -6,8 +6,7 @@ let make = (~cellModelMatrix as m: cellModelMatrix) => {
   let rows =
     Array.map(
       row => {
-        let cells =
-          Array.map(cellModel => <td> <Cell model=cellModel /> </td>, row);
+        let cells = Array.map(model => <td> <Cell model /> </td>, row);
         <tr> {React.array(cells)} </tr>;
       },
       m,

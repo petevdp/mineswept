@@ -7,20 +7,6 @@ function str(prim) {
   return prim;
 }
 
-function join(list, $$char) {
-  if (list) {
-    var tail = list[1];
-    var tail$1 = list[0];
-    if (tail) {
-      return tail$1 + ($$char + join(tail, $$char));
-    } else {
-      return tail$1;
-    }
-  } else {
-    return "";
-  }
-}
-
 var cellSize = Css.px(30);
 
 var base = Css.style(/* :: */[
@@ -62,7 +48,7 @@ var bomb = Css.style(/* :: */[
       ]
     ]);
 
-var mine = Css.style(/* :: */[
+var mined = Css.style(/* :: */[
       Css.backgroundColor(Css.salmon),
       /* [] */0
     ]);
@@ -73,7 +59,7 @@ var empty = Css.style(/* :: */[
     ]);
 
 var Visible = {
-  mine: mine,
+  mined: mined,
   empty: empty
 };
 
@@ -89,18 +75,18 @@ var Styles = {
 };
 
 function Cell(Props) {
-  var model = Props.model;
-  var match;
-  switch (model[/* state */0]) {
+  var match = Props.model;
+  var match$1;
+  switch (match[/* state */0]) {
     case /* Hidden */0 :
-        match = /* tuple */[
+        match$1 = /* tuple */[
           hidden,
           " "
         ];
         break;
     case /* Visible */1 :
-        match = model[/* mined */1] ? /* tuple */[
-            mine,
+        match$1 = match[/* mined */1] ? /* tuple */[
+            mined,
             React.createElement("img", {
                   className: bomb,
                   src: "/assets/bomb.svg"
@@ -111,7 +97,7 @@ function Cell(Props) {
           ];
         break;
     case /* Flagged */2 :
-        match = /* tuple */[
+        match$1 = /* tuple */[
           flagged,
           React.createElement("img", {
                 className: flag,
@@ -125,17 +111,17 @@ function Cell(Props) {
               className: Css.merge(/* :: */[
                     base,
                     /* :: */[
-                      match[0],
+                      match$1[0],
                       /* [] */0
                     ]
-                  ])
-            }, match[1]);
+                  ]),
+              onClick: match[/* onClick */2]
+            }, match$1[1]);
 }
 
 var make = Cell;
 
 exports.str = str;
-exports.join = join;
 exports.Styles = Styles;
 exports.make = make;
 /* cellSize Not a pure module */

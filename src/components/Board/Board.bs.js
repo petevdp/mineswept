@@ -7,9 +7,9 @@ var Cell$ReasonReactExamples = require("../Cell/Cell.bs.js");
 function Board(Props) {
   var m = Props.cellModelMatrix;
   var rows = $$Array.map((function (row) {
-          var cells = $$Array.map((function (cellModel) {
+          var cells = $$Array.map((function (model) {
                   return React.createElement("td", undefined, React.createElement(Cell$ReasonReactExamples.make, {
-                                  model: cellModel
+                                  model: model
                                 }));
                 }), row);
           return React.createElement("tr", undefined, cells);

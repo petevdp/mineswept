@@ -26,9 +26,15 @@ function makeContainer(text) {
   return content;
 }
 
+function onClick(param) {
+  console.log("clicked!");
+  return /* () */0;
+}
+
 var visibleCell = /* record */[
   /* state : Visible */1,
-  /* mined */true
+  /* mined */true,
+  /* onClick */onClick
 ];
 
 var matrix = $$Array.make_matrix(10, 10, visibleCell);
@@ -36,19 +42,23 @@ var matrix = $$Array.make_matrix(10, 10, visibleCell);
 var testMatrix = /* array */[/* array */[
     /* record */[
       /* state : Hidden */0,
-      /* mined */false
+      /* mined */false,
+      /* onClick */onClick
     ],
     /* record */[
       /* state : Visible */1,
-      /* mined */true
+      /* mined */true,
+      /* onClick */onClick
     ],
     /* record */[
       /* state : Visible */1,
-      /* mined */false
+      /* mined */false,
+      /* onClick */onClick
     ],
     /* record */[
       /* state : Flagged */2,
-      /* mined */false
+      /* mined */false,
+      /* onClick */onClick
     ]
   ]];
 
@@ -62,6 +72,7 @@ ReactDom.render(React.createElement(Board$ReasonReactExamples.make, {
 
 exports.style = style;
 exports.makeContainer = makeContainer;
+exports.onClick = onClick;
 exports.visibleCell = visibleCell;
 exports.matrix = matrix;
 exports.testMatrix = testMatrix;
