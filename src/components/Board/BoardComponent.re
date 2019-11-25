@@ -2,44 +2,19 @@ open GlobalTypes;
 open CustomUtils;
 
 type cellModelMatrix = matrix(CellComponent.props);
-type actionHandler = (Cell.action, coords) => unit;
 
 module Style = {
   open Css;
   let board = style([]);
 };
 
-let getCellProps =
-    (
-      {state, mined, numAdjacentMines}: Board.hydratedCellModel,
-      ~coords: coords,
-      ~actionHandler: actionHandler,
-    )
-    : CellComponent.props => {
-  let handleClick: CellComponent.handleClick =
-    click => {
-      let action =
-        switch (click) {
-        | Left => Cell.Check
-        | Right => Cell.ToggleFlag
-        };
-      actionHandler(action, coords);
-    };
-  {state, mined, numAdjacentMines, handleClick};
-};
-
-let getCellClickHandler =
-    (coords: coords, actionHandler: actionHandler, click: CellComponent.click) => {
-  let action =
-    switch (click) {
-    | Left => Cell.Check
-    | Right => Cell.ToggleFlag
-    };
-  actionHandler(action, coords);
+type handlers = {
+  onCheck: coords => unit,
+  onFlagToggle: coords => unit,
 };
 
 [@react.component]
-let make = (~model: Board.model, ~actionHandler: actionHandler) => {
+let make = (~model: Board.model, ~handlers: handlers) => {
   let cellComponents =
     model
     // add clickHandler
@@ -47,7 +22,14 @@ let make = (~model: Board.model, ~actionHandler: actionHandler) => {
          ({state, mined, numAdjacentMines}: Board.hydratedCellModel, coords) =>
          (
            {
-             let handleClick = getCellClickHandler(coords, actionHandler);
+             let handleClick = click => {
+               let {onCheck, onFlagToggle} = handlers;
+               switch ((click: CellComponent.click)) {
+               | Left => onCheck(coords)
+               | Right => onFlagToggle(coords)
+               };
+               ();
+             };
              {state, mined, numAdjacentMines, handleClick};
            }: CellComponent.props
          )

@@ -1,40 +1,30 @@
 open GlobalTypes;
 open CustomUtils;
 
-module ControlPanel = {
-  type action =
-    | Clear;
-};
+let initBoard = (): Board.model =>
+  Board.make(~size=(10, 10), ~minedCells=[(0, 0)]);
 
 type appState = {board: Board.model};
-
-type appAction =
-  | BoardAction(Cell.action, coords)
-  | NewGame;
-
-let initBoard = () => Board.make(~size=(9, 9), ~minedCells=[(0, 0)]);
-
 [@react.component]
 let make = () => {
   let ({board}, dispatch) =
+    // game state
     React.useReducer(
       (state, action) =>
-        switch (action) {
-        | BoardAction(cellAction, coords) => {
-            ...state,
-            board: Board.update((cellAction, coords), state.board),
-          }
-        | NewGame => {board: initBoard()}
-        },
+        {board: Game.update(action, state.board, ~initBoard)},
       {board: initBoard()},
     );
 
-  let boardActionHandler = (action, coords) =>
-    dispatch(BoardAction(action, coords));
+  // setup player action dispatching for the board
+  let boardHandlers: BoardComponent.handlers = {
+    onCheck: coords => dispatch(Game.Check(coords)),
+    onFlagToggle: coords => dispatch(Game.ToggleFlag(coords)),
+  };
+
   let onNewGame = () => dispatch(NewGame);
 
   <React.Fragment>
     <ControlPanelComponent onNewGame />
-    <BoardComponent model=board actionHandler=boardActionHandler />
+    <BoardComponent model=board handlers=boardHandlers />
   </React.Fragment>;
 };

@@ -13,27 +13,9 @@ var Style = {
   board: board
 };
 
-function getCellProps(param, coords, actionHandler) {
-  var handleClick = function (click) {
-    var action = click ? /* Check */0 : /* ToggleFlag */1;
-    return Curry._2(actionHandler, action, coords);
-  };
-  return /* record */[
-          /* state */param[/* state */0],
-          /* mined */param[/* mined */1],
-          /* numAdjacentMines */param[/* numAdjacentMines */2],
-          /* handleClick */handleClick
-        ];
-}
-
-function getCellClickHandler(coords, actionHandler, click) {
-  var action = click ? /* Check */0 : /* ToggleFlag */1;
-  return Curry._2(actionHandler, action, coords);
-}
-
 function BoardComponent(Props) {
   var model = Props.model;
-  var actionHandler = Props.actionHandler;
+  var handlers = Props.handlers;
   var cellComponents = $$Array.mapi((function (y, modelRow) {
           var cellComponents = $$Array.mapi((function (x, param) {
                   return React.createElement("th", {
@@ -49,8 +31,13 @@ function BoardComponent(Props) {
                       key: String(y)
                     }, cellComponents);
         }), CustomUtils$ReasonReactExamples.Matrix.map((function (param, coords) {
-              var handleClick = function (param) {
-                return getCellClickHandler(coords, actionHandler, param);
+              var handleClick = function (click) {
+                if (click) {
+                  Curry._1(handlers[/* onCheck */0], coords);
+                } else {
+                  Curry._1(handlers[/* onFlagToggle */1], coords);
+                }
+                return /* () */0;
               };
               return /* record */[
                       /* state */param[/* state */0],
@@ -72,7 +59,5 @@ function BoardComponent(Props) {
 var make = BoardComponent;
 
 exports.Style = Style;
-exports.getCellProps = getCellProps;
-exports.getCellClickHandler = getCellClickHandler;
 exports.make = make;
 /* board Not a pure module */

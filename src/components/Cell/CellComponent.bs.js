@@ -3,7 +3,6 @@
 var Css = require("bs-css/src/Css.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
-var Cell$ReasonReactExamples = require("../../gameLogic/Cell.bs.js");
 var GlobalTypes$ReasonReactExamples = require("../../GlobalTypes.bs.js");
 
 var cellSize = Css.px(30);
@@ -129,11 +128,8 @@ function CellComponent(Props) {
             }, match[1]);
 }
 
-var update = Cell$ReasonReactExamples.update;
-
 var make = CellComponent;
 
-exports.update = update;
 exports.Styles = Styles;
 exports.make = make;
 /* cellSize Not a pure module */

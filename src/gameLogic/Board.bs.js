@@ -4,7 +4,6 @@ var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
-var Cell$ReasonReactExamples = require("./Cell.bs.js");
 var CustomUtils$ReasonReactExamples = require("../utils/CustomUtils.bs.js");
 
 var adjacentDiff = /* :: */[
@@ -129,26 +128,8 @@ function make(size, minedCells) {
               }), makeRaw(size, minedCells));
 }
 
-function update(param, board) {
-  var match = param[1];
-  var y = match[1];
-  var x = match[0];
-  var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
-  var match$1 = Cell$ReasonReactExamples.update(param[0], /* record */[
-        /* state */cell[/* state */0],
-        /* mined */cell[/* mined */1]
-      ]);
-  Caml_array.caml_array_set(Caml_array.caml_array_get(board, y), x, /* record */[
-        /* state */match$1[/* state */0],
-        /* mined */cell[/* mined */1],
-        /* numAdjacentMines */cell[/* numAdjacentMines */2]
-      ]);
-  return board;
-}
-
 exports.Coords = Coords;
 exports.getAdjacentCells = getAdjacentCells;
 exports.makeRaw = makeRaw;
 exports.make = make;
-exports.update = update;
 /* No side effect */
