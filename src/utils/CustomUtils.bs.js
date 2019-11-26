@@ -2,6 +2,7 @@
 
 var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
+var Caml_array = require("bs-platform/lib/js/caml_array.js");
 
 function map(func, matrix) {
   return $$Array.mapi((function (i, row) {
@@ -14,8 +15,23 @@ function map(func, matrix) {
               }), matrix);
 }
 
+function size(matrix) {
+  if (matrix.length === 0 || Caml_array.caml_array_get(matrix, 0).length === 0) {
+    return /* tuple */[
+            0,
+            0
+          ];
+  } else {
+    return /* tuple */[
+            Caml_array.caml_array_get(matrix, 0).length,
+            matrix.length
+          ];
+  }
+}
+
 var Matrix = {
-  map: map
+  map: map,
+  size: size
 };
 
 exports.Matrix = Matrix;

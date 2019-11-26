@@ -4,15 +4,27 @@ open CustomUtils;
 let initBoard = (): Board.model =>
   Board.make(~size=(10, 10), ~minedCells=[(0, 0)]);
 
-type appState = {board: Board.model};
+type appState = {
+  board: Board.model,
+  gameState: Game.gameState,
+};
+
 [@react.component]
 let make = () => {
   let ({board}, dispatch) =
     // game state
     React.useReducer(
-      (state, action) =>
-        {board: Game.update(action, state.board, ~initBoard)},
-      {board: initBoard()},
+      (state, action) => {
+        let (board, gameState) =
+          Game.update(
+            action,
+            ~board=state.board,
+            ~initBoard,
+            ~gameState=state.gameState,
+          );
+        {board, gameState};
+      },
+      {board: initBoard(), gameState: New},
     );
 
   // setup player action dispatching for the board

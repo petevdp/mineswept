@@ -23,8 +23,15 @@ function initBoard(param) {
 
 function GameComponent(Props) {
   var match = React.useReducer((function (state, action) {
-          return /* record */[/* board */Game$ReasonReactExamples.update(action, state[/* board */0], initBoard)];
-        }), /* record */[/* board */initBoard(/* () */0)]);
+          var match = Game$ReasonReactExamples.update(action, state[/* board */0], state[/* gameState */1], initBoard);
+          return /* record */[
+                  /* board */match[0],
+                  /* gameState */match[1]
+                ];
+        }), /* record */[
+        /* board */initBoard(/* () */0),
+        /* gameState : New */0
+      ]);
   var dispatch = match[1];
   var boardHandlers_000 = function (coords) {
     return Curry._1(dispatch, /* Check */Block.__(0, [coords]));

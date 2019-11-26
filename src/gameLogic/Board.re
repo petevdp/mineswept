@@ -15,6 +15,13 @@ module Coords = {
     ((-1), (-1)),
   ] /* */;
 
+  let getAdjacentCoords = ((x, y), (xSize, ySize)) => {
+    adjacentDiff
+    |> List.map(((xDiff, yDiff)) => (x + xDiff, y + yDiff))
+    // filter out of bounds
+    |> List.filter(((x, y)) => x >= 0 && x < xSize && y >= 0 && y < ySize);
+  };
+
   type getNumAdjacent = (coords, list(coords)) => int;
   let getNumAdjacent: getNumAdjacent =
     ((x, y), countedCoords) =>
@@ -25,6 +32,7 @@ module Coords = {
          )
       |> List.length;
 };
+let adjacentCoords = Coords.getAdjacentCoords;
 
 let getAdjacentCells = ((x, y): coords, matrix: matrix('a)) => {
   let xSize = Array.length(matrix[0]);

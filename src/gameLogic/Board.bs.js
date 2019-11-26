@@ -56,6 +56,27 @@ var adjacentDiff = /* :: */[
   ]
 ];
 
+function getAdjacentCoords(param, param$1) {
+  var ySize = param$1[1];
+  var xSize = param$1[0];
+  var y = param[1];
+  var x = param[0];
+  return List.filter((function (param) {
+                  var y = param[1];
+                  var x = param[0];
+                  if (x >= 0 && x < xSize && y >= 0) {
+                    return y < ySize;
+                  } else {
+                    return false;
+                  }
+                }))(List.map((function (param) {
+                    return /* tuple */[
+                            x + param[0] | 0,
+                            y + param[1] | 0
+                          ];
+                  }), adjacentDiff));
+}
+
 function getNumAdjacent(param, countedCoords) {
   var y = param[1];
   var x = param[0];
@@ -73,6 +94,7 @@ function getNumAdjacent(param, countedCoords) {
 
 var Coords = {
   adjacentDiff: adjacentDiff,
+  getAdjacentCoords: getAdjacentCoords,
   getNumAdjacent: getNumAdjacent
 };
 
@@ -128,7 +150,10 @@ function make(size, minedCells) {
               }), makeRaw(size, minedCells));
 }
 
+var adjacentCoords = getAdjacentCoords;
+
 exports.Coords = Coords;
+exports.adjacentCoords = adjacentCoords;
 exports.getAdjacentCells = getAdjacentCells;
 exports.makeRaw = makeRaw;
 exports.make = make;
