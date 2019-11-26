@@ -44,7 +44,7 @@ let rec checkAndReveal = (coords: coords, board: Board.model): Board.model => {
       adjacentCoords |> List.filter(((x, y)) => board[y][x].state === Hidden);
     // recurse into all adjacent coordinates
     hiddenAdjacentCoords->Belt.List.reduce(board, (board, coords) =>
-      revealCells(coords, board)
+      checkAndReveal(coords, board)
     );
   } else {
     board;
@@ -54,7 +54,7 @@ let rec checkAndReveal = (coords: coords, board: Board.model): Board.model => {
 let cellCheck =
     (~coords: coords, ~gameState: gameState, ~board: Board.model)
     : (Board.model, gameState) => {
-  let (y, x) = coords;
+  let (x, y) = coords;
   let cell = board[y][x];
   Js.log("checking cell");
   Js.log(coords);
@@ -67,7 +67,7 @@ let cellCheck =
       checkAndReveal(coords, board),
       Playing,
     )
-  | (New | Playing, Visible | Flagged, true | false) => (board, gameState)
+  | (New | Playing, Visible | Flagged, _) => (board, gameState)
   };
 };
 
@@ -93,9 +93,15 @@ let update =
     : (Board.model, gameState) => {
   Js.log("gamestate: ");
   Js.log(gameState);
-  switch (action) {
-  | NewGame => (initBoard(), New)
-  | Check(coords) => cellCheck(~coords, ~gameState, ~board)
-  | ToggleFlag(coords) => (toggleFlag(coords, board), Playing)
+  switch (action, gameState) {
+  | (NewGame, _) => (initBoard(), New)
+  | (Check(coords), Playing | New) => cellCheck(~coords, ~gameState, ~board)
+  | (ToggleFlag(coords), Playing | New) => (
+      toggleFlag(coords, board),
+      Playing,
+    )
+  // these two should never actually happen given proper input control, included for completeness
+  | (Check(_), Ended) => (board, Ended)
+  | (ToggleFlag(_), Ended) => (board, Ended)
   };
 };

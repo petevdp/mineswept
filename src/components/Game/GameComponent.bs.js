@@ -10,9 +10,9 @@ var ControlPanelComponent$ReasonReactExamples = require("../ControlPanel/Control
 
 function initBoard(param) {
   return Board$ReasonReactExamples.initRandom(/* tuple */[
-              2,
-              2
-            ], 2);
+              5,
+              5
+            ], 4);
 }
 
 function GameComponent(Props) {
@@ -28,12 +28,13 @@ function GameComponent(Props) {
                 ];
         }), /* record */[
         /* board */Board$ReasonReactExamples.initRandom(/* tuple */[
-              2,
-              2
-            ], 2),
+              5,
+              5
+            ], 4),
         /* gameState : New */0
       ]);
   var dispatch = match[1];
+  var match$1 = match[0];
   var boardHandlers_000 = function (coords) {
     return Curry._1(dispatch, /* Check */Block.__(0, [coords]));
   };
@@ -50,9 +51,10 @@ function GameComponent(Props) {
   return React.createElement(React.Fragment, {
               children: null
             }, React.createElement(ControlPanelComponent$ReasonReactExamples.make, {
-                  onNewGame: onNewGame
+                  onNewGame: onNewGame,
+                  gameState: match$1[/* gameState */1]
                 }), React.createElement(BoardComponent$ReasonReactExamples.make, {
-                  model: match[0][/* board */0],
+                  model: match$1[/* board */0],
                   handlers: boardHandlers
                 }));
 }

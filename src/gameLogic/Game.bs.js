@@ -29,7 +29,7 @@ function revealAllMines(board) {
               }), board);
 }
 
-function revealCells(coords, board) {
+function checkAndReveal(coords, board) {
   var y = coords[1];
   var x = coords[0];
   var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
@@ -44,7 +44,7 @@ function revealCells(coords, board) {
               return Caml_array.caml_array_get(Caml_array.caml_array_get(board, param[1]), param[0])[/* state */0] === /* Hidden */0;
             }))(adjacentCoords);
     return Belt_List.reduce(hiddenAdjacentCoords, board, (function (board, coords) {
-                  return revealCells(coords, board);
+                  return checkAndReveal(coords, board);
                 }));
   } else {
     return board;
@@ -52,7 +52,7 @@ function revealCells(coords, board) {
 }
 
 function cellCheck(coords, gameState, board) {
-  var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, coords[0]), coords[1]);
+  var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, coords[1]), coords[0]);
   console.log("checking cell");
   console.log(coords);
   console.log(cell);
@@ -75,7 +75,7 @@ function cellCheck(coords, gameState, board) {
           ];
   } else {
     return /* tuple */[
-            revealCells(coords, board),
+            checkAndReveal(coords, board),
             /* Playing */1
           ];
   }
@@ -116,9 +116,21 @@ function update(action, board, gameState, initBoard) {
             /* New */0
           ];
   } else if (action.tag) {
+    if (gameState >= 2) {
+      return /* tuple */[
+              board,
+              /* Ended */2
+            ];
+    } else {
+      return /* tuple */[
+              toggleFlag(action[0], board),
+              /* Playing */1
+            ];
+    }
+  } else if (gameState >= 2) {
     return /* tuple */[
-            toggleFlag(action[0], board),
-            /* Playing */1
+            board,
+            /* Ended */2
           ];
   } else {
     return cellCheck(action[0], gameState, board);
@@ -127,7 +139,7 @@ function update(action, board, gameState, initBoard) {
 
 exports.staticCellCheck = staticCellCheck;
 exports.revealAllMines = revealAllMines;
-exports.revealCells = revealCells;
+exports.checkAndReveal = checkAndReveal;
 exports.cellCheck = cellCheck;
 exports.toggleFlag = toggleFlag;
 exports.update = update;

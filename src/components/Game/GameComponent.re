@@ -2,7 +2,8 @@ open GlobalTypes;
 open CustomUtils;
 
 let initBoard = (): Board.model =>
-  Board.initRandom(~size=(2, 2), ~mineCount=2);
+  Board.initRandom(~size=(5, 5), ~mineCount=4);
+// Board.make(~size=(10, 10), ~minedCells=[(0, 0), (0, 1)]);
 
 type appState = {
   board: Board.model,
@@ -11,7 +12,7 @@ type appState = {
 
 [@react.component]
 let make = () => {
-  let ({board}, dispatch) =
+  let ({board, gameState}, dispatch) =
     // game state
     React.useReducer(
       (state, action) => {
@@ -37,7 +38,7 @@ let make = () => {
   let onNewGame = () => dispatch(NewGame);
 
   <React.Fragment>
-    <ControlPanelComponent onNewGame />
+    <ControlPanelComponent onNewGame gameState />
     <BoardComponent model=board handlers=boardHandlers />
   </React.Fragment>;
 };
