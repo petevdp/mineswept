@@ -20,8 +20,17 @@ let staticCellCheck = (state: Cell.state): Cell.state =>
   | Visible => Visible
   };
 
+let revealAllMines = (board: Board.model): Board.model =>
+  Matrix.map(board, ~f=(cell: Board.hydratedCellModel, _) =>
+    if (cell.mined) {
+      {...cell, state: Visible};
+    } else {
+      cell;
+    }
+  );
+
 // Assumed that mined=false. We're modifying board in place.
-let rec revealCells = (coords: coords, board: Board.model): Board.model => {
+let rec checkAndReveal = (coords: coords, board: Board.model): Board.model => {
   let (x, y) = coords;
   let cell = board[y][x];
   board[y][x] = {...cell, state: Cell.Visible};
@@ -47,11 +56,18 @@ let cellCheck =
     : (Board.model, gameState) => {
   let (y, x) = coords;
   let cell = board[y][x];
+  Js.log("checking cell");
+  Js.log(coords);
+  Js.log(cell);
+
   switch (gameState, cell.state, cell.mined) {
   | (Ended, _, _) => (board, Ended)
-  | (New | Playing, Hidden, true) => (board, Ended)
-  | (New | Playing, Hidden, false) => (revealCells(coords, board), Playing)
-  | (New | Playing, Visible, true | false) => (board, gameState)
+  | (New | Playing, Hidden, true) => (revealAllMines(board), Ended)
+  | (New | Playing, Hidden, false) => (
+      checkAndReveal(coords, board),
+      Playing,
+    )
+  | (New | Playing, Visible | Flagged, true | false) => (board, gameState)
   };
 };
 
@@ -75,6 +91,8 @@ let update =
       ~initBoard: unit => Board.model,
     )
     : (Board.model, gameState) => {
+  Js.log("gamestate: ");
+  Js.log(gameState);
   switch (action) {
   | NewGame => (initBoard(), New)
   | Check(coords) => cellCheck(~coords, ~gameState, ~board)

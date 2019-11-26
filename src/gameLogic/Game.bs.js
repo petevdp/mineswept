@@ -4,7 +4,6 @@ var List = require("bs-platform/lib/js/list.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
-var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
 var Board$ReasonReactExamples = require("./Board.bs.js");
 var CustomUtils$ReasonReactExamples = require("../utils/CustomUtils.bs.js");
 
@@ -14,6 +13,20 @@ function staticCellCheck(state) {
   } else {
     return /* Visible */1;
   }
+}
+
+function revealAllMines(board) {
+  return CustomUtils$ReasonReactExamples.Matrix.map((function (cell, param) {
+                if (cell[/* mined */1]) {
+                  return /* record */[
+                          /* state : Visible */1,
+                          /* mined */cell[/* mined */1],
+                          /* numAdjacentMines */cell[/* numAdjacentMines */2]
+                        ];
+                } else {
+                  return cell;
+                }
+              }), board);
 }
 
 function revealCells(coords, board) {
@@ -40,6 +53,9 @@ function revealCells(coords, board) {
 
 function cellCheck(coords, gameState, board) {
   var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, coords[0]), coords[1]);
+  console.log("checking cell");
+  console.log(coords);
+  console.log(cell);
   var match = cell[/* state */0];
   var match$1 = cell[/* mined */1];
   if (gameState >= 2) {
@@ -47,36 +63,21 @@ function cellCheck(coords, gameState, board) {
             board,
             /* Ended */2
           ];
+  } else if (match !== 0) {
+    return /* tuple */[
+            board,
+            gameState
+          ];
+  } else if (match$1) {
+    return /* tuple */[
+            revealAllMines(board),
+            /* Ended */2
+          ];
   } else {
-    switch (match) {
-      case /* Hidden */0 :
-          if (match$1) {
-            return /* tuple */[
-                    board,
-                    /* Ended */2
-                  ];
-          } else {
-            return /* tuple */[
-                    revealCells(coords, board),
-                    /* Playing */1
-                  ];
-          }
-      case /* Visible */1 :
-          return /* tuple */[
-                  board,
-                  gameState
-                ];
-      case /* Flagged */2 :
-          throw [
-                Caml_builtin_exceptions.match_failure,
-                /* tuple */[
-                  "Game.re",
-                  50,
-                  2
-                ]
-              ];
-      
-    }
+    return /* tuple */[
+            revealCells(coords, board),
+            /* Playing */1
+          ];
   }
 }
 
@@ -107,6 +108,8 @@ function toggleFlag(param, board) {
 }
 
 function update(action, board, gameState, initBoard) {
+  console.log("gamestate: ");
+  console.log(gameState);
   if (typeof action === "number") {
     return /* tuple */[
             Curry._1(initBoard, /* () */0),
@@ -123,6 +126,7 @@ function update(action, board, gameState, initBoard) {
 }
 
 exports.staticCellCheck = staticCellCheck;
+exports.revealAllMines = revealAllMines;
 exports.revealCells = revealCells;
 exports.cellCheck = cellCheck;
 exports.toggleFlag = toggleFlag;

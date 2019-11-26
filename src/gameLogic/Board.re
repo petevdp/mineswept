@@ -13,9 +13,9 @@ module Coords = {
     ((-1), 1),
     ((-1), 0),
     ((-1), (-1)),
-  ] /* */;
+  ];
 
-  let getAdjacentCoords = ((x, y), (xSize, ySize)) => {
+  let getAdjacent = ((x, y), (xSize, ySize)) => {
     adjacentDiff
     |> List.map(((xDiff, yDiff)) => (x + xDiff, y + yDiff))
     // filter out of bounds
@@ -32,7 +32,7 @@ module Coords = {
          )
       |> List.length;
 };
-let adjacentCoords = Coords.getAdjacentCoords;
+let adjacentCoords = Coords.getAdjacent;
 
 let getAdjacentCells = ((x, y): coords, matrix: matrix('a)) => {
   let xSize = Array.length(matrix[0]);
@@ -72,7 +72,7 @@ type model = matrix(hydratedCellModel);
 
 let make = (~size: size, ~minedCells: list(coords)): model => {
   makeRaw(size, minedCells)
-  |> Matrix.map(({state, mined}: Cell.model, coords: coords) =>
+  |> Matrix.map(~f=({state, mined}: Cell.model, coords: coords) =>
        (
          {
            let numAdjacentMines = Coords.getNumAdjacent(coords, minedCells);
@@ -83,4 +83,16 @@ let make = (~size: size, ~minedCells: list(coords)): model => {
      );
 };
 
-type specifiedCellAction = (Cell.action, coords);
+let initRandom = (~size: size, ~mineCount: int): model => {
+  let (x, y) = size;
+  let allCoords = MyList.combinationRange(x, y);
+  let shuffled: list(coords) = allCoords->Belt.List.shuffle;
+  let minedCells = shuffled->Belt.List.take(mineCount);
+  Js.log("mined: ");
+  switch (minedCells) {
+  | Some(arr) =>
+    Js.log(Array.of_list(arr));
+    make(~size, ~minedCells=arr);
+  | None => make(~size, ~minedCells=[])
+  };
+};

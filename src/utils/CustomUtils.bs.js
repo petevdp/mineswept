@@ -1,13 +1,15 @@
 'use strict';
 
+var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
+var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 
-function map(func, matrix) {
+function map(f, matrix) {
   return $$Array.mapi((function (i, row) {
                 return $$Array.mapi((function (j, e) {
-                              return Curry._2(func, e, /* tuple */[
+                              return Curry._2(f, e, /* tuple */[
                                           j,
                                           i
                                         ]);
@@ -34,5 +36,21 @@ var Matrix = {
   size: size
 };
 
+function combinationRange(a, b) {
+  return List.concat(Belt_List.makeBy(a, (function (i) {
+                    return Belt_List.makeBy(b, (function (j) {
+                                  return /* tuple */[
+                                          j,
+                                          i
+                                        ];
+                                }));
+                  })));
+}
+
+var MyList = {
+  combinationRange: combinationRange
+};
+
 exports.Matrix = Matrix;
+exports.MyList = MyList;
 /* No side effect */

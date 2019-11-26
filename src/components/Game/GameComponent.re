@@ -2,7 +2,7 @@ open GlobalTypes;
 open CustomUtils;
 
 let initBoard = (): Board.model =>
-  Board.make(~size=(10, 10), ~minedCells=[(0, 0)]);
+  Board.initRandom(~size=(2, 2), ~mineCount=2);
 
 type appState = {
   board: Board.model,
@@ -15,6 +15,7 @@ let make = () => {
     // game state
     React.useReducer(
       (state, action) => {
+        Js.log(("action", action));
         let (board, gameState) =
           Game.update(
             action,

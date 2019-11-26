@@ -3,6 +3,7 @@
 var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
+var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var CustomUtils$ReasonReactExamples = require("../utils/CustomUtils.bs.js");
 
@@ -56,7 +57,7 @@ var adjacentDiff = /* :: */[
   ]
 ];
 
-function getAdjacentCoords(param, param$1) {
+function getAdjacent(param, param$1) {
   var ySize = param$1[1];
   var xSize = param$1[0];
   var y = param[1];
@@ -94,7 +95,7 @@ function getNumAdjacent(param, countedCoords) {
 
 var Coords = {
   adjacentDiff: adjacentDiff,
-  getAdjacentCoords: getAdjacentCoords,
+  getAdjacent: getAdjacent,
   getNumAdjacent: getNumAdjacent
 };
 
@@ -150,11 +151,26 @@ function make(size, minedCells) {
               }), makeRaw(size, minedCells));
 }
 
-var adjacentCoords = getAdjacentCoords;
+function initRandom(size, mineCount) {
+  var allCoords = CustomUtils$ReasonReactExamples.MyList.combinationRange(size[0], size[1]);
+  var shuffled = Belt_List.shuffle(allCoords);
+  var minedCells = Belt_List.take(shuffled, mineCount);
+  console.log("mined: ");
+  if (minedCells !== undefined) {
+    var arr = minedCells;
+    console.log($$Array.of_list(arr));
+    return make(size, arr);
+  } else {
+    return make(size, /* [] */0);
+  }
+}
+
+var adjacentCoords = getAdjacent;
 
 exports.Coords = Coords;
 exports.adjacentCoords = adjacentCoords;
 exports.getAdjacentCells = getAdjacentCells;
 exports.makeRaw = makeRaw;
 exports.make = make;
+exports.initRandom = initRandom;
 /* No side effect */

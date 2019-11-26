@@ -9,27 +9,28 @@ var BoardComponent$ReasonReactExamples = require("../Board/BoardComponent.bs.js"
 var ControlPanelComponent$ReasonReactExamples = require("../ControlPanel/ControlPanelComponent.bs.js");
 
 function initBoard(param) {
-  return Board$ReasonReactExamples.make(/* tuple */[
-              10,
-              10
-            ], /* :: */[
-              /* tuple */[
-                0,
-                0
-              ],
-              /* [] */0
-            ]);
+  return Board$ReasonReactExamples.initRandom(/* tuple */[
+              2,
+              2
+            ], 2);
 }
 
 function GameComponent(Props) {
   var match = React.useReducer((function (state, action) {
+          console.log(/* tuple */[
+                "action",
+                action
+              ]);
           var match = Game$ReasonReactExamples.update(action, state[/* board */0], state[/* gameState */1], initBoard);
           return /* record */[
                   /* board */match[0],
                   /* gameState */match[1]
                 ];
         }), /* record */[
-        /* board */initBoard(/* () */0),
+        /* board */Board$ReasonReactExamples.initRandom(/* tuple */[
+              2,
+              2
+            ], 2),
         /* gameState : New */0
       ]);
   var dispatch = match[1];

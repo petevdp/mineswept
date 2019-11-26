@@ -19,7 +19,10 @@ let make = (~model: Board.model, ~handlers: handlers) => {
     model
     // add clickHandler
     |> Matrix.map(
-         ({state, mined, numAdjacentMines}: Board.hydratedCellModel, coords) =>
+         ~f=(
+              {state, mined, numAdjacentMines}: Board.hydratedCellModel,
+              coords,
+            ) =>
          (
            {
              let handleClick = click => {
