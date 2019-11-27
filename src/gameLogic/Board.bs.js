@@ -122,7 +122,7 @@ function getAdjacentCells(param, matrix) {
                       }), adjacentDiff)));
 }
 
-function makeRaw(param, minedCells) {
+function makeRaw(param, minedCoords) {
   var xSize = param[0];
   return $$Array.init(param[1], (function (i) {
                 return $$Array.init(xSize, (function (j) {
@@ -131,7 +131,7 @@ function makeRaw(param, minedCells) {
                                                   j,
                                                   i
                                                 ]);
-                                    }), minedCells);
+                                    }), minedCoords);
                               return /* record */[
                                       /* state : Hidden */0,
                                       /* mined */mined
@@ -140,28 +140,50 @@ function makeRaw(param, minedCells) {
               }));
 }
 
-function make(size, minedCells) {
+function make(size, minedCoords) {
   return CustomUtils$ReasonReactExamples.Matrix.map((function (param, coords) {
-                var numAdjacentMines = getNumAdjacent(coords, minedCells);
+                var numAdjacentMines = getNumAdjacent(coords, minedCoords);
                 return /* record */[
                         /* state */param[/* state */0],
                         /* mined */param[/* mined */1],
                         /* numAdjacentMines */numAdjacentMines
                       ];
-              }), makeRaw(size, minedCells));
+              }), makeRaw(size, minedCoords));
 }
 
-function initRandom(size, mineCount) {
-  var allCoords = CustomUtils$ReasonReactExamples.MyList.combinationRange(size[0], size[1]);
-  var shuffled = Belt_List.shuffle(allCoords);
-  var minedCells = Belt_List.take(shuffled, mineCount);
-  console.log("mined: ");
-  if (minedCells !== undefined) {
-    var arr = minedCells;
-    console.log($$Array.of_list(arr));
-    return make(size, arr);
+function revealAllMines(board) {
+  return CustomUtils$ReasonReactExamples.Matrix.map((function (cell, param) {
+                if (cell[/* mined */1]) {
+                  return /* record */[
+                          /* state : Visible */1,
+                          /* mined */cell[/* mined */1],
+                          /* numAdjacentMines */cell[/* numAdjacentMines */2]
+                        ];
+                } else {
+                  return cell;
+                }
+              }), board);
+}
+
+function checkAndReveal(coords, board) {
+  var y = coords[1];
+  var x = coords[0];
+  var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
+  Caml_array.caml_array_set(Caml_array.caml_array_get(board, y), x, /* record */[
+        /* state : Visible */1,
+        /* mined */cell[/* mined */1],
+        /* numAdjacentMines */cell[/* numAdjacentMines */2]
+      ]);
+  if (cell[/* numAdjacentMines */2] === 0) {
+    var adjacentCoords = getAdjacent(coords, CustomUtils$ReasonReactExamples.Matrix.size(board));
+    var hiddenAdjacentCoords = List.filter((function (param) {
+              return Caml_array.caml_array_get(Caml_array.caml_array_get(board, param[1]), param[0])[/* state */0] === /* Hidden */0;
+            }))(adjacentCoords);
+    return Belt_List.reduce(hiddenAdjacentCoords, board, (function (board, coords) {
+                  return checkAndReveal(coords, board);
+                }));
   } else {
-    return make(size, /* [] */0);
+    return board;
   }
 }
 
@@ -172,5 +194,6 @@ exports.adjacentCoords = adjacentCoords;
 exports.getAdjacentCells = getAdjacentCells;
 exports.makeRaw = makeRaw;
 exports.make = make;
-exports.initRandom = initRandom;
+exports.revealAllMines = revealAllMines;
+exports.checkAndReveal = checkAndReveal;
 /* No side effect */

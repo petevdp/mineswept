@@ -1,15 +1,16 @@
 open GlobalTypes;
 
 [@react.component]
-let make = (~onNewGame: unit => unit, ~gameState: Game.gameState) => {
-  let gameStateMsg =
-    switch (gameState) {
-    | New => "new"
+let make = (~onNewGame: unit => unit, ~gamePhase: Game.phase) => {
+  let gamePhaseMsg =
+    switch (gamePhase) {
+    | Start => "new"
     | Playing => "in progress"
-    | Ended => "game over"
+    | Ended(Win) => "You Win"
+    | Ended(Loss) => "You lose"
     };
   <section>
     <button onClick={_ => onNewGame()}> {str("new game")} </button>
-    <span> {str(gameStateMsg)} </span>
+    <span> {str(gamePhaseMsg)} </span>
   </section>;
 };

@@ -49,12 +49,12 @@ let getAdjacentCells = ((x, y): coords, matrix: matrix('a)) => {
 };
 
 let makeRaw =
-    ((xSize, ySize): size, minedCells: list(coords)): matrix(Cell.model) => {
+    ((xSize, ySize): size, minedCoords: list(coords)): matrix(Cell.model) => {
   Array.init(ySize, i =>
     Array.init(
       xSize,
       j => {
-        let mined = List.exists(e => e == (j, i), minedCells);
+        let mined = List.exists(e => e == (j, i), minedCoords);
         let model: Cell.model = {state: Cell.Hidden, mined};
         model;
       },
@@ -70,12 +70,12 @@ type hydratedCellModel = {
 
 type model = matrix(hydratedCellModel);
 
-let make = (~size: size, ~minedCells: list(coords)): model => {
-  makeRaw(size, minedCells)
+let make = (~size: size, ~minedCoords: list(coords)): model => {
+  makeRaw(size, minedCoords)
   |> Matrix.map(~f=({state, mined}: Cell.model, coords: coords) =>
        (
          {
-           let numAdjacentMines = Coords.getNumAdjacent(coords, minedCells);
+           let numAdjacentMines = Coords.getNumAdjacent(coords, minedCoords);
            let hydrated: hydratedCellModel = {state, mined, numAdjacentMines};
            hydrated;
          }: hydratedCellModel
@@ -83,16 +83,33 @@ let make = (~size: size, ~minedCells: list(coords)): model => {
      );
 };
 
-let initRandom = (~size: size, ~mineCount: int): model => {
-  let (x, y) = size;
-  let allCoords = MyList.combinationRange(x, y);
-  let shuffled: list(coords) = allCoords->Belt.List.shuffle;
-  let minedCells = shuffled->Belt.List.take(mineCount);
-  Js.log("mined: ");
-  switch (minedCells) {
-  | Some(arr) =>
-    Js.log(Array.of_list(arr));
-    make(~size, ~minedCells=arr);
-  | None => make(~size, ~minedCells=[])
+let revealAllMines = (board: model): model =>
+  Matrix.map(board, ~f=(cell: hydratedCellModel, _) =>
+    if (cell.mined) {
+      {...cell, state: Visible};
+    } else {
+      cell;
+    }
+  );
+
+// Assumed that mined=false. We're modifying board in place.
+let rec checkAndReveal = (coords: coords, board: model): model => {
+  let (x, y) = coords;
+  let cell = board[y][x];
+  board[y][x] = {...cell, state: Cell.Visible};
+
+  // If there a no adjacent mines, then we can reveal the surrounding area.
+  if (cell.numAdjacentMines == 0) {
+    let board = board;
+    let adjacentCoords = Coords.getAdjacent(coords, Matrix.size(board));
+
+    let hiddenAdjacentCoords =
+      adjacentCoords |> List.filter(((x, y)) => board[y][x].state === Hidden);
+    // recurse into all adjacent coordinates
+    hiddenAdjacentCoords->Belt.List.reduce(board, (board, coords) =>
+      checkAndReveal(coords, board)
+    );
+  } else {
+    board;
   };
 };

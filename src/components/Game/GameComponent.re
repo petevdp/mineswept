@@ -1,44 +1,32 @@
 open GlobalTypes;
 open CustomUtils;
 
-let initBoard = (): Board.model =>
-  Board.initRandom(~size=(5, 5), ~mineCount=4);
-// Board.make(~size=(10, 10), ~minedCells=[(0, 0), (0, 1)]);
-
 type appState = {
-  board: Board.model,
-  gameState: Game.gameState,
+  // should be maintained by useGame
+  gameModel: Game.model,
 };
 
 [@react.component]
 let make = () => {
-  let ({board, gameState}, dispatch) =
-    // game state
-    React.useReducer(
-      (state, action) => {
-        Js.log(("action", action));
-        let (board, gameState) =
-          Game.update(
-            action,
-            ~board=state.board,
-            ~initBoard,
-            ~gameState=state.gameState,
-          );
-        {board, gameState};
-      },
-      {board: initBoard(), gameState: New},
-    );
+  let (gameModel, gameActionDispatch) =
+    Game.useGame({
+      size: (10, 10),
+      minePopulationStrategy: Game.MinePopulationStrategy.random,
+      mineCount: 20,
+    });
 
   // setup player action dispatching for the board
   let boardHandlers: BoardComponent.handlers = {
-    onCheck: coords => dispatch(Game.Check(coords)),
-    onFlagToggle: coords => dispatch(Game.ToggleFlag(coords)),
+    onCheck: coords => gameActionDispatch(Game.Check(coords)),
+    onFlagToggle: coords => gameActionDispatch(Game.ToggleFlag(coords)),
   };
 
-  let onNewGame = () => dispatch(NewGame);
+  // control panel dispatch
+  let onNewGame = () => gameActionDispatch(NewGame);
+  let gamePhase = gameModel.phase;
 
   <React.Fragment>
-    <ControlPanelComponent onNewGame gameState />
-    <BoardComponent model=board handlers=boardHandlers />
+    <ControlPanelComponent onNewGame gamePhase />
+    <BoardComponent model={gameModel.board} handlers=boardHandlers />
   </React.Fragment>;
 };

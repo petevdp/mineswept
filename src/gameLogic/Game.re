@@ -6,10 +6,21 @@ type action =
   | Check(coords)
   | ToggleFlag(coords);
 
-type gameState =
-  | New
+type endState =
+  | Win
+  | Loss;
+
+type phase =
+  | Start
   | Playing
-  | Ended;
+  | Ended(endState);
+
+type model = {
+  phase,
+  board: Board.model,
+  flagCount: int,
+  mineCount: int,
+};
 
 type actionHandler = action => unit;
 
@@ -20,55 +31,49 @@ let staticCellCheck = (state: Cell.state): Cell.state =>
   | Visible => Visible
   };
 
-let revealAllMines = (board: Board.model): Board.model =>
-  Matrix.map(board, ~f=(cell: Board.hydratedCellModel, _) =>
-    if (cell.mined) {
-      {...cell, state: Visible};
-    } else {
-      cell;
-    }
-  );
-
-// Assumed that mined=false. We're modifying board in place.
-let rec checkAndReveal = (coords: coords, board: Board.model): Board.model => {
-  let (x, y) = coords;
-  let cell = board[y][x];
-  board[y][x] = {...cell, state: Cell.Visible};
-
-  // If there a no adjacent mines, then we can reveal the surrounding area.
-  if (cell.numAdjacentMines == 0) {
-    let board = board;
-    let adjacentCoords = Board.adjacentCoords(coords, Matrix.size(board));
-
-    let hiddenAdjacentCoords =
-      adjacentCoords |> List.filter(((x, y)) => board[y][x].state === Hidden);
-    // recurse into all adjacent coordinates
-    hiddenAdjacentCoords->Belt.List.reduce(board, (board, coords) =>
-      checkAndReveal(coords, board)
-    );
-  } else {
-    board;
-  };
-};
-
 let cellCheck =
-    (~coords: coords, ~gameState: gameState, ~board: Board.model)
-    : (Board.model, gameState) => {
-  let (x, y) = coords;
-  let cell = board[y][x];
-  Js.log("checking cell");
-  Js.log(coords);
-  Js.log(cell);
-
-  switch (gameState, cell.state, cell.mined) {
-  | (Ended, _, _) => (board, Ended)
-  | (New | Playing, Hidden, true) => (revealAllMines(board), Ended)
-  | (New | Playing, Hidden, false) => (
-      checkAndReveal(coords, board),
-      Playing,
+    (
+      prevPhase: phase,
+      prevBoard: Board.model,
+      ~mineCount: int,
+      ~coords: coords,
     )
-  | (New | Playing, Visible | Flagged, _) => (board, gameState)
-  };
+    : (Board.model, phase) => {
+  let (x, y) = coords;
+  let cell = prevBoard[y][x];
+
+  let board =
+    switch (cell.state, cell.mined) {
+    | (Hidden, false) => Board.checkAndReveal(coords, prevBoard)
+    | (Hidden, true) => Board.revealAllMines(prevBoard)
+    | (Flagged, _) => prevBoard
+
+    // the game should be over if this is matched
+    | (Visible, _) => prevBoard
+    };
+
+  let onlyMinedCellsLeft: bool =
+    (
+      () => {
+        let allCells = board |> Matrix.flatten |> Array.to_list;
+        let visibleCells =
+          allCells
+          |> List.filter(({state}: Board.hydratedCellModel) =>
+               state == Visible
+             );
+
+        List.length(allCells) - List.length(visibleCells) == mineCount;
+      }
+    )();
+
+  let phase =
+    switch (prevPhase, cell.mined, onlyMinedCellsLeft) {
+    | (Ended(endState), _, _) => Ended(endState)
+    | (Start | Playing, true, _) => Ended(Loss)
+    | (Start | Playing, false, true) => Ended(Win)
+    | (Start | Playing, false, false) => Playing
+    };
+  (board, phase);
 };
 
 let toggleFlag = ((x, y): coords, board: Board.model): Board.model => {
@@ -83,25 +88,80 @@ let toggleFlag = ((x, y): coords, board: Board.model): Board.model => {
   board;
 };
 
-let update =
-    (
-      action: action,
-      ~board: Board.model,
-      ~gameState: gameState,
-      ~initBoard: unit => Board.model,
-    )
-    : (Board.model, gameState) => {
-  Js.log("gamestate: ");
-  Js.log(gameState);
-  switch (action, gameState) {
-  | (NewGame, _) => (initBoard(), New)
-  | (Check(coords), Playing | New) => cellCheck(~coords, ~gameState, ~board)
-  | (ToggleFlag(coords), Playing | New) => (
-      toggleFlag(coords, board),
-      Playing,
-    )
-  // these two should never actually happen given proper input control, included for completeness
-  | (Check(_), Ended) => (board, Ended)
-  | (ToggleFlag(_), Ended) => (board, Ended)
+module MinePopulationStrategy = {
+  // produce a list of coordinates to place mines at
+  type t = (~size: size, ~mineCount: int) => list(coords);
+  let random: t =
+    (~size, ~mineCount) => {
+      let (x, y) = size;
+
+      let allCoords = MyList.combinationRange(x, y);
+
+      // Shuffle the list of coords and take the first `mineCount` elements.
+      // Belt.List.take outputs option(list('a))
+      let minedCoords: option(list(coords)) =
+        allCoords->Belt.List.shuffle->Belt.List.take(mineCount);
+      switch (minedCoords) {
+      | Some(list) => list
+      | None => []
+      };
+    };
+};
+
+// produce new game models from actions
+let reduce =
+    (model, action, ~initBoard: unit => Board.model, ~mineCount: int): model => {
+  // only the below variables should be used in computing the next game model
+  let {phase, board} = model;
+
+  let (board, phase) =
+    switch (action, phase) {
+    | (NewGame, _) => (initBoard(), Start)
+
+    // the game might end when the action is Check
+    | (Check(coords), Playing | Start) =>
+      cellCheck(phase, board, ~mineCount, ~coords)
+
+    | (ToggleFlag(coords), Playing | Start) => (
+        toggleFlag(coords, board),
+        Playing,
+      )
+
+    // this should never actually be called given proper player input control, included for completeness
+    | (Check(_) | ToggleFlag(_), Ended(endState)) => (
+        board,
+        Ended(endState),
+      )
+    };
+
+  let flagCount =
+    board
+    |> Matrix.flatten
+    |> Array.to_list
+    |> List.filter(({state}: Board.hydratedCellModel) => state == Flagged)
+    |> List.length;
+
+  {phase, board, mineCount, flagCount};
+};
+
+// extended game model with convenient computed info for view layer
+type initOptions = {
+  size,
+  minePopulationStrategy: MinePopulationStrategy.t,
+  mineCount: int,
+};
+
+let useGame = ({size, minePopulationStrategy, mineCount}: initOptions) => {
+  let initBoard = () => {
+    Board.make(
+      ~size,
+      ~minedCoords=minePopulationStrategy(~size, ~mineCount),
+    );
   };
+
+  React.useReducer(
+    (model: model, action: action) =>
+      reduce(model, action, ~initBoard, ~mineCount),
+    {board: initBoard(), phase: Start, flagCount: 0, mineCount},
+  );
 };

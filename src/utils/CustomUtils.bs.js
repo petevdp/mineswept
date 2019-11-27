@@ -4,6 +4,7 @@ var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
+var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 
 function map(f, matrix) {
@@ -31,9 +32,33 @@ function size(matrix) {
   }
 }
 
+function reduce(acc, f, matrix) {
+  var cells = Belt_Array.concatMany(matrix);
+  return Belt_Array.reduce(cells, acc, f);
+}
+
+function select(f, matrix) {
+  return reduce(/* [] */0, (function (acc, a) {
+                var match = Curry._1(f, a);
+                return List.concat(/* :: */[
+                            acc,
+                            /* :: */[
+                              match ? /* :: */[
+                                  a,
+                                  /* [] */0
+                                ] : /* [] */0,
+                              /* [] */0
+                            ]
+                          ]);
+              }), matrix);
+}
+
 var Matrix = {
   map: map,
-  size: size
+  size: size,
+  flatten: Belt_Array.concatMany,
+  reduce: reduce,
+  select: select
 };
 
 function combinationRange(a, b) {
