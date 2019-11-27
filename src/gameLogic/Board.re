@@ -92,7 +92,7 @@ let revealAllMines = (board: model): model =>
     }
   );
 
-// Assumed that mined=false. We're modifying board in place.
+/** Assumed that mined=false. We're modifying board in place. */
 let rec checkAndReveal = (coords: coords, board: model): model => {
   let (x, y) = coords;
   let cell = board[y][x];

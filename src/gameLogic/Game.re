@@ -2,9 +2,10 @@ open GlobalTypes;
 open CustomUtils;
 
 type action =
-  | NewGame
+  // board, minecount
   | Check(coords)
-  | ToggleFlag(coords);
+  | ToggleFlag(coords)
+  | Rewind(int);
 
 type endState =
   | Win
@@ -21,6 +22,8 @@ type model = {
   flagCount: int,
   mineCount: int,
 };
+
+type history = list(model);
 
 type actionHandler = action => unit;
 
@@ -108,19 +111,30 @@ module MinePopulationStrategy = {
     };
 };
 
-// produce new game models from actions
-let reduce =
-    (model, action, ~initBoard: unit => Board.model, ~mineCount: int): model => {
+/* produce new game models from actions **/
+let reduce = (history: history, action: action): history => {
   // only the below variables should be used in computing the next game model
-  let {phase, board} = model;
+  let prevBoard = List.hd(history);
+  let {phase as prevPhase, board as prevBoard, mineCount} = prevBoard;
 
-  let (board, phase) =
+  // make deep copy of board
+  let newBoard =
+    Array.map(
+      (row: array(Board.hydratedCellModel)) => Array.copy(row),
+      prevBoard,
+    );
+
+  let (newBoard, newPhase) =
     switch (action, phase) {
-    | (NewGame, _) => (initBoard(), Start)
+    | (Rewind(steps), _) =>
+      let length = List.length(history);
+      let steps = length > steps ? steps : length;
+      let {board, phase} = List.nth(history, steps);
+      (board, phase);
 
     // the game might end when the action is Check
     | (Check(coords), Playing | Start) =>
-      cellCheck(phase, board, ~mineCount, ~coords)
+      cellCheck(phase, newBoard, ~mineCount, ~coords)
 
     | (ToggleFlag(coords), Playing | Start) => (
         toggleFlag(coords, board),
@@ -129,19 +143,19 @@ let reduce =
 
     // this should never actually be called given proper player input control, included for completeness
     | (Check(_) | ToggleFlag(_), Ended(endState)) => (
-        board,
+        newBoard,
         Ended(endState),
       )
     };
 
   let flagCount =
-    board
+    newBoard
     |> Matrix.flatten
     |> Array.to_list
     |> List.filter(({state}: Board.hydratedCellModel) => state == Flagged)
     |> List.length;
 
-  {phase, board, mineCount, flagCount};
+  [{phase: newPhase, board: newBoard, mineCount, flagCount}, ...history];
 };
 
 // extended game model with convenient computed info for view layer
@@ -151,17 +165,15 @@ type initOptions = {
   mineCount: int,
 };
 
-let useGame = ({size, minePopulationStrategy, mineCount}: initOptions) => {
-  let initBoard = () => {
-    Board.make(
-      ~size,
-      ~minedCoords=minePopulationStrategy(~size, ~mineCount),
-    );
+let make = ({size, minePopulationStrategy, mineCount}: initOptions) => {
+  {
+    board:
+      Board.make(
+        ~size,
+        ~minedCoords=minePopulationStrategy(~size, ~mineCount),
+      ),
+    phase: Start,
+    flagCount: 0,
+    mineCount,
   };
-
-  React.useReducer(
-    (model: model, action: action) =>
-      reduce(model, action, ~initBoard, ~mineCount),
-    {board: initBoard(), phase: Start, flagCount: 0, mineCount},
-  );
 };

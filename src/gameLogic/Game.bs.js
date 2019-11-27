@@ -3,7 +3,6 @@
 var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
-var React = require("react");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Board$ReasonReactExamples = require("./Board.bs.js");
@@ -81,56 +80,66 @@ var MinePopulationStrategy = {
   random: random
 };
 
-function reduce(model, action, initBoard, mineCount) {
-  var board = model[/* board */1];
-  var phase = model[/* phase */0];
+function reduce(history, action) {
+  var prevBoard = List.hd(history);
+  var prevBoard$1 = prevBoard[/* board */1];
+  var prevPhase = prevBoard[/* phase */0];
+  var mineCount = prevBoard[/* mineCount */3];
+  var newBoard = $$Array.map($$Array.copy, prevBoard$1);
   var match;
-  match = typeof action === "number" ? /* tuple */[
-      Curry._1(initBoard, /* () */0),
-      /* Start */0
-    ] : (
-      action.tag ? (
-          typeof phase === "number" ? /* tuple */[
-              toggleFlag(action[0], board),
-              /* Playing */1
-            ] : /* tuple */[
-              board,
-              /* Ended */[phase[0]]
-            ]
-        ) : (
-          typeof phase === "number" ? cellCheck(phase, board, mineCount, action[0]) : /* tuple */[
-              board,
-              /* Ended */[phase[0]]
-            ]
-        )
-    );
-  var board$1 = match[0];
+  switch (action.tag | 0) {
+    case /* Check */0 :
+        match = typeof prevPhase === "number" ? cellCheck(prevPhase, newBoard, mineCount, action[0]) : /* tuple */[
+            newBoard,
+            /* Ended */[prevPhase[0]]
+          ];
+        break;
+    case /* ToggleFlag */1 :
+        match = typeof prevPhase === "number" ? /* tuple */[
+            toggleFlag(action[0], prevBoard$1),
+            /* Playing */1
+          ] : /* tuple */[
+            newBoard,
+            /* Ended */[prevPhase[0]]
+          ];
+        break;
+    case /* Rewind */2 :
+        var steps = action[0];
+        var length = List.length(history);
+        var match$1 = length > steps;
+        var steps$1 = match$1 ? steps : length;
+        var match$2 = List.nth(history, steps$1);
+        match = /* tuple */[
+          match$2[/* board */1],
+          match$2[/* phase */0]
+        ];
+        break;
+    
+  }
+  var newBoard$1 = match[0];
   var flagCount = List.length(List.filter((function (param) {
                 return param[/* state */0] === /* Flagged */2;
-              }))($$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, board$1))));
-  return /* record */[
-          /* phase */match[1],
-          /* board */board$1,
-          /* flagCount */flagCount,
-          /* mineCount */mineCount
+              }))($$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, newBoard$1))));
+  return /* :: */[
+          /* record */[
+            /* phase */match[1],
+            /* board */newBoard$1,
+            /* flagCount */flagCount,
+            /* mineCount */mineCount
+          ],
+          history
         ];
 }
 
-function useGame(param) {
+function make(param) {
   var mineCount = param[/* mineCount */2];
-  var minePopulationStrategy = param[/* minePopulationStrategy */1];
   var size = param[/* size */0];
-  var initBoard = function (param) {
-    return Board$ReasonReactExamples.make(size, Curry._2(minePopulationStrategy, size, mineCount));
-  };
-  return React.useReducer((function (model, action) {
-                return reduce(model, action, initBoard, mineCount);
-              }), /* record */[
-              /* phase : Start */0,
-              /* board */initBoard(/* () */0),
-              /* flagCount */0,
-              /* mineCount */mineCount
-            ]);
+  return /* record */[
+          /* phase : Start */0,
+          /* board */Board$ReasonReactExamples.make(size, Curry._2(param[/* minePopulationStrategy */1], size, mineCount)),
+          /* flagCount */0,
+          /* mineCount */mineCount
+        ];
 }
 
 exports.staticCellCheck = staticCellCheck;
@@ -138,5 +147,5 @@ exports.cellCheck = cellCheck;
 exports.toggleFlag = toggleFlag;
 exports.MinePopulationStrategy = MinePopulationStrategy;
 exports.reduce = reduce;
-exports.useGame = useGame;
-/* react Not a pure module */
+exports.make = make;
+/* No side effect */

@@ -1,27 +1,37 @@
 open GlobalTypes;
 open CustomUtils;
 
-type appState = {
-  // should be maintained by useGame
-  gameModel: Game.model,
-};
+type appState = {gameHistory: Game.history};
+
+type action =
+  | GameAction(Game.action)
+  | NewGame(Game.initOptions);
 
 [@react.component]
 let make = () => {
-  let (gameModel, gameActionDispatch) =
-    Game.useGame({
-      size: (10, 10),
-      minePopulationStrategy: Game.MinePopulationStrategy.random,
-      mineCount: 20,
-    });
+  let (appState, dispatch) =
+    React.useReducer(
+      (prevState: appState, action: action): appState => {
+        let gameHistory =
+          switch (action) {
+          | NewGame(options) => [Game.make(options)]
+          | GameAction(action) => Game.reduce(prevState.gameHistory, action)
+          };
 
-  // setup player action dispatching for the board
+        let state = {
+          gameHistory;
+        };
+        state;
+      },
+      {gameHistory: [Game.make(options)]},
+    );
+
+  /** set up player action dispatching for the board */
   let boardHandlers: BoardComponent.handlers = {
-    onCheck: coords => gameActionDispatch(Game.Check(coords)),
-    onFlagToggle: coords => gameActionDispatch(Game.ToggleFlag(coords)),
+    onCheck: coords => dispatch(GameAction(Game.Check(coords))),
+    onFlagToggle: coords => dispatch(GameAction(Game.ToggleFlag(coords))),
   };
 
-  // control panel dispatch
   let onNewGame = () => gameActionDispatch(NewGame);
   let gamePhase = gameModel.phase;
 
