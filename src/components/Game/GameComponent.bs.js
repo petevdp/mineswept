@@ -32,11 +32,13 @@ function GameComponent(Props) {
     return Curry._1(gameActionDispatch, /* NewGame */0);
   };
   var gamePhase = gameModel[/* phase */0];
+  var minesLeft = gameModel[/* mineCount */3] - gameModel[/* flagCount */2] | 0;
   return React.createElement(React.Fragment, {
               children: null
             }, React.createElement(ControlPanelComponent$ReasonReactExamples.make, {
                   onNewGame: onNewGame,
-                  gamePhase: gamePhase
+                  gamePhase: gamePhase,
+                  minesLeft: minesLeft
                 }), React.createElement(BoardComponent$ReasonReactExamples.make, {
                   model: gameModel[/* board */1],
                   handlers: boardHandlers

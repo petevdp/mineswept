@@ -25,8 +25,13 @@ let make = () => {
   let onNewGame = () => gameActionDispatch(NewGame);
   let gamePhase = gameModel.phase;
 
+  let {mineCount, flagCount}: Game.model = gameModel;
+
+  // this might be innacurate since the player might misplace a flag
+  let minesLeft = mineCount - flagCount;
+
   <React.Fragment>
-    <ControlPanelComponent onNewGame gamePhase />
+    <ControlPanelComponent onNewGame gamePhase minesLeft />
     <BoardComponent model={gameModel.board} handlers=boardHandlers />
   </React.Fragment>;
 };
