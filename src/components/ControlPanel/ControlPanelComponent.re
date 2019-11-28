@@ -1,7 +1,13 @@
 open GlobalTypes;
 
 [@react.component]
-let make = (~onNewGame: unit => unit, ~gamePhase: Game.phase, ~minesLeft: int) => {
+let make =
+    (
+      ~onNewGame: unit => unit,
+      ~gamePhase: Game.phase,
+      ~minesLeft: int,
+      ~onRewindGame: int => unit,
+    ) => {
   let gamePhaseMsg =
     switch (gamePhase) {
     | Start => "new"
@@ -11,6 +17,7 @@ let make = (~onNewGame: unit => unit, ~gamePhase: Game.phase, ~minesLeft: int) =
     };
   <section>
     <button onClick={_ => onNewGame()}> {str("new game")} </button>
+    <button onClick={_ => onRewindGame(1)}> {str("rewind game")} </button>
     <span> {str(gamePhaseMsg)} </span>
     <span> {str("  mines left: " ++ string_of_int(minesLeft))} </span>
   </section>;

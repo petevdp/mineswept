@@ -21,6 +21,7 @@ type model = {
   board: Board.model,
   flagCount: int,
   mineCount: int,
+  lastAction: option(action),
 };
 
 type history = list(model);
@@ -155,7 +156,16 @@ let reduce = (history: history, action: action): history => {
     |> List.filter(({state}: Board.hydratedCellModel) => state == Flagged)
     |> List.length;
 
-  [{phase: newPhase, board: newBoard, mineCount, flagCount}, ...history];
+  [
+    {
+      phase: newPhase,
+      board: newBoard,
+      mineCount,
+      flagCount,
+      lastAction: Some(action),
+    },
+    ...history,
+  ];
 };
 
 // extended game model with convenient computed info for view layer
@@ -175,5 +185,6 @@ let make = ({size, minePopulationStrategy, mineCount}: initOptions) => {
     phase: Start,
     flagCount: 0,
     mineCount,
+    lastAction: None,
   };
 };

@@ -8,6 +8,7 @@ function ControlPanelComponent(Props) {
   var onNewGame = Props.onNewGame;
   var gamePhase = Props.gamePhase;
   var minesLeft = Props.minesLeft;
+  var onRewindGame = Props.onRewindGame;
   var gamePhaseMsg = typeof gamePhase === "number" ? (
       gamePhase !== 0 ? "in progress" : "new"
     ) : (
@@ -17,7 +18,11 @@ function ControlPanelComponent(Props) {
                   onClick: (function (param) {
                       return Curry._1(onNewGame, /* () */0);
                     })
-                }, GlobalTypes$ReasonReactExamples.str("new game")), React.createElement("span", undefined, GlobalTypes$ReasonReactExamples.str(gamePhaseMsg)), React.createElement("span", undefined, GlobalTypes$ReasonReactExamples.str("  mines left: " + String(minesLeft))));
+                }, GlobalTypes$ReasonReactExamples.str("new game")), React.createElement("button", {
+                  onClick: (function (param) {
+                      return Curry._1(onRewindGame, 1);
+                    })
+                }, GlobalTypes$ReasonReactExamples.str("rewind game")), React.createElement("span", undefined, GlobalTypes$ReasonReactExamples.str(gamePhaseMsg)), React.createElement("span", undefined, GlobalTypes$ReasonReactExamples.str("  mines left: " + String(minesLeft))));
 }
 
 var make = ControlPanelComponent;

@@ -125,7 +125,8 @@ function reduce(history, action) {
             /* phase */match[1],
             /* board */newBoard$1,
             /* flagCount */flagCount,
-            /* mineCount */mineCount
+            /* mineCount */mineCount,
+            /* lastAction */action
           ],
           history
         ];
@@ -138,7 +139,8 @@ function make(param) {
           /* phase : Start */0,
           /* board */Board$ReasonReactExamples.make(size, Curry._2(param[/* minePopulationStrategy */1], size, mineCount)),
           /* flagCount */0,
-          /* mineCount */mineCount
+          /* mineCount */mineCount,
+          /* lastAction */undefined
         ];
 }
 
