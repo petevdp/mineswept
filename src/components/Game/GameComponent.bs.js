@@ -81,20 +81,27 @@ function GameComponent(Props) {
         /* playGameOutWithEngine */false,
         /* fallbackGameInitOptions */gameOptions
       ]);
-  var dispatch = match[1];
-  var boardHandlers_000 = function (coords) {
-    return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Check */Block.__(0, [coords])]));
-  };
-  var boardHandlers_001 = function (coords) {
-    return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* ToggleFlag */Block.__(1, [coords])]));
-  };
-  var boardHandlers = /* record */[
-    boardHandlers_000,
-    boardHandlers_001
-  ];
   var gameHistory = match[0][/* gameHistory */0];
+  var dispatch = match[1];
   if (gameHistory) {
     var currGameModel = gameHistory[0];
+    var match$1 = currGameModel[/* phase */0];
+    var isGameOver = typeof match$1 === "number" ? false : true;
+    var boardHandlers = isGameOver ? /* record */[
+        /* onCheck */(function (param) {
+            return /* () */0;
+          }),
+        /* onFlagToggle */(function (param) {
+            return /* () */0;
+          })
+      ] : /* record */[
+        /* onCheck */(function (coords) {
+            return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Check */Block.__(0, [coords])]));
+          }),
+        /* onFlagToggle */(function (coords) {
+            return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* ToggleFlag */Block.__(1, [coords])]));
+          })
+      ];
     var onNewGame = function (param) {
       return Curry._1(dispatch, /* NewGame */Block.__(0, [gameOptions]));
     };
@@ -102,8 +109,6 @@ function GameComponent(Props) {
       return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Rewind */Block.__(2, [steps])]));
     };
     var minesLeft = currGameModel[/* mineCount */3] - currGameModel[/* flagCount */2] | 0;
-    var match$1 = currGameModel[/* phase */0];
-    var isGameOver = typeof match$1 === "number" ? false : true;
     return React.createElement(React.Fragment, {
                 children: null
               }, React.createElement(ControlPanelComponent$ReasonReactExamples.make, {
@@ -121,7 +126,7 @@ function GameComponent(Props) {
           Caml_builtin_exceptions.match_failure,
           /* tuple */[
             "GameComponent.re",
-            72,
+            65,
             6
           ]
         ];

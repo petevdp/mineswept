@@ -60,16 +60,27 @@ let make = () => {
       },
     );
 
-  /** set up player action dispatching for the board */
-  let boardHandlers: BoardComponent.handlers = {
-    onCheck: coords => dispatch(HumanGameAction(Game.Check(coords))),
-    onFlagToggle: coords =>
-      dispatch(HumanGameAction(Game.ToggleFlag(coords))),
-  };
-
   let {gameHistory} = appState;
 
   let [currGameModel, ..._] = gameHistory;
+
+  let isGameOver =
+    switch (currGameModel.phase) {
+    | Start
+    | Playing => false
+    | Ended(_) => true
+    };
+
+  /** set up player action dispatching for the board */
+  let boardHandlers: BoardComponent.handlers =
+    isGameOver
+      // if game is over these handlers won't do anything
+      ? {onCheck: _ => (), onFlagToggle: _ => ()}
+      : {
+        onCheck: coords => dispatch(HumanGameAction(Game.Check(coords))),
+        onFlagToggle: coords =>
+          dispatch(HumanGameAction(Game.ToggleFlag(coords))),
+      };
 
   let onNewGame = () => dispatch(NewGame(gameOptions));
   let onRewindGame = steps => dispatch(HumanGameAction(Rewind(steps)));
@@ -78,13 +89,6 @@ let make = () => {
 
   // this might be innacurate since the player might misplace a flag
   let minesLeft = mineCount - flagCount;
-
-  let isGameOver =
-    switch (currGameModel.phase) {
-    | Start
-    | Playing => false
-    | Ended(_) => true
-    };
 
   <React.Fragment>
     <ControlPanelComponent onNewGame gamePhase minesLeft onRewindGame />
