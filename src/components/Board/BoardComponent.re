@@ -14,7 +14,7 @@ type handlers = {
 };
 
 [@react.component]
-let make = (~model: Board.model, ~handlers: handlers) => {
+let make = (~model: Board.model, ~handlers: handlers, ~isGameOver: bool) => {
   let cellComponents =
     model
     // add clickHandler
@@ -30,7 +30,7 @@ let make = (~model: Board.model, ~handlers: handlers) => {
                };
                ();
              };
-             {state, mined, numAdjacentMines, handleClick};
+             {state, mined, numAdjacentMines, handleClick, isGameOver};
            }: CellComponent.props
          )
        )
@@ -40,10 +40,16 @@ let make = (~model: Board.model, ~handlers: handlers) => {
            Array.mapi(
              (
                x,
-               {state, mined, numAdjacentMines, handleClick}: CellComponent.props,
+               {state, mined, numAdjacentMines, handleClick, isGameOver}: CellComponent.props,
              ) =>
                <th key={string_of_int(x)}>
-                 <CellComponent state mined numAdjacentMines handleClick />
+                 <CellComponent
+                   state
+                   mined
+                   numAdjacentMines
+                   handleClick
+                   isGameOver
+                 />
                </th>,
              modelRow,
            );

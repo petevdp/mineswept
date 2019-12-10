@@ -102,6 +102,8 @@ function GameComponent(Props) {
       return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Rewind */Block.__(2, [steps])]));
     };
     var minesLeft = currGameModel[/* mineCount */3] - currGameModel[/* flagCount */2] | 0;
+    var match$1 = currGameModel[/* phase */0];
+    var isGameOver = typeof match$1 === "number" ? false : true;
     return React.createElement(React.Fragment, {
                 children: null
               }, React.createElement(ControlPanelComponent$ReasonReactExamples.make, {
@@ -111,7 +113,8 @@ function GameComponent(Props) {
                     onRewindGame: onRewindGame
                   }), React.createElement(BoardComponent$ReasonReactExamples.make, {
                     model: currGameModel[/* board */1],
-                    handlers: boardHandlers
+                    handlers: boardHandlers,
+                    isGameOver: isGameOver
                   }));
   } else {
     throw [

@@ -17,12 +17,24 @@ var base = Css.style(/* :: */[
 
 var hidden = Css.style(/* :: */[
       Css.backgroundColor(Css.grey),
-      /* [] */0
+      /* :: */[
+        Css.hover(/* :: */[
+              Css.backgroundColor(Css.darkgrey),
+              /* [] */0
+            ]),
+        /* [] */0
+      ]
     ]);
 
 var flagged = Css.style(/* :: */[
       Css.backgroundColor(Css.green),
-      /* [] */0
+      /* :: */[
+        Css.hover(/* :: */[
+              Css.backgroundColor(Css.lightgreen),
+              /* [] */0
+            ]),
+        /* [] */0
+      ]
     ]);
 
 var iconSize = Css.px(25);
@@ -61,6 +73,24 @@ var Visible = {
   empty: empty
 };
 
+var hidden$1 = Css.merge(/* :: */[
+      hidden,
+      /* :: */[
+        Css.style(/* :: */[
+              Css.hover(/* :: */[
+                    Css.backgroundColor(Css.grey),
+                    /* [] */0
+                  ]),
+              /* [] */0
+            ]),
+        /* [] */0
+      ]
+    ]);
+
+var GameOver = {
+  hidden: hidden$1
+};
+
 var Styles = {
   cellSize: cellSize,
   base: base,
@@ -69,7 +99,8 @@ var Styles = {
   iconSize: iconSize,
   flag: flag,
   bomb: bomb,
-  Visible: Visible
+  Visible: Visible,
+  GameOver: GameOver
 };
 
 function CellComponent(Props) {
@@ -77,13 +108,17 @@ function CellComponent(Props) {
   var mined$1 = Props.mined;
   var numAdjacentMines = Props.numAdjacentMines;
   var handleClick = Props.handleClick;
+  var isGameOver = Props.isGameOver;
   var match;
   switch (state) {
     case /* Hidden */0 :
-        match = /* tuple */[
-          hidden,
-          GlobalTypes$ReasonReactExamples.str(" ")
-        ];
+        match = isGameOver ? /* tuple */[
+            hidden$1,
+            GlobalTypes$ReasonReactExamples.str(" ")
+          ] : /* tuple */[
+            hidden,
+            GlobalTypes$ReasonReactExamples.str(" ")
+          ];
         break;
     case /* Visible */1 :
         match = mined$1 ? /* tuple */[
@@ -115,14 +150,15 @@ function CellComponent(Props) {
     e.preventDefault();
     return Curry._1(handleClick, /* Right */0);
   };
-  return React.createElement("div", {
-              className: Css.merge(/* :: */[
-                    base,
-                    /* :: */[
-                      match[0],
-                      /* [] */0
-                    ]
-                  ]),
+  var classStyles = Css.merge(/* :: */[
+        base,
+        /* :: */[
+          match[0],
+          /* [] */0
+        ]
+      ]);
+  return React.createElement("section", {
+              className: classStyles,
               onClick: onClick,
               onContextMenu: onContextMenu
             }, match[1]);

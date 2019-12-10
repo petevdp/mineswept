@@ -16,6 +16,7 @@ var Style = {
 function BoardComponent(Props) {
   var model = Props.model;
   var handlers = Props.handlers;
+  var isGameOver = Props.isGameOver;
   var cellComponents = $$Array.mapi((function (y, modelRow) {
           var cellComponents = $$Array.mapi((function (x, param) {
                   return React.createElement("th", {
@@ -24,7 +25,8 @@ function BoardComponent(Props) {
                                   state: param[/* state */0],
                                   mined: param[/* mined */1],
                                   numAdjacentMines: param[/* numAdjacentMines */2],
-                                  handleClick: param[/* handleClick */3]
+                                  handleClick: param[/* handleClick */3],
+                                  isGameOver: param[/* isGameOver */4]
                                 }));
                 }), modelRow);
           return React.createElement("tr", {
@@ -43,7 +45,8 @@ function BoardComponent(Props) {
                       /* state */param[/* state */0],
                       /* mined */param[/* mined */1],
                       /* numAdjacentMines */param[/* numAdjacentMines */2],
-                      /* handleClick */handleClick
+                      /* handleClick */handleClick,
+                      /* isGameOver */isGameOver
                     ];
             }), model));
   var onContextMenu = function (e) {

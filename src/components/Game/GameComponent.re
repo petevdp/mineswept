@@ -79,8 +79,15 @@ let make = () => {
   // this might be innacurate since the player might misplace a flag
   let minesLeft = mineCount - flagCount;
 
+  let isGameOver =
+    switch (currGameModel.phase) {
+    | Start
+    | Playing => false
+    | Ended(_) => true
+    };
+
   <React.Fragment>
     <ControlPanelComponent onNewGame gamePhase minesLeft onRewindGame />
-    <BoardComponent model=board handlers=boardHandlers />
+    <BoardComponent model=board handlers=boardHandlers isGameOver />
   </React.Fragment>;
 };
