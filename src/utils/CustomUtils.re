@@ -14,6 +14,8 @@ module Matrix = {
 
   let flatten = Belt.Array.concatMany;
 
+  let toList = (matrix: matrix('a)) => matrix->flatten->Array.to_list;
+
   let flattenWithCoords = (matrix: matrix('a)): array(('a, coords)) =>
     matrix
     |> map(~f=(cell, coords) => (cell, coords))
@@ -24,6 +26,7 @@ module Matrix = {
     Belt.Array.reduce(cells, acc, f);
   };
 
+  let copy = matrix => Array.map(row => Array.copy(row), matrix);
   // let forEach = (~f: (~coords: coords, 'a`) => unit, matrix: t('a)) => {
   //   let (sizeX, sizeY) = size(matrix);
   //   for (i in 0 to sizeY) {

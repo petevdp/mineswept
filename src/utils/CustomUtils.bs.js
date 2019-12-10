@@ -32,6 +32,10 @@ function size(matrix) {
   }
 }
 
+function toList(matrix) {
+  return $$Array.to_list(Belt_Array.concatMany(matrix));
+}
+
 function flattenWithCoords(matrix) {
   return Belt_Array.concatMany(map((function (cell, coords) {
                     return /* tuple */[
@@ -44,6 +48,10 @@ function flattenWithCoords(matrix) {
 function reduce(acc, f, matrix) {
   var cells = Belt_Array.concatMany(matrix);
   return Belt_Array.reduce(cells, acc, f);
+}
+
+function copy(matrix) {
+  return $$Array.map($$Array.copy, matrix);
 }
 
 function select(f, matrix) {
@@ -66,8 +74,10 @@ var Matrix = {
   map: map,
   size: size,
   flatten: Belt_Array.concatMany,
+  toList: toList,
   flattenWithCoords: flattenWithCoords,
   reduce: reduce,
+  copy: copy,
   select: select
 };
 

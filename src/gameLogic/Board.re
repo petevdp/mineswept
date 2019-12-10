@@ -163,3 +163,17 @@ let rec checkAndReveal = (coords: coords, board: model): model => {
     board;
   };
 };
+
+let hasUnfinishedCells = model => {
+  let cellList = Matrix.toList(model);
+  let hasHiddenCells: bool =
+    List.exists(({state}: Cell.model) => state == Hidden, cellList);
+
+  let hasIncorrectFlaggedCells: bool =
+    List.exists(
+      ({state, mined}: Cell.model) => !mined && state == Flagged,
+      cellList,
+    );
+
+  hasHiddenCells || hasIncorrectFlaggedCells;
+};

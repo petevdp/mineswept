@@ -23,22 +23,11 @@ function cellCheck(prevPhase, prevBoard, mineCount, coords) {
   var board = match !== 0 ? prevBoard : (
       match$1 ? Board$ReasonReactExamples.revealAllMines(prevBoard) : Board$ReasonReactExamples.checkAndReveal(coords, prevBoard)
     );
-  var allCells = $$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, board));
-  var hasHiddenCells = List.exists((function (param) {
-          return param[/* state */0] === /* Hidden */0;
-        }), allCells);
-  var hasIncorrectFlaggedCells = List.exists((function (param) {
-          if (param[/* mined */1]) {
-            return false;
-          } else {
-            return param[/* state */0] === /* Flagged */2;
-          }
-        }), allCells);
-  var hasUnfinishedCells = hasHiddenCells || hasIncorrectFlaggedCells;
   var match$2 = cell[/* mined */1];
+  var match$3 = Board$ReasonReactExamples.hasUnfinishedCells(board);
   var phase = typeof prevPhase === "number" ? (
       match$2 ? /* Ended */[/* Loss */1] : (
-          hasUnfinishedCells ? /* Playing */1 : /* Ended */[/* Win */0]
+          match$3 ? /* Playing */1 : /* Ended */[/* Win */0]
         )
     ) : /* Ended */[prevPhase[0]];
   return /* tuple */[
@@ -51,26 +40,32 @@ function toggleFlag(param, board) {
   var y = param[1];
   var x = param[0];
   var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
+  var board$1 = CustomUtils$ReasonReactExamples.Matrix.copy(board);
   var match = cell[/* state */0];
-  var newState;
+  var state;
   switch (match) {
     case /* Hidden */0 :
-        newState = /* Flagged */2;
+        state = /* Flagged */2;
         break;
     case /* Visible */1 :
-        newState = /* Visible */1;
+        state = /* Visible */1;
         break;
     case /* Flagged */2 :
-        newState = /* Hidden */0;
+        state = /* Hidden */0;
         break;
     
   }
-  Caml_array.caml_array_set(Caml_array.caml_array_get(board, y), x, /* record */[
-        /* state */newState,
+  Caml_array.caml_array_set(Caml_array.caml_array_get(board$1, y), x, /* record */[
+        /* state */state,
         /* mined */cell[/* mined */1],
         /* numAdjacentMines */cell[/* numAdjacentMines */2]
       ]);
-  return board;
+  var match$1 = Board$ReasonReactExamples.hasUnfinishedCells(board$1);
+  var phase = match$1 ? /* Playing */1 : /* Ended */[/* Win */0];
+  return /* tuple */[
+          board$1,
+          phase
+        ];
 }
 
 function random(size, mineCount) {
@@ -102,10 +97,7 @@ function reduce(history, action) {
           ];
         break;
     case /* ToggleFlag */1 :
-        match = typeof prevPhase === "number" ? /* tuple */[
-            toggleFlag(action[0], prevBoard$1),
-            /* Playing */1
-          ] : /* tuple */[
+        match = typeof prevPhase === "number" ? toggleFlag(action[0], prevBoard$1) : /* tuple */[
             newBoard,
             /* Ended */[prevPhase[0]]
           ];
@@ -125,22 +117,38 @@ function reduce(history, action) {
     
   }
   var newBoard$1 = match[0];
-  var flagCount = List.length(List.filter((function (param) {
-                return param[/* state */0] === /* Flagged */2;
-              }))($$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, newBoard$1))));
-  var history_000 = /* record */[
-    /* phase */match[1],
-    /* board */newBoard$1,
-    /* flagCount */flagCount,
-    /* mineCount */mineCount,
-    /* lastAction */action
-  ];
-  var history$1 = /* :: */[
-    history_000,
-    history
-  ];
-  console.log(List.length(history$1));
-  return history$1;
+  var match$3 = List.length(history);
+  var newHistory;
+  var exit = 0;
+  switch (action.tag | 0) {
+    case /* Check */0 :
+    case /* ToggleFlag */1 :
+        exit = 1;
+        break;
+    case /* Rewind */2 :
+        newHistory = match$3 !== 0 ? (
+            match$3 !== 1 ? List.tl(history) : history
+          ) : /* [] */0;
+        break;
+    
+  }
+  if (exit === 1) {
+    var flagCount = List.length(List.filter((function (param) {
+                  return param[/* state */0] === /* Flagged */2;
+                }))($$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, newBoard$1))));
+    newHistory = /* :: */[
+      /* record */[
+        /* phase */match[1],
+        /* board */newBoard$1,
+        /* flagCount */flagCount,
+        /* mineCount */mineCount,
+        /* lastAction */action
+      ],
+      history
+    ];
+  }
+  console.log(List.length(newHistory));
+  return newHistory;
 }
 
 function make(param) {

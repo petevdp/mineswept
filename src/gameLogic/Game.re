@@ -60,21 +60,8 @@ let cellCheck =
     | (Visible, _) => prevBoard
     };
 
-  let allCells = board |> Matrix.flatten |> Array.to_list;
-
-  let hasHiddenCells: bool =
-    List.exists(({state}: Board.Cell.model) => state == Hidden, allCells);
-
-  let hasIncorrectFlaggedCells: bool =
-    List.exists(
-      ({state, mined}: Board.Cell.model) => !mined && state == Flagged,
-      allCells,
-    );
-
-  let hasUnfinishedCells = hasHiddenCells || hasIncorrectFlaggedCells;
-
   let phase =
-    switch (prevPhase, cell.mined, hasUnfinishedCells) {
+    switch (prevPhase, cell.mined, Board.hasUnfinishedCells(board)) {
     // if the game is already over, it's still over
     | (Ended(endState), _, _) => Ended(endState)
     // if you click on a mine, you lose
@@ -87,16 +74,19 @@ let cellCheck =
   (board, phase);
 };
 
-let toggleFlag = ((x, y): coords, board: Board.model): Board.model => {
+let toggleFlag = ((x, y): coords, board: Board.model): (Board.model, phase) => {
   let cell: Board.Cell.model = board[y][x];
-  let newState: Board.Cell.state =
+  let board = Matrix.copy(board);
+  let state: Board.Cell.state =
     switch (cell.state) {
     | Hidden => Flagged
     | Flagged => Hidden
     | Visible => Visible
     };
-  board[y][x] = {...cell, state: newState};
-  board;
+  board[y][x] = {...cell, state};
+
+  let phase = Board.hasUnfinishedCells(board) ? Playing : Ended(Win);
+  (board, phase);
 };
 
 module MinePopulationStrategy = {
@@ -146,10 +136,7 @@ let reduce = (history: history, action: action): history => {
     | (Check(coords), Playing | Start) =>
       cellCheck(phase, newBoard, ~mineCount, ~coords)
 
-    | (ToggleFlag(coords), Playing | Start) => (
-        toggleFlag(coords, board),
-        Playing,
-      )
+    | (ToggleFlag(coords), Playing | Start) => toggleFlag(coords, board)
 
     // this should never actually be called given proper player input control, included for completeness
     | (Check(_) | ToggleFlag(_), Ended(endState)) => (
@@ -158,26 +145,32 @@ let reduce = (history: history, action: action): history => {
       )
     };
 
-  let flagCount =
-    newBoard
-    |> Matrix.flatten
-    |> Array.to_list
-    |> List.filter(({state}: Board.Cell.model) => state == Flagged)
-    |> List.length;
+  let newHistory =
+    switch (action, List.length(history)) {
+    | (Rewind(_), 0) => []
+    | (Rewind(_), 1) => history
+    | (Rewind(_), _) => List.tl(history)
+    | (_, _) =>
+      let flagCount =
+        newBoard
+        |> Matrix.flatten
+        |> Array.to_list
+        |> List.filter(({state}: Board.Cell.model) => state == Flagged)
+        |> List.length;
 
-  let history = [
-    {
-      phase: newPhase,
-      board: newBoard,
-      mineCount,
-      flagCount,
-      lastAction: Some(action),
-    },
-    ...history,
-  ];
-
-  Js.log(List.length(history));
-  history;
+      [
+        {
+          board: newBoard,
+          phase: newPhase,
+          mineCount,
+          flagCount,
+          lastAction: Some(action),
+        },
+        ...history,
+      ];
+    };
+  Js.log(List.length(newHistory));
+  newHistory;
 };
 
 // extended game model with convenient computed info for view layer

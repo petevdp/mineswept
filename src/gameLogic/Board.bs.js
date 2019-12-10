@@ -212,6 +212,25 @@ function checkAndReveal(coords, board) {
   }
 }
 
+function hasUnfinishedCells(model) {
+  var cellList = CustomUtils$ReasonReactExamples.Matrix.toList(model);
+  var hasHiddenCells = List.exists((function (param) {
+          return param[/* state */0] === /* Hidden */0;
+        }), cellList);
+  var hasIncorrectFlaggedCells = List.exists((function (param) {
+          if (param[/* mined */1]) {
+            return false;
+          } else {
+            return param[/* state */0] === /* Flagged */2;
+          }
+        }), cellList);
+  if (hasHiddenCells) {
+    return true;
+  } else {
+    return hasIncorrectFlaggedCells;
+  }
+}
+
 var adjacentCoords = getAdjacent;
 
 exports.Cell = Cell;
@@ -224,4 +243,5 @@ exports.InvalidBoardState = InvalidBoardState;
 exports.getRestrictedModel = getRestrictedModel;
 exports.revealAllMines = revealAllMines;
 exports.checkAndReveal = checkAndReveal;
+exports.hasUnfinishedCells = hasUnfinishedCells;
 /* No side effect */
