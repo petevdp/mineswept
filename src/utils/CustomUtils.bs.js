@@ -32,6 +32,15 @@ function size(matrix) {
   }
 }
 
+function flattenWithCoords(matrix) {
+  return Belt_Array.concatMany(map((function (cell, coords) {
+                    return /* tuple */[
+                            cell,
+                            coords
+                          ];
+                  }), matrix));
+}
+
 function reduce(acc, f, matrix) {
   var cells = Belt_Array.concatMany(matrix);
   return Belt_Array.reduce(cells, acc, f);
@@ -57,6 +66,7 @@ var Matrix = {
   map: map,
   size: size,
   flatten: Belt_Array.concatMany,
+  flattenWithCoords: flattenWithCoords,
   reduce: reduce,
   select: select
 };

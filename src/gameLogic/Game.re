@@ -7,6 +7,10 @@ type action =
   | ToggleFlag(coords)
   | Rewind(int);
 
+type engineAction =
+  | Check(coords)
+  | ToggleFlag(coords);
+
 type endState =
   | Win
   | Loss;
@@ -28,7 +32,7 @@ type history = list(model);
 
 type actionHandler = action => unit;
 
-let staticCellCheck = (state: Cell.state): Cell.state =>
+let staticCellCheck = (state: Board.Cell.state): Board.Cell.state =>
   switch (state) {
   | Hidden => Visible
   | Flagged => Hidden
@@ -56,33 +60,36 @@ let cellCheck =
     | (Visible, _) => prevBoard
     };
 
-  let onlyMinedCellsLeft: bool =
-    (
-      () => {
-        let allCells = board |> Matrix.flatten |> Array.to_list;
-        let visibleCells =
-          allCells
-          |> List.filter(({state}: Board.hydratedCellModel) =>
-               state == Visible
-             );
+  let allCells = board |> Matrix.flatten |> Array.to_list;
 
-        List.length(allCells) - List.length(visibleCells) == mineCount;
-      }
-    )();
+  let hasHiddenCells: bool =
+    List.exists(({state}: Board.Cell.model) => state == Hidden, allCells);
+
+  let hasIncorrectFlaggedCells: bool =
+    List.exists(
+      ({state, mined}: Board.Cell.model) => !mined && state == Flagged,
+      allCells,
+    );
+
+  let hasUnfinishedCells = hasHiddenCells || hasIncorrectFlaggedCells;
 
   let phase =
-    switch (prevPhase, cell.mined, onlyMinedCellsLeft) {
+    switch (prevPhase, cell.mined, hasUnfinishedCells) {
+    // if the game is already over, it's still over
     | (Ended(endState), _, _) => Ended(endState)
+    // if you click on a mine, you lose
     | (Start | Playing, true, _) => Ended(Loss)
-    | (Start | Playing, false, true) => Ended(Win)
-    | (Start | Playing, false, false) => Playing
+    // if there are no unfinished cells, you win
+    | (Start | Playing, false, false) => Ended(Win)
+    // if there still are unfinished cells, you have to keep playing
+    | (Start | Playing, false, true) => Playing
     };
   (board, phase);
 };
 
 let toggleFlag = ((x, y): coords, board: Board.model): Board.model => {
-  let cell: Board.hydratedCellModel = board[y][x];
-  let newState: Cell.state =
+  let cell: Board.Cell.model = board[y][x];
+  let newState: Board.Cell.state =
     switch (cell.state) {
     | Hidden => Flagged
     | Flagged => Hidden
@@ -121,15 +128,17 @@ let reduce = (history: history, action: action): history => {
   // make deep copy of board
   let newBoard =
     Array.map(
-      (row: array(Board.hydratedCellModel)) => Array.copy(row),
+      (row: array(Board.Cell.model)) => Array.copy(row),
       prevBoard,
     );
 
   let (newBoard, newPhase) =
     switch (action, phase) {
     | (Rewind(steps), _) =>
-      let length = List.length(history);
+      // -1 because the first entry in history is the initial state
+      let length = List.length(history) - 1;
       let steps = length > steps ? steps : length;
+      Js.log(string_of_int(steps) ++ " steps");
       let {board, phase} = List.nth(history, steps);
       (board, phase);
 
@@ -153,10 +162,10 @@ let reduce = (history: history, action: action): history => {
     newBoard
     |> Matrix.flatten
     |> Array.to_list
-    |> List.filter(({state}: Board.hydratedCellModel) => state == Flagged)
+    |> List.filter(({state}: Board.Cell.model) => state == Flagged)
     |> List.length;
 
-  [
+  let history = [
     {
       phase: newPhase,
       board: newBoard,
@@ -166,6 +175,9 @@ let reduce = (history: history, action: action): history => {
     },
     ...history,
   ];
+
+  Js.log(List.length(history));
+  history;
 };
 
 // extended game model with convenient computed info for view layer

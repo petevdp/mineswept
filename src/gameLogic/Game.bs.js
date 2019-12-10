@@ -24,14 +24,21 @@ function cellCheck(prevPhase, prevBoard, mineCount, coords) {
       match$1 ? Board$ReasonReactExamples.revealAllMines(prevBoard) : Board$ReasonReactExamples.checkAndReveal(coords, prevBoard)
     );
   var allCells = $$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, board));
-  var visibleCells = List.filter((function (param) {
-            return param[/* state */0] === /* Visible */1;
-          }))(allCells);
-  var onlyMinedCellsLeft = (List.length(allCells) - List.length(visibleCells) | 0) === mineCount;
+  var hasHiddenCells = List.exists((function (param) {
+          return param[/* state */0] === /* Hidden */0;
+        }), allCells);
+  var hasIncorrectFlaggedCells = List.exists((function (param) {
+          if (param[/* mined */1]) {
+            return false;
+          } else {
+            return param[/* state */0] === /* Flagged */2;
+          }
+        }), allCells);
+  var hasUnfinishedCells = hasHiddenCells || hasIncorrectFlaggedCells;
   var match$2 = cell[/* mined */1];
   var phase = typeof prevPhase === "number" ? (
       match$2 ? /* Ended */[/* Loss */1] : (
-          onlyMinedCellsLeft ? /* Ended */[/* Win */0] : /* Playing */1
+          hasUnfinishedCells ? /* Playing */1 : /* Ended */[/* Win */0]
         )
     ) : /* Ended */[prevPhase[0]];
   return /* tuple */[
@@ -105,9 +112,10 @@ function reduce(history, action) {
         break;
     case /* Rewind */2 :
         var steps = action[0];
-        var length = List.length(history);
+        var length = List.length(history) - 1 | 0;
         var match$1 = length > steps;
         var steps$1 = match$1 ? steps : length;
+        console.log(String(steps$1) + " steps");
         var match$2 = List.nth(history, steps$1);
         match = /* tuple */[
           match$2[/* board */1],
@@ -120,16 +128,19 @@ function reduce(history, action) {
   var flagCount = List.length(List.filter((function (param) {
                 return param[/* state */0] === /* Flagged */2;
               }))($$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, newBoard$1))));
-  return /* :: */[
-          /* record */[
-            /* phase */match[1],
-            /* board */newBoard$1,
-            /* flagCount */flagCount,
-            /* mineCount */mineCount,
-            /* lastAction */action
-          ],
-          history
-        ];
+  var history_000 = /* record */[
+    /* phase */match[1],
+    /* board */newBoard$1,
+    /* flagCount */flagCount,
+    /* mineCount */mineCount,
+    /* lastAction */action
+  ];
+  var history$1 = /* :: */[
+    history_000,
+    history
+  ];
+  console.log(List.length(history$1));
+  return history$1;
 }
 
 function make(param) {

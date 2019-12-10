@@ -1,7 +1,37 @@
 open GlobalTypes;
 open CustomUtils;
 
-type rawModel = matrix(Cell.model);
+module Cell = {
+  type state =
+    | Hidden
+    | Visible
+    | Flagged;
+
+  /** cell with no computed data */
+  type rawModel = {
+    state,
+    mined: bool,
+  };
+
+  /** what a player would see */
+  type restrictedModel =
+    | Hidden
+    | Visible(int) // int: num of adjacent mines
+    | Flagged;
+
+  type model = {
+    state,
+    mined: bool,
+    numAdjacentMines: int,
+  };
+
+  type action =
+    | Check
+    | ToggleFlag;
+};
+
+type model = matrix(Cell.model);
+type restrictedModel = matrix(Cell.restrictedModel);
 
 module Coords = {
   let adjacentDiff: list(coords) = [
@@ -49,42 +79,62 @@ let getAdjacentCells = ((x, y): coords, matrix: matrix('a)) => {
 };
 
 let makeRaw =
-    ((xSize, ySize): size, minedCoords: list(coords)): matrix(Cell.model) => {
+    ((xSize, ySize): size, minedCoords: list(coords))
+    : matrix(Cell.rawModel) => {
   Array.init(ySize, i =>
     Array.init(
       xSize,
       j => {
         let mined = List.exists(e => e == (j, i), minedCoords);
-        let model: Cell.model = {state: Cell.Hidden, mined};
+        let model: Cell.rawModel = {state: Cell.Hidden, mined};
         model;
       },
     )
   );
 };
 
-type hydratedCellModel = {
-  state: Cell.state,
-  mined: bool,
-  numAdjacentMines: int,
-};
-
-type model = matrix(hydratedCellModel);
-
 let make = (~size: size, ~minedCoords: list(coords)): model => {
   makeRaw(size, minedCoords)
-  |> Matrix.map(~f=({state, mined}: Cell.model, coords: coords) =>
+  |> Matrix.map(~f=({state, mined}: Cell.rawModel, coords: coords) =>
        (
          {
            let numAdjacentMines = Coords.getNumAdjacent(coords, minedCoords);
-           let hydrated: hydratedCellModel = {state, mined, numAdjacentMines};
-           hydrated;
-         }: hydratedCellModel
+           {state, mined, numAdjacentMines};
+         }: Cell.model
        )
      );
 };
 
+exception InvalidBoardState(string);
+
+/** get the board with only the info the player sees (for engines). The board
+ *  state needs to be a valid playable one, meaning no visible mined cells
+ *  or an exception will be thrown.
+ */
+let getRestrictedModel = (board: model): restrictedModel => {
+  Matrix.map(
+    ~f=
+      ({state, mined, numAdjacentMines}: Cell.model, _) => {
+        let restrictedModel: Cell.restrictedModel =
+          switch (state, mined) {
+          | (Hidden, _) => Hidden
+          | (Visible, false) => Visible(numAdjacentMines)
+          | (Visible, true) =>
+            raise(
+              InvalidBoardState(
+                "the board has a visible cell which has a mine, so it shouldn't be evaluated by an engine",
+              ),
+            )
+          | (Flagged, _) => Flagged
+          };
+        restrictedModel;
+      },
+    board,
+  );
+};
+
 let revealAllMines = (board: model): model =>
-  Matrix.map(board, ~f=(cell: hydratedCellModel, _) =>
+  Matrix.map(board, ~f=(cell: Cell.model, _) =>
     if (cell.mined) {
       {...cell, state: Visible};
     } else {

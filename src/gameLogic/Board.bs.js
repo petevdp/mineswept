@@ -5,7 +5,10 @@ var $$Array = require("bs-platform/lib/js/array.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
+var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
 var CustomUtils$ReasonReactExamples = require("../utils/CustomUtils.bs.js");
+
+var Cell = { };
 
 var adjacentDiff = /* :: */[
   /* tuple */[
@@ -151,6 +154,28 @@ function make(size, minedCoords) {
               }), makeRaw(size, minedCoords));
 }
 
+var InvalidBoardState = Caml_exceptions.create("Board-ReasonReactExamples.InvalidBoardState");
+
+function getRestrictedModel(board) {
+  return CustomUtils$ReasonReactExamples.Matrix.map((function (param, param$1) {
+                switch (param[/* state */0]) {
+                  case /* Hidden */0 :
+                      return /* Hidden */0;
+                  case /* Visible */1 :
+                      if (param[/* mined */1]) {
+                        throw [
+                              InvalidBoardState,
+                              "the board has a visible cell which has a mine, so it shouldn't be evaluated by an engine"
+                            ];
+                      }
+                      return /* Visible */[param[/* numAdjacentMines */2]];
+                  case /* Flagged */2 :
+                      return /* Flagged */1;
+                  
+                }
+              }), board);
+}
+
 function revealAllMines(board) {
   return CustomUtils$ReasonReactExamples.Matrix.map((function (cell, param) {
                 if (cell[/* mined */1]) {
@@ -189,11 +214,14 @@ function checkAndReveal(coords, board) {
 
 var adjacentCoords = getAdjacent;
 
+exports.Cell = Cell;
 exports.Coords = Coords;
 exports.adjacentCoords = adjacentCoords;
 exports.getAdjacentCells = getAdjacentCells;
 exports.makeRaw = makeRaw;
 exports.make = make;
+exports.InvalidBoardState = InvalidBoardState;
+exports.getRestrictedModel = getRestrictedModel;
 exports.revealAllMines = revealAllMines;
 exports.checkAndReveal = checkAndReveal;
 /* No side effect */

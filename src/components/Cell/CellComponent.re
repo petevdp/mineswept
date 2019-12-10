@@ -1,5 +1,4 @@
 open GlobalTypes;
-include Cell;
 
 module Styles = {
   open Css;
@@ -28,7 +27,7 @@ type click =
 type handleClick = click => unit;
 
 type props = {
-  state,
+  state: Board.Cell.state,
   mined: bool,
   numAdjacentMines: int,
   handleClick,
@@ -37,7 +36,7 @@ type props = {
 [@react.component]
 let make =
     (
-      ~state: state,
+      ~state: Board.Cell.state,
       ~mined: bool,
       ~numAdjacentMines: int,
       ~handleClick: handleClick,

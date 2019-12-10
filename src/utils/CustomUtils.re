@@ -14,6 +14,11 @@ module Matrix = {
 
   let flatten = Belt.Array.concatMany;
 
+  let flattenWithCoords = (matrix: matrix('a)): array(('a, coords)) =>
+    matrix
+    |> map(~f=(cell, coords) => (cell, coords))
+    |> Belt.Array.concatMany;
+
   let reduce = (~acc: 'a, ~f: ('a, 'b) => 'a, matrix: matrix('b)): 'a => {
     let cells = flatten(matrix);
     Belt.Array.reduce(cells, acc, f);
