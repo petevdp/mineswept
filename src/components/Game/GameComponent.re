@@ -36,6 +36,7 @@ let make = () => {
         switch (action) {
         | NewGame(options) => {
             ...prevState,
+            playGameOutWithEngine: false,
             gameHistory: [Game.make(options)],
           }
         | HumanGameAction(action) => {
@@ -62,8 +63,24 @@ let make = () => {
         },
       startingAppState,
     );
+  let {gameHistory, playGameOutWithEngine} = appState;
+  let [currGameModel, ..._] = gameHistory;
 
-  let {gameHistory, selectedEngine} = appState;
+  let isGameOver =
+    switch (currGameModel.phase) {
+    | Start
+    | Playing => false
+    | Ended(_) => true
+    };
+  React.useEffect3(
+    () => {
+      if (playGameOutWithEngine && !isGameOver) {
+        dispatch(EngineGameAction);
+      };
+      Some(() => ());
+    },
+    (gameHistory, playGameOutWithEngine, currGameModel),
+  );
 
   let [currGameModel, ..._] = gameHistory;
 
@@ -85,10 +102,21 @@ let make = () => {
           dispatch(HumanGameAction(Game.ToggleFlag(coords))),
       };
 
-  let onNewGame = () => dispatch(NewGame(gameOptions));
-  let onRewindGame = steps => dispatch(HumanGameAction(Rewind(steps)));
+  let panelGameActionHandlers: ControlPanelComponent.handlers = {
+    isGameOver
+      ? {
+        onRewindGame: _ => (),
+        onMakeEngineMove: _ => (),
+        onPlayGameWithEngine: _ => (),
+      }
+      : {
+        onRewindGame: steps => dispatch(HumanGameAction(Rewind(steps))),
+        onMakeEngineMove: () => dispatch(EngineGameAction),
+        onPlayGameWithEngine: () => dispatch(PlayGameWithEngine),
+      };
+  };
 
-  let onMakeEngineMove = () => dispatch(EngineGameAction);
+  let onNewGame = () => dispatch(NewGame(gameOptions));
 
   let {mineCount, flagCount, phase as gamePhase, board}: Game.model = currGameModel;
 
@@ -100,8 +128,7 @@ let make = () => {
       onNewGame
       gamePhase
       minesLeft
-      onRewindGame
-      onMakeEngineMove
+      handlers=panelGameActionHandlers
     />
     <BoardComponent model=board handlers=boardHandlers isGameOver />
   </React.Fragment>;

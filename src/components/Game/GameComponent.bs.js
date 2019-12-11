@@ -78,61 +78,103 @@ function GameComponent(Props) {
                       /* [] */0
                     ],
                     /* selectedEngine */prevState[/* selectedEngine */1],
-                    /* playGameOutWithEngine */prevState[/* playGameOutWithEngine */2],
+                    /* playGameOutWithEngine */false,
                     /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */3]
                   ];
           }
         }), startingAppState);
-  var gameHistory = match[0][/* gameHistory */0];
+  var appState = match[0];
+  var playGameOutWithEngine = appState[/* playGameOutWithEngine */2];
+  var gameHistory = appState[/* gameHistory */0];
   var dispatch = match[1];
   if (gameHistory) {
     var currGameModel = gameHistory[0];
     var match$1 = currGameModel[/* phase */0];
     var isGameOver = typeof match$1 === "number" ? false : true;
-    var boardHandlers = isGameOver ? /* record */[
-        /* onCheck */(function (param) {
-            return /* () */0;
-          }),
-        /* onFlagToggle */(function (param) {
-            return /* () */0;
-          })
-      ] : /* record */[
-        /* onCheck */(function (coords) {
-            return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Check */Block.__(0, [coords])]));
-          }),
-        /* onFlagToggle */(function (coords) {
-            return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* ToggleFlag */Block.__(1, [coords])]));
-          })
-      ];
-    var onNewGame = function (param) {
-      return Curry._1(dispatch, /* NewGame */Block.__(0, [gameOptions]));
-    };
-    var onRewindGame = function (steps) {
-      return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Rewind */Block.__(2, [steps])]));
-    };
-    var onMakeEngineMove = function (param) {
-      return Curry._1(dispatch, /* EngineGameAction */0);
-    };
-    var minesLeft = currGameModel[/* mineCount */3] - currGameModel[/* flagCount */2] | 0;
-    return React.createElement(React.Fragment, {
-                children: null
-              }, React.createElement(ControlPanelComponent$ReasonReactExamples.make, {
-                    onNewGame: onNewGame,
-                    gamePhase: currGameModel[/* phase */0],
-                    minesLeft: minesLeft,
-                    onRewindGame: onRewindGame,
-                    onMakeEngineMove: onMakeEngineMove
-                  }), React.createElement(BoardComponent$ReasonReactExamples.make, {
-                    model: currGameModel[/* board */1],
-                    handlers: boardHandlers,
-                    isGameOver: isGameOver
-                  }));
+    React.useEffect((function (param) {
+            if (playGameOutWithEngine && !isGameOver) {
+              Curry._1(dispatch, /* EngineGameAction */0);
+            }
+            return (function (param) {
+                      return /* () */0;
+                    });
+          }), /* tuple */[
+          gameHistory,
+          playGameOutWithEngine,
+          currGameModel
+        ]);
+    if (gameHistory) {
+      var currGameModel$1 = gameHistory[0];
+      var match$2 = currGameModel$1[/* phase */0];
+      var isGameOver$1 = typeof match$2 === "number" ? false : true;
+      var boardHandlers = isGameOver$1 ? /* record */[
+          /* onCheck */(function (param) {
+              return /* () */0;
+            }),
+          /* onFlagToggle */(function (param) {
+              return /* () */0;
+            })
+        ] : /* record */[
+          /* onCheck */(function (coords) {
+              return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Check */Block.__(0, [coords])]));
+            }),
+          /* onFlagToggle */(function (coords) {
+              return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* ToggleFlag */Block.__(1, [coords])]));
+            })
+        ];
+      var panelGameActionHandlers = isGameOver$1 ? /* record */[
+          /* onRewindGame */(function (param) {
+              return /* () */0;
+            }),
+          /* onMakeEngineMove */(function (param) {
+              return /* () */0;
+            }),
+          /* onPlayGameWithEngine */(function (param) {
+              return /* () */0;
+            })
+        ] : /* record */[
+          /* onRewindGame */(function (steps) {
+              return Curry._1(dispatch, /* HumanGameAction */Block.__(1, [/* Rewind */Block.__(2, [steps])]));
+            }),
+          /* onMakeEngineMove */(function (param) {
+              return Curry._1(dispatch, /* EngineGameAction */0);
+            }),
+          /* onPlayGameWithEngine */(function (param) {
+              return Curry._1(dispatch, /* PlayGameWithEngine */1);
+            })
+        ];
+      var onNewGame = function (param) {
+        return Curry._1(dispatch, /* NewGame */Block.__(0, [gameOptions]));
+      };
+      var minesLeft = currGameModel$1[/* mineCount */3] - currGameModel$1[/* flagCount */2] | 0;
+      return React.createElement(React.Fragment, {
+                  children: null
+                }, React.createElement(ControlPanelComponent$ReasonReactExamples.make, {
+                      onNewGame: onNewGame,
+                      gamePhase: currGameModel$1[/* phase */0],
+                      minesLeft: minesLeft,
+                      handlers: panelGameActionHandlers
+                    }), React.createElement(BoardComponent$ReasonReactExamples.make, {
+                      model: currGameModel$1[/* board */1],
+                      handlers: boardHandlers,
+                      isGameOver: isGameOver$1
+                    }));
+    } else {
+      throw [
+            Caml_builtin_exceptions.match_failure,
+            /* tuple */[
+              "GameComponent.re",
+              85,
+              6
+            ]
+          ];
+    }
   } else {
     throw [
           Caml_builtin_exceptions.match_failure,
           /* tuple */[
             "GameComponent.re",
-            68,
+            67,
             6
           ]
         ];
