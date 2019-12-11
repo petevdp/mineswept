@@ -128,7 +128,6 @@ let reduce = (history: history, action: action): history => {
       // -1 because the first entry in history is the initial state
       let length = List.length(history) - 1;
       let steps = length > steps ? steps : length;
-      Js.log(string_of_int(steps) ++ " steps");
       let {board, phase} = List.nth(history, steps);
       (board, phase);
 
@@ -169,7 +168,6 @@ let reduce = (history: history, action: action): history => {
         ...history,
       ];
     };
-  Js.log(List.length(newHistory));
   newHistory;
 };
 

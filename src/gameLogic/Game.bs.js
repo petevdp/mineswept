@@ -107,7 +107,6 @@ function reduce(history, action) {
         var length = List.length(history) - 1 | 0;
         var match$1 = length > steps;
         var steps$1 = match$1 ? steps : length;
-        console.log(String(steps$1) + " steps");
         var match$2 = List.nth(history, steps$1);
         match = /* tuple */[
           match$2[/* board */1],
@@ -118,37 +117,35 @@ function reduce(history, action) {
   }
   var newBoard$1 = match[0];
   var match$3 = List.length(history);
-  var newHistory;
-  var exit = 0;
   switch (action.tag | 0) {
     case /* Check */0 :
     case /* ToggleFlag */1 :
-        exit = 1;
         break;
     case /* Rewind */2 :
-        newHistory = match$3 !== 0 ? (
-            match$3 !== 1 ? List.tl(history) : history
-          ) : /* [] */0;
-        break;
+        if (match$3 !== 0) {
+          if (match$3 !== 1) {
+            return List.tl(history);
+          } else {
+            return history;
+          }
+        } else {
+          return /* [] */0;
+        }
     
   }
-  if (exit === 1) {
-    var flagCount = List.length(List.filter((function (param) {
-                  return param[/* state */0] === /* Flagged */2;
-                }))($$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, newBoard$1))));
-    newHistory = /* :: */[
-      /* record */[
-        /* phase */match[1],
-        /* board */newBoard$1,
-        /* flagCount */flagCount,
-        /* mineCount */mineCount,
-        /* lastAction */action
-      ],
-      history
-    ];
-  }
-  console.log(List.length(newHistory));
-  return newHistory;
+  var flagCount = List.length(List.filter((function (param) {
+                return param[/* state */0] === /* Flagged */2;
+              }))($$Array.to_list(Curry._1(CustomUtils$ReasonReactExamples.Matrix.flatten, newBoard$1))));
+  return /* :: */[
+          /* record */[
+            /* phase */match[1],
+            /* board */newBoard$1,
+            /* flagCount */flagCount,
+            /* mineCount */mineCount,
+            /* lastAction */action
+          ],
+          history
+        ];
 }
 
 function make(param) {
@@ -169,4 +166,4 @@ exports.toggleFlag = toggleFlag;
 exports.MinePopulationStrategy = MinePopulationStrategy;
 exports.reduce = reduce;
 exports.make = make;
-/* No side effect */
+/* Board-ReasonReactExamples Not a pure module */

@@ -10,98 +10,6 @@ var CustomUtils$ReasonReactExamples = require("../utils/CustomUtils.bs.js");
 
 var Cell = { };
 
-var adjacentDiff = /* :: */[
-  /* tuple */[
-    1,
-    1
-  ],
-  /* :: */[
-    /* tuple */[
-      1,
-      0
-    ],
-    /* :: */[
-      /* tuple */[
-        1,
-        -1
-      ],
-      /* :: */[
-        /* tuple */[
-          0,
-          1
-        ],
-        /* :: */[
-          /* tuple */[
-            0,
-            -1
-          ],
-          /* :: */[
-            /* tuple */[
-              -1,
-              1
-            ],
-            /* :: */[
-              /* tuple */[
-                -1,
-                0
-              ],
-              /* :: */[
-                /* tuple */[
-                  -1,
-                  -1
-                ],
-                /* [] */0
-              ]
-            ]
-          ]
-        ]
-      ]
-    ]
-  ]
-];
-
-function getAdjacent(param, param$1) {
-  var ySize = param$1[1];
-  var xSize = param$1[0];
-  var y = param[1];
-  var x = param[0];
-  return List.filter((function (param) {
-                  var y = param[1];
-                  var x = param[0];
-                  if (x >= 0 && x < xSize && y >= 0) {
-                    return y < ySize;
-                  } else {
-                    return false;
-                  }
-                }))(List.map((function (param) {
-                    return /* tuple */[
-                            x + param[0] | 0,
-                            y + param[1] | 0
-                          ];
-                  }), adjacentDiff));
-}
-
-function getNumAdjacent(param, countedCoords) {
-  var y = param[1];
-  var x = param[0];
-  return List.length(List.filter((function (coords) {
-                      return List.exists((function (checked) {
-                                    return Caml_obj.caml_equal(checked, coords);
-                                  }), countedCoords);
-                    }))(List.map((function (param) {
-                        return /* tuple */[
-                                x + param[0] | 0,
-                                y + param[1] | 0
-                              ];
-                      }), adjacentDiff)));
-}
-
-var Coords = {
-  adjacentDiff: adjacentDiff,
-  getAdjacent: getAdjacent,
-  getNumAdjacent: getNumAdjacent
-};
-
 function getAdjacentCells(param, matrix) {
   var y = param[1];
   var x = param[0];
@@ -122,7 +30,7 @@ function getAdjacentCells(param, matrix) {
                                 x + param[0] | 0,
                                 y + param[1] | 0
                               ];
-                      }), adjacentDiff)));
+                      }), CustomUtils$ReasonReactExamples.Coords.adjacentDiff)));
 }
 
 function makeRaw(param, minedCoords) {
@@ -145,7 +53,7 @@ function makeRaw(param, minedCoords) {
 
 function make(size, minedCoords) {
   return CustomUtils$ReasonReactExamples.Matrix.map((function (param, coords) {
-                var numAdjacentMines = getNumAdjacent(coords, minedCoords);
+                var numAdjacentMines = CustomUtils$ReasonReactExamples.Coords.getNumAdjacent(coords, minedCoords);
                 return /* record */[
                         /* state */param[/* state */0],
                         /* mined */param[/* mined */1],
@@ -155,26 +63,6 @@ function make(size, minedCoords) {
 }
 
 var InvalidBoardState = Caml_exceptions.create("Board-ReasonReactExamples.InvalidBoardState");
-
-function getRestrictedModel(board) {
-  return CustomUtils$ReasonReactExamples.Matrix.map((function (param, param$1) {
-                switch (param[/* state */0]) {
-                  case /* Hidden */0 :
-                      return /* Hidden */0;
-                  case /* Visible */1 :
-                      if (param[/* mined */1]) {
-                        throw [
-                              InvalidBoardState,
-                              "the board has a visible cell which has a mine, so it shouldn't be evaluated by an engine"
-                            ];
-                      }
-                      return /* Visible */[param[/* numAdjacentMines */2]];
-                  case /* Flagged */2 :
-                      return /* Flagged */1;
-                  
-                }
-              }), board);
-}
 
 function revealAllMines(board) {
   return CustomUtils$ReasonReactExamples.Matrix.map((function (cell, param) {
@@ -200,7 +88,7 @@ function checkAndReveal(coords, board) {
         /* numAdjacentMines */cell[/* numAdjacentMines */2]
       ]);
   if (cell[/* numAdjacentMines */2] === 0) {
-    var adjacentCoords = getAdjacent(coords, CustomUtils$ReasonReactExamples.Matrix.size(board));
+    var adjacentCoords = CustomUtils$ReasonReactExamples.Coords.getAdjacent(coords, CustomUtils$ReasonReactExamples.Matrix.size(board));
     var hiddenAdjacentCoords = List.filter((function (param) {
               return Caml_array.caml_array_get(Caml_array.caml_array_get(board, param[1]), param[0])[/* state */0] === /* Hidden */0;
             }))(adjacentCoords);
@@ -231,17 +119,23 @@ function hasUnfinishedCells(model) {
   }
 }
 
-var adjacentCoords = getAdjacent;
+function hasVisibleMines(model) {
+  return Belt_List.some(CustomUtils$ReasonReactExamples.Matrix.toList(model), (function (param) {
+                if (param[/* state */0] !== 1 || !param[/* mined */1]) {
+                  return false;
+                } else {
+                  return true;
+                }
+              }));
+}
 
 exports.Cell = Cell;
-exports.Coords = Coords;
-exports.adjacentCoords = adjacentCoords;
 exports.getAdjacentCells = getAdjacentCells;
 exports.makeRaw = makeRaw;
 exports.make = make;
 exports.InvalidBoardState = InvalidBoardState;
-exports.getRestrictedModel = getRestrictedModel;
 exports.revealAllMines = revealAllMines;
 exports.checkAndReveal = checkAndReveal;
 exports.hasUnfinishedCells = hasUnfinishedCells;
-/* No side effect */
+exports.hasVisibleMines = hasVisibleMines;
+/* CustomUtils-ReasonReactExamples Not a pure module */

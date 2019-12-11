@@ -11,13 +11,21 @@ type appState = {
 type action =
   | NewGame(Game.initOptions)
   | HumanGameAction(Game.action)
-  | EngineGameAction(Game.engineAction)
+  | EngineGameAction
   | PlayGameWithEngine;
 
+let gameSize = 6;
 let gameOptions: Game.initOptions = {
-  size: (4, 4),
-  mineCount: 2,
+  size: (gameSize, gameSize),
+  mineCount: gameSize * gameSize / 8,
   minePopulationStrategy: Game.MinePopulationStrategy.random,
+};
+
+let startingAppState = {
+  gameHistory: [Game.make(gameOptions)],
+  selectedEngine: Engine.solver1,
+  playGameOutWithEngine: false,
+  fallbackGameInitOptions: gameOptions,
 };
 
 [@react.component]
@@ -34,7 +42,7 @@ let make = () => {
             ...prevState,
             gameHistory: Game.reduce(prevState.gameHistory, action),
           }
-        | EngineGameAction(_) =>
+        | EngineGameAction =>
           let {gameHistory, selectedEngine, fallbackGameInitOptions} = prevState;
           let getActionFromEngine =
             Engine.getActionFromEngine(~engine=selectedEngine);
@@ -52,15 +60,10 @@ let make = () => {
           {...prevState, gameHistory};
         | PlayGameWithEngine => {...prevState, playGameOutWithEngine: true}
         },
-      {
-        gameHistory: [Game.make(gameOptions)],
-        selectedEngine: Engine.firstAvailable,
-        playGameOutWithEngine: false,
-        fallbackGameInitOptions: gameOptions,
-      },
+      startingAppState,
     );
 
-  let {gameHistory} = appState;
+  let {gameHistory, selectedEngine} = appState;
 
   let [currGameModel, ..._] = gameHistory;
 
@@ -85,13 +88,21 @@ let make = () => {
   let onNewGame = () => dispatch(NewGame(gameOptions));
   let onRewindGame = steps => dispatch(HumanGameAction(Rewind(steps)));
 
+  let onMakeEngineMove = () => dispatch(EngineGameAction);
+
   let {mineCount, flagCount, phase as gamePhase, board}: Game.model = currGameModel;
 
   // this might be innacurate since the player might misplace a flag
   let minesLeft = mineCount - flagCount;
 
   <React.Fragment>
-    <ControlPanelComponent onNewGame gamePhase minesLeft onRewindGame />
+    <ControlPanelComponent
+      onNewGame
+      gamePhase
+      minesLeft
+      onRewindGame
+      onMakeEngineMove
+    />
     <BoardComponent model=board handlers=boardHandlers isGameOver />
   </React.Fragment>;
 };
