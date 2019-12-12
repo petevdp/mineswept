@@ -92,6 +92,7 @@ module Coords = {
 
 module CoordsSet = Set.Make(Coords);
 module CoordsMap = Map.Make(Coords);
+module CoordsSetMap = Map.Make(CoordsSet);
 module MyList = {
   let combinationRange = (a: int, b: int): list(coords) => {
     Belt.List.makeBy(a, i => Belt.List.makeBy(b, j => (j, i)))->List.concat;

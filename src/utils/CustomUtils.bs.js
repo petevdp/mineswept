@@ -215,6 +215,10 @@ var CoordsMap = $$Map.Make({
       compare: compare
     });
 
+var CoordsSetMap = $$Map.Make({
+      compare: CoordsSet.compare
+    });
+
 function combinationRange(a, b) {
   return List.concat(Belt_List.makeBy(a, (function (i) {
                     return Belt_List.makeBy(b, (function (j) {
@@ -234,5 +238,6 @@ exports.Matrix = Matrix;
 exports.Coords = Coords;
 exports.CoordsSet = CoordsSet;
 exports.CoordsMap = CoordsMap;
+exports.CoordsSetMap = CoordsSetMap;
 exports.MyList = MyList;
 /* CoordsSet Not a pure module */
