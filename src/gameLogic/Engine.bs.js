@@ -1,10 +1,12 @@
 'use strict';
 
+var $$Map = require("bs-platform/lib/js/map.js");
 var $$Set = require("bs-platform/lib/js/set.js");
 var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
+var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
@@ -95,42 +97,66 @@ function resolveOrdering(orderings) {
   }
 }
 
+function compare(a, b) {
+  var match = Caml_obj.caml_compare(a[/* coords */0], b[/* coords */0]);
+  var match$1 = a[/* effect */1];
+  var match$2 = b[/* effect */1];
+  if (match !== 0) {
+    return match;
+  } else if (match$1) {
+    if (match$2) {
+      return 0;
+    } else {
+      return -1;
+    }
+  } else if (match$2) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+var Descriminator = {
+  compare: compare
+};
+
+var DescriminatorSet = $$Set.Make(Descriminator);
+
 function makeBase(coords, boardSize, numMines, board) {
-  return List.fold_left((function (param, param$1) {
-                var y = param$1[1];
-                var x = param$1[0];
-                var coordsSet = param[/* coordsSet */2];
-                var minMines = param[/* minMines */1];
-                var maxMines = param[/* maxMines */0];
+  return List.fold_left((function (group, param) {
+                var y = param[1];
+                var x = param[0];
                 var match = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
                 if (typeof match === "number") {
                   if (match !== 0) {
                     return /* record */[
-                            /* maxMines */maxMines - 1 | 0,
-                            /* minMines */minMines - 1 | 0,
-                            /* coordsSet */coordsSet
+                            /* maxMines */group[/* maxMines */0] - 1 | 0,
+                            /* minMines */group[/* minMines */1] - 1 | 0,
+                            /* coordsSet */group[/* coordsSet */2],
+                            /* descriminatorSet */group[/* descriminatorSet */3]
                           ];
                   } else {
                     return /* record */[
-                            /* maxMines */maxMines,
-                            /* minMines */minMines,
+                            /* maxMines */group[/* maxMines */0],
+                            /* minMines */group[/* minMines */1],
                             /* coordsSet */Curry._2(CustomUtils$ReasonReactExamples.CoordsSet.add, /* tuple */[
                                   x,
                                   y
-                                ], coordsSet)
+                                ], group[/* coordsSet */2]),
+                            /* descriminatorSet */group[/* descriminatorSet */3]
                           ];
                   }
                 } else {
-                  return /* record */[
-                          /* maxMines */maxMines,
-                          /* minMines */minMines,
-                          /* coordsSet */coordsSet
-                        ];
+                  return group;
                 }
               }), /* record */[
               /* maxMines */numMines,
               /* minMines */numMines,
-              /* coordsSet */CustomUtils$ReasonReactExamples.CoordsSet.empty
+              /* coordsSet */CustomUtils$ReasonReactExamples.CoordsSet.empty,
+              /* descriminatorSet */Curry._1(DescriminatorSet.singleton, /* record */[
+                    /* coords */coords,
+                    /* effect : Included */0
+                  ])
             ], CustomUtils$ReasonReactExamples.Coords.getAdjacent(coords, boardSize));
 }
 
@@ -146,7 +172,7 @@ function avgMines(t) {
   
 }
 
-function compare(a, b) {
+function compare$1(a, b) {
   var lenA = numCoords(a);
   var lenB = numCoords(b);
   var isAFlaggable = lenA === a[/* minMines */1];
@@ -192,14 +218,20 @@ function compare(a, b) {
 }
 
 var Group = {
+  Descriminator: Descriminator,
+  DescriminatorSet: DescriminatorSet,
   makeBase: makeBase,
   numCoords: numCoords,
   avgMines: avgMines,
-  compare: compare
+  compare: compare$1
 };
 
 var GroupSet = $$Set.Make({
-      compare: compare
+      compare: compare$1
+    });
+
+var CoordsSetMap = $$Map.Make({
+      compare: CustomUtils$ReasonReactExamples.CoordsSet.compare
     });
 
 var merge = Curry._1(CustomUtils$ReasonReactExamples.CoordsMap.merge, (function (param, a, b) {
@@ -217,26 +249,26 @@ var merge = Curry._1(CustomUtils$ReasonReactExamples.CoordsMap.merge, (function 
         }
       }));
 
-function invertGroupSet(groupSet) {
-  return Curry._3(GroupSet.fold, (function (group, map) {
+function invertGroupMap(groups) {
+  return Curry._3(CoordsSetMap.fold, (function (coordsSet, group, map) {
                 var addMap = Curry._3(CustomUtils$ReasonReactExamples.CoordsSet.fold, (function (coords, map) {
                         return Curry._3(CustomUtils$ReasonReactExamples.CoordsMap.add, coords, Curry._1(GroupSet.singleton, group), map);
-                      }), group[/* coordsSet */2], CustomUtils$ReasonReactExamples.CoordsMap.empty);
+                      }), coordsSet, CustomUtils$ReasonReactExamples.CoordsMap.empty);
                 return Curry._2(merge, addMap, map);
-              }), groupSet, CustomUtils$ReasonReactExamples.CoordsMap.empty);
+              }), groups, CustomUtils$ReasonReactExamples.CoordsMap.empty);
 }
 
 function make$1(board) {
   var cellList = $$Array.to_list(CustomUtils$ReasonReactExamples.Matrix.flattenWithCoords(board));
   var size = CustomUtils$ReasonReactExamples.Matrix.size(board);
-  return invertGroupSet(List.fold_left((function (set, param) {
+  return invertGroupMap(List.fold_left((function (map, param) {
                     var cell = param[0];
                     if (typeof cell === "number") {
-                      return set;
+                      return map;
                     } else {
                       var mineCount = cell[0];
                       if (mineCount === 0) {
-                        return set;
+                        return map;
                       } else {
                         var group = makeBase(param[1], size, mineCount, board);
                         var val;
@@ -245,22 +277,26 @@ function make$1(board) {
                         }
                         catch (exn){
                           if (exn === Caml_builtin_exceptions.not_found) {
-                            return set;
+                            return map;
                           } else {
                             throw exn;
                           }
                         }
-                        return Curry._2(GroupSet.add, group, set);
+                        return Curry._3(CoordsSetMap.add, group[/* coordsSet */2], group, map);
                       }
                     }
-                  }), GroupSet.empty, cellList));
+                  }), CoordsSetMap.empty, cellList));
 }
 
 var GroupedCellMap = {
   merge: merge,
-  invertGroupSet: invertGroupSet,
+  invertGroupMap: invertGroupMap,
   make: make$1
 };
+
+var DescriminatorMap = $$Map.Make({
+      compare: DescriminatorSet.compare
+    });
 
 function getIntersectingCellCoords(a, b) {
   return Curry._2(CustomUtils$ReasonReactExamples.CoordsSet.inter, a[/* coordsSet */2], b[/* coordsSet */2]);
@@ -306,20 +342,59 @@ function getConstrainedGroups(a, b) {
       ]);
   var gOnlyA_000 = /* maxMines */a[/* maxMines */0] - maxMinesInter | 0;
   var gOnlyA_001 = /* minMines */a[/* minMines */1] - minMinesInter | 0;
+  var gOnlyA_003 = /* descriminatorSet */Curry._2(DescriminatorSet.filter, (function (d) {
+          try {
+            Curry._2(DescriminatorSet.find, d, b[/* descriminatorSet */3]);
+            return false;
+          }
+          catch (exn){
+            if (exn === Caml_builtin_exceptions.not_found) {
+              return true;
+            } else {
+              throw exn;
+            }
+          }
+        }), a[/* descriminatorSet */3]);
   var gOnlyA = /* record */[
     gOnlyA_000,
     gOnlyA_001,
-    /* coordsSet */cdsOnlyA
+    /* coordsSet */cdsOnlyA,
+    gOnlyA_003
   ];
+  var gOnlyB_000 = /* maxMines */b[/* maxMines */0] - maxMinesInter | 0;
+  var gOnlyB_001 = /* minMines */b[/* minMines */1] - minMinesInter | 0;
+  var gOnlyB_003 = /* descriminatorSet */Curry._2(DescriminatorSet.filter, (function (d) {
+          try {
+            Curry._2(DescriminatorSet.find, d, a[/* descriminatorSet */3]);
+            return false;
+          }
+          catch (exn){
+            if (exn === Caml_builtin_exceptions.not_found) {
+              return true;
+            } else {
+              throw exn;
+            }
+          }
+        }), b[/* descriminatorSet */3]);
+  var gOnlyB = /* record */[
+    gOnlyB_000,
+    gOnlyB_001,
+    /* coordsSet */cdsOnlyB,
+    gOnlyB_003
+  ];
+  var gInter_003 = /* descriminatorSet */Curry._2(DescriminatorSet.union, b[/* descriminatorSet */3], a[/* descriminatorSet */3]);
   var gInter = /* record */[
     /* maxMines */maxMinesInter,
     /* minMines */minMinesInter,
-    /* coordsSet */cdsInter
+    /* coordsSet */cdsInter,
+    gInter_003
   ];
-  return Curry._1(GroupSet.of_list, /* :: */[
+  return List.fold_left((function (map, group) {
+                return Curry._3(DescriminatorMap.add, group[/* descriminatorSet */3], group, map);
+              }), DescriminatorMap.empty, /* :: */[
               gOnlyA,
               /* :: */[
-                gOnlyA,
+                gOnlyB,
                 /* :: */[
                   gInter,
                   /* [] */0
@@ -328,7 +403,8 @@ function getConstrainedGroups(a, b) {
             ]);
 }
 
-var GroupComputation = {
+var GroupComputations = {
+  DescriminatorMap: DescriminatorMap,
   getIntersectingCellCoords: getIntersectingCellCoords,
   getConstrainedGroups: getConstrainedGroups
 };
@@ -457,8 +533,9 @@ exports.orderValue = orderValue;
 exports.resolveOrdering = resolveOrdering;
 exports.Group = Group;
 exports.GroupSet = GroupSet;
+exports.CoordsSetMap = CoordsSetMap;
 exports.GroupedCellMap = GroupedCellMap;
-exports.GroupComputation = GroupComputation;
+exports.GroupComputations = GroupComputations;
 exports.BaseGroup = BaseGroup;
 exports.solver1 = solver1;
-/* GroupSet Not a pure module */
+/* DescriminatorSet Not a pure module */

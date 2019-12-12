@@ -94,30 +94,58 @@ let resolveOrdering = orderings =>
 
 /** OrderedType compatible, ordered */
 module Group = {
+  /** describes the coords and the effect of descriminators that factor into a group, so groups can be uniquly identified */
+  module Descriminator = {
+    type effect =
+      | Included
+      | Excluded;
+    type t = {
+      coords: Coords.t,
+      effect,
+    };
+
+    let compare = (a, b) =>
+      switch (compare(a.coords, b.coords), a.effect, b.effect) {
+      | (0, Included, Included) => 0
+      | (0, Included, Excluded) => 1
+      | (0, Excluded, Included) => (-1)
+      | (0, Excluded, Excluded) => 0
+      | (order, _, _) => order
+      };
+  };
+  module DescriminatorSet = Set.Make(Descriminator);
   type t = {
     maxMines: int,
     minMines: int,
     coordsSet: CoordsSet.t,
+    descriminatorSet: DescriminatorSet.t,
   };
 
   let makeBase = (coords, boardSize, numMines, board: RestrictedBoard.t) => {
     Coords.getAdjacent(coords, boardSize)
     |> List.fold_left(
-         ({coordsSet, minMines, maxMines}, (x, y)) =>
+         (group, (x, y)) => {
+           let {coordsSet, minMines, maxMines} = group;
            switch (board[y][x]) {
-           | Visible(_) => {coordsSet, minMines, maxMines}
+           | Visible(_) => group
            | Flagged => {
-               coordsSet,
+               ...group,
                minMines: minMines - 1,
                maxMines: maxMines - 1,
              }
            | Hidden => {
+               ...group,
                coordsSet: CoordsSet.add((x, y), coordsSet),
-               minMines,
-               maxMines,
              }
-           },
-         {coordsSet: CoordsSet.empty, minMines: numMines, maxMines: numMines},
+           };
+         },
+         {
+           coordsSet: CoordsSet.empty,
+           descriminatorSet:
+             DescriminatorSet.singleton({coords, effect: Included}),
+           minMines: numMines,
+           maxMines: numMines,
+         },
        );
   };
 
@@ -176,7 +204,11 @@ module Group = {
 };
 
 module GroupSet = Set.Make(Group);
+module CoordsSetMap = Map.Make(CoordsSet);
+
+/** relating cells and groups they belong to */
 module GroupedCellMap = {
+  /** individual hidden cell and the groups it's included in */
   type t = CoordsMap.t(GroupSet.t);
 
   /** curry of regular map merge to merge groupsets */
@@ -189,20 +221,20 @@ module GroupedCellMap = {
       | (None, None) => None
       }
     );
-  /** change groupSet into t */
-  let invertGroupSet = (groupSet: GroupSet.t) => {
-    GroupSet.fold(
-      (group, map) => {
+  /** change groupCOordsMap into map of coords map of groups */
+  let invertGroupMap = groups => {
+    CoordsSetMap.fold(
+      (coordsSet, group, map) => {
         let addMap =
           CoordsSet.fold(
             (coords, map) =>
               CoordsMap.add(coords, GroupSet.singleton(group), map),
-            group.coordsSet,
+            coordsSet,
             CoordsMap.empty,
           );
         merge(addMap, map);
       },
-      groupSet,
+      groups,
       CoordsMap.empty,
     );
   };
@@ -214,27 +246,29 @@ module GroupedCellMap = {
 
     let groups =
       List.fold_left(
-        (set, (cell: RestrictedBoard.rCell, coords: coords)) =>
+        (map, (cell: RestrictedBoard.rCell, coords: coords)) =>
           switch (cell) {
-          | Visible(mineCount) when mineCount == 0 => set
+          | Visible(mineCount) when mineCount == 0 => map
           | Hidden
-          | Flagged => set
+          | Flagged => map
           | Visible(mineCount) =>
             let group = Group.makeBase(coords, size, mineCount, board);
             switch (CoordsSet.choose(group.coordsSet)) {
-            | exception Not_found => set
-            | _ => GroupSet.add(group, set)
+            | exception Not_found => map
+            | _ => CoordsSetMap.add(group.coordsSet, group, map)
             };
           },
-        GroupSet.empty,
+        CoordsSetMap.empty,
         cellList,
       );
-    invertGroupSet(groups);
+    invertGroupMap(groups);
   };
 };
 
-module GroupComputation = {
+/** map from descriminator sets to groups they help define */
+module GroupComputations = {
   open Group;
+  module DescriminatorMap = Map.Make(DescriminatorSet);
 
   let getIntersectingCellCoords = (a, b) =>
     CoordsSet.inter(a.coordsSet, b.coordsSet);
@@ -264,22 +298,52 @@ module GroupComputation = {
 
     let gOnlyA = {
       coordsSet: cdsOnlyA,
+      descriminatorSet:
+        DescriminatorSet.(
+          filter(
+            d =>
+              switch (find(d, b.descriminatorSet)) {
+              | exception Not_found => true
+              | _ => false
+              },
+            a.descriminatorSet,
+          )
+        ),
       minMines: a.minMines - minMinesInter,
       maxMines: a.maxMines - maxMinesInter,
     };
 
     let gOnlyB = {
       coordsSet: cdsOnlyB,
+      descriminatorSet:
+        DescriminatorSet.(
+          filter(
+            d =>
+              switch (find(d, a.descriminatorSet)) {
+              | exception Not_found => true
+              | _ => false
+              },
+            b.descriminatorSet,
+          )
+        ),
       minMines: b.minMines - minMinesInter,
       maxMines: b.maxMines - maxMinesInter,
     };
-
     let gInter = {
       coordsSet: cdsInter,
+      descriminatorSet:
+        DescriminatorSet.union(b.descriminatorSet, a.descriminatorSet),
       minMines: minMinesInter,
       maxMines: maxMinesInter,
     };
-    GroupSet.of_list([gOnlyA, gOnlyA, gInter]);
+
+    DescriminatorMap.(
+      List.fold_left(
+        (map, group) => add(group.descriminatorSet, group, map),
+        empty,
+        [gOnlyA, gOnlyB, gInter],
+      )
+    );
   };
 };
 
