@@ -6,6 +6,7 @@ var React = require("react");
 var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
 var Game$ReasonReactExamples = require("../../gameLogic/Game.bs.js");
 var Engine$ReasonReactExamples = require("../../gameLogic/Engine.bs.js");
+var CustomUtils$ReasonReactExamples = require("../../utils/CustomUtils.bs.js");
 var BoardComponent$ReasonReactExamples = require("../Board/BoardComponent.bs.js");
 var ControlPanelComponent$ReasonReactExamples = require("../ControlPanel/ControlPanelComponent.bs.js");
 
@@ -27,9 +28,12 @@ var startingAppState_000 = /* gameHistory : :: */[
   /* [] */0
 ];
 
+var startingAppState_001 = /* engineRegistry */Engine$ReasonReactExamples.Registry.registry;
+
 var startingAppState = /* record */[
   startingAppState_000,
-  /* selectedEngine */Engine$ReasonReactExamples.solver1,
+  startingAppState_001,
+  /* selectedEngineName */"naive",
   /* playGameOutWithEngine */false,
   /* fallbackGameInitOptions */gameOptions
 ];
@@ -38,38 +42,42 @@ function GameComponent(Props) {
   var match = React.useReducer((function (prevState, action) {
           if (typeof action === "number") {
             if (action === /* EngineGameAction */0) {
-              var selectedEngine = prevState[/* selectedEngine */1];
               var gameHistory = prevState[/* gameHistory */0];
+              var match = Curry._2(CustomUtils$ReasonReactExamples.StrMap.find, prevState[/* selectedEngineName */2], prevState[/* engineRegistry */1]);
+              var engine = match[/* engine */2];
               var gameHistory$1;
               if (gameHistory) {
-                gameHistory$1 = Game$ReasonReactExamples.reduce(gameHistory, Engine$ReasonReactExamples.getActionFromEngine(selectedEngine, gameHistory[0][/* board */1]));
+                gameHistory$1 = Game$ReasonReactExamples.reduce(gameHistory, Engine$ReasonReactExamples.getActionFromEngine(engine, gameHistory[0][/* board */1]));
               } else {
-                var gameState = Game$ReasonReactExamples.make(prevState[/* fallbackGameInitOptions */3]);
+                var gameState = Game$ReasonReactExamples.make(prevState[/* fallbackGameInitOptions */4]);
                 gameHistory$1 = Game$ReasonReactExamples.reduce(/* :: */[
                       gameState,
                       /* [] */0
-                    ], Engine$ReasonReactExamples.getActionFromEngine(selectedEngine, gameState[/* board */1]));
+                    ], Engine$ReasonReactExamples.getActionFromEngine(engine, gameState[/* board */1]));
               }
               return /* record */[
                       /* gameHistory */gameHistory$1,
-                      /* selectedEngine */prevState[/* selectedEngine */1],
-                      /* playGameOutWithEngine */prevState[/* playGameOutWithEngine */2],
-                      /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */3]
+                      /* engineRegistry */prevState[/* engineRegistry */1],
+                      /* selectedEngineName */prevState[/* selectedEngineName */2],
+                      /* playGameOutWithEngine */prevState[/* playGameOutWithEngine */3],
+                      /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                     ];
             } else {
               return /* record */[
                       /* gameHistory */prevState[/* gameHistory */0],
-                      /* selectedEngine */prevState[/* selectedEngine */1],
+                      /* engineRegistry */prevState[/* engineRegistry */1],
+                      /* selectedEngineName */prevState[/* selectedEngineName */2],
                       /* playGameOutWithEngine */true,
-                      /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */3]
+                      /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                     ];
             }
           } else if (action.tag) {
             return /* record */[
                     /* gameHistory */Game$ReasonReactExamples.reduce(prevState[/* gameHistory */0], action[0]),
-                    /* selectedEngine */prevState[/* selectedEngine */1],
-                    /* playGameOutWithEngine */prevState[/* playGameOutWithEngine */2],
-                    /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */3]
+                    /* engineRegistry */prevState[/* engineRegistry */1],
+                    /* selectedEngineName */prevState[/* selectedEngineName */2],
+                    /* playGameOutWithEngine */prevState[/* playGameOutWithEngine */3],
+                    /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                   ];
           } else {
             return /* record */[
@@ -77,14 +85,15 @@ function GameComponent(Props) {
                       Game$ReasonReactExamples.make(action[0]),
                       /* [] */0
                     ],
-                    /* selectedEngine */prevState[/* selectedEngine */1],
+                    /* engineRegistry */prevState[/* engineRegistry */1],
+                    /* selectedEngineName */prevState[/* selectedEngineName */2],
                     /* playGameOutWithEngine */false,
-                    /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */3]
+                    /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                   ];
           }
         }), startingAppState);
   var appState = match[0];
-  var playGameOutWithEngine = appState[/* playGameOutWithEngine */2];
+  var playGameOutWithEngine = appState[/* playGameOutWithEngine */3];
   var gameHistory = appState[/* gameHistory */0];
   var dispatch = match[1];
   if (gameHistory) {
@@ -164,7 +173,7 @@ function GameComponent(Props) {
             Caml_builtin_exceptions.match_failure,
             /* tuple */[
               "GameComponent.re",
-              85,
+              93,
               6
             ]
           ];
@@ -174,7 +183,7 @@ function GameComponent(Props) {
           Caml_builtin_exceptions.match_failure,
           /* tuple */[
             "GameComponent.re",
-            67,
+            75,
             6
           ]
         ];

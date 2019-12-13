@@ -90,11 +90,16 @@ module Coords = {
       |> List.length;
 };
 
+// sets
 module CoordsSet = Set.Make(Coords);
+
+// maps
 module CoordsMap = Map.Make(Coords);
 module CoordsSetMap = Map.Make(CoordsSet);
+module StrMap = Map.Make(String);
+
 module MyList = {
   let combinationRange = (a: int, b: int): list(coords) => {
     Belt.List.makeBy(a, i => Belt.List.makeBy(b, j => (j, i)))->List.concat;
   };
-} /* }*/ /*   type t = (int, int); // num, deno*/ /*   let max = (list: list(t)) => List.fold_left((a, b) => float_of_int()  < float_of_int(b) ? a : b, (0 , 1), list)*/ /*   let min = (list: list(t)) => List.fold_left((a, b) => float_of_int(a)  > float_of_int(b) ? a : b)*/ /*   let greaterThan = ((an, ad), (bn, bd)) => float_of_in*/ /* module Ratio = */;
+};

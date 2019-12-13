@@ -3,7 +3,8 @@ open CustomUtils;
 
 type appState = {
   gameHistory: Game.history,
-  selectedEngine: Engine.t,
+  engineRegistry: Engine.Registry.t,
+  selectedEngineName: String.t,
   playGameOutWithEngine: bool,
   fallbackGameInitOptions: Game.initOptions,
 };
@@ -23,7 +24,8 @@ let gameOptions: Game.initOptions = {
 
 let startingAppState = {
   gameHistory: [Game.make(gameOptions)],
-  selectedEngine: Engine.solver1,
+  selectedEngineName: "naive",
+  engineRegistry: Engine.Registry.registry,
   playGameOutWithEngine: false,
   fallbackGameInitOptions: gameOptions,
 };
@@ -44,9 +46,15 @@ let make = () => {
             gameHistory: Game.reduce(prevState.gameHistory, action),
           }
         | EngineGameAction =>
-          let {gameHistory, selectedEngine, fallbackGameInitOptions} = prevState;
-          let getActionFromEngine =
-            Engine.getActionFromEngine(~engine=selectedEngine);
+          let {
+            gameHistory,
+            selectedEngineName,
+            engineRegistry,
+            fallbackGameInitOptions,
+          } = prevState;
+          let {engine}: Engine.Registry.registration =
+            StrMap.find(selectedEngineName, engineRegistry);
+          let getActionFromEngine = Engine.getActionFromEngine(~engine);
           let gameHistory =
             switch (gameHistory) {
             | [] =>

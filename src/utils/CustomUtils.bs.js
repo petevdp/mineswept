@@ -6,6 +6,7 @@ var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var Int32 = require("bs-platform/lib/js/int32.js");
+var $$String = require("bs-platform/lib/js/string.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
@@ -219,6 +220,10 @@ var CoordsSetMap = $$Map.Make({
       compare: CoordsSet.compare
     });
 
+var StrMap = $$Map.Make({
+      compare: $$String.compare
+    });
+
 function combinationRange(a, b) {
   return List.concat(Belt_List.makeBy(a, (function (i) {
                     return Belt_List.makeBy(b, (function (j) {
@@ -239,5 +244,6 @@ exports.Coords = Coords;
 exports.CoordsSet = CoordsSet;
 exports.CoordsMap = CoordsMap;
 exports.CoordsSetMap = CoordsSetMap;
+exports.StrMap = StrMap;
 exports.MyList = MyList;
 /* CoordsSet Not a pure module */

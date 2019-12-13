@@ -122,42 +122,57 @@ var Descriminator = {
 
 var DescriminatorSet = $$Set.Make(Descriminator);
 
+function compare$1(a, b) {
+  return Curry._2(DescriminatorSet.compare, a[/* descriminatorSet */3], b[/* descriminatorSet */3]);
+}
+
 function makeBase(coords, boardSize, numMines, board) {
-  return List.fold_left((function (group, param) {
-                var y = param[1];
-                var x = param[0];
-                var match = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
-                if (typeof match === "number") {
-                  if (match !== 0) {
-                    return /* record */[
-                            /* maxMines */group[/* maxMines */0] - 1 | 0,
-                            /* minMines */group[/* minMines */1] - 1 | 0,
-                            /* coordsSet */group[/* coordsSet */2],
-                            /* descriminatorSet */group[/* descriminatorSet */3]
-                          ];
-                  } else {
-                    return /* record */[
-                            /* maxMines */group[/* maxMines */0],
-                            /* minMines */group[/* minMines */1],
-                            /* coordsSet */Curry._2(CustomUtils$ReasonReactExamples.CoordsSet.add, /* tuple */[
-                                  x,
-                                  y
-                                ], group[/* coordsSet */2]),
-                            /* descriminatorSet */group[/* descriminatorSet */3]
-                          ];
-                  }
-                } else {
-                  return group;
-                }
-              }), /* record */[
-              /* maxMines */numMines,
-              /* minMines */numMines,
-              /* coordsSet */CustomUtils$ReasonReactExamples.CoordsSet.empty,
-              /* descriminatorSet */Curry._1(DescriminatorSet.singleton, /* record */[
-                    /* coords */coords,
-                    /* effect : Included */0
-                  ])
-            ], CustomUtils$ReasonReactExamples.Coords.getAdjacent(coords, boardSize));
+  var rawGroup = List.fold_left((function (group, param) {
+          var y = param[1];
+          var x = param[0];
+          var match = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
+          if (typeof match === "number") {
+            if (match !== 0) {
+              return /* record */[
+                      /* maxMines */group[/* maxMines */0] - 1 | 0,
+                      /* minMines */group[/* minMines */1] - 1 | 0,
+                      /* coordsSet */group[/* coordsSet */2],
+                      /* descriminatorSet */group[/* descriminatorSet */3]
+                    ];
+            } else {
+              return /* record */[
+                      /* maxMines */group[/* maxMines */0],
+                      /* minMines */group[/* minMines */1],
+                      /* coordsSet */Curry._2(CustomUtils$ReasonReactExamples.CoordsSet.add, /* tuple */[
+                            x,
+                            y
+                          ], group[/* coordsSet */2]),
+                      /* descriminatorSet */group[/* descriminatorSet */3]
+                    ];
+            }
+          } else {
+            return group;
+          }
+        }), /* record */[
+        /* maxMines */numMines,
+        /* minMines */numMines,
+        /* coordsSet */CustomUtils$ReasonReactExamples.CoordsSet.empty,
+        /* descriminatorSet */Curry._1(DescriminatorSet.singleton, /* record */[
+              /* coords */coords,
+              /* effect : Included */0
+            ])
+      ], CustomUtils$ReasonReactExamples.Coords.getAdjacent(coords, boardSize));
+  var coordsSet = rawGroup[/* coordsSet */2];
+  var minMines = rawGroup[/* minMines */1];
+  var maxMines = rawGroup[/* maxMines */0];
+  return /* record */[
+          /* maxMines */maxMines,
+          /* minMines */minMines,
+          /* coordsSet */coordsSet,
+          /* descriminatorSet */rawGroup[/* descriminatorSet */3],
+          /* flaggable */Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.cardinal, coordsSet) === minMines,
+          /* checkable */maxMines === 0
+        ];
 }
 
 function numCoords(t) {
@@ -172,131 +187,76 @@ function avgMines(t) {
   
 }
 
-function compare$1(a, b) {
-  var lenA = numCoords(a);
-  var lenB = numCoords(b);
-  var isAFlaggable = lenA === a[/* minMines */1];
-  var isBFlaggable = lenB === b[/* minMines */1];
-  var flagOrder = isAFlaggable ? (
-      isBFlaggable ? /* Equal */2 : /* AFirst */0
-    ) : (
-      isBFlaggable ? /* BFirst */1 : /* Equal */2
-    );
-  var isACheckable = a[/* minMines */1] === 0;
-  var isBCheckable = b[/* minMines */1] === 0;
-  var checkOrder = isACheckable ? (
-      isBCheckable ? /* Equal */2 : /* AFirst */0
-    ) : (
-      isBCheckable ? /* BFirst */1 : /* Equal */2
-    );
-  var match = avgMines(a);
-  var match$1 = avgMines(b);
-  var averageOrder;
-  if (match !== undefined && match$1 !== undefined) {
-    var diff = match - match$1;
-    averageOrder = diff > 0.0 ? /* AFirst */0 : (
-        diff < 0.0 ? /* BFirst */1 : /* Equal */2
-      );
+var Malformed_group = Caml_exceptions.create("Engine-ReasonReactExamples.Group.Malformed_group");
+
+function getSafeAction(param) {
+  var coordsSet = param[/* coordsSet */2];
+  var isFlaggable = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.cardinal, coordsSet) === param[/* minMines */1];
+  var isEmpty = param[/* maxMines */0] === 0;
+  var coords = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.choose, coordsSet);
+  if (isFlaggable) {
+    if (isEmpty) {
+      throw [
+            Malformed_group,
+            "this group is somehow both flaggable and empty"
+          ];
+    }
+    return /* ToggleFlag */Block.__(1, [coords]);
+  } else if (isEmpty) {
+    return /* Check */Block.__(0, [coords]);
   } else {
-    averageOrder = /* Equal */2;
-  }
-  var priorityOrdering = resolveOrdering(/* :: */[
-        flagOrder,
-        /* :: */[
-          checkOrder,
-          /* :: */[
-            averageOrder,
-            /* [] */0
-          ]
-        ]
-      ]);
-  if (priorityOrdering >= 2) {
-    return Curry._2(CustomUtils$ReasonReactExamples.CoordsSet.compare, a[/* coordsSet */2], b[/* coordsSet */2]);
-  } else {
-    return orderValue(priorityOrdering);
+    throw Caml_builtin_exceptions.not_found;
   }
 }
 
 var Group = {
   Descriminator: Descriminator,
   DescriminatorSet: DescriminatorSet,
+  compare: compare$1,
   makeBase: makeBase,
   numCoords: numCoords,
   avgMines: avgMines,
-  compare: compare$1
+  Malformed_group: Malformed_group,
+  getSafeAction: getSafeAction
 };
-
-var GroupSet = $$Set.Make({
-      compare: compare$1
-    });
 
 var CoordsSetMap = $$Map.Make({
       compare: CustomUtils$ReasonReactExamples.CoordsSet.compare
     });
 
-var merge = Curry._1(CustomUtils$ReasonReactExamples.CoordsMap.merge, (function (param, a, b) {
-        if (a !== undefined) {
-          var group = Caml_option.valFromOption(a);
-          if (b !== undefined) {
-            return Caml_option.some(Curry._2(GroupSet.union, group, Caml_option.valFromOption(b)));
-          } else {
-            return Caml_option.some(group);
-          }
-        } else if (b !== undefined) {
-          return Caml_option.some(Caml_option.valFromOption(b));
-        } else {
-          return ;
-        }
-      }));
-
-function invertGroupMap(groups) {
-  return Curry._3(CoordsSetMap.fold, (function (coordsSet, group, map) {
-                var addMap = Curry._3(CustomUtils$ReasonReactExamples.CoordsSet.fold, (function (coords, map) {
-                        return Curry._3(CustomUtils$ReasonReactExamples.CoordsMap.add, coords, Curry._1(GroupSet.singleton, group), map);
-                      }), coordsSet, CustomUtils$ReasonReactExamples.CoordsMap.empty);
-                return Curry._2(merge, addMap, map);
-              }), groups, CustomUtils$ReasonReactExamples.CoordsMap.empty);
-}
+var DescriminatorMap = $$Map.Make({
+      compare: DescriminatorSet.compare
+    });
 
 function make$1(board) {
   var cellList = $$Array.to_list(CustomUtils$ReasonReactExamples.Matrix.flattenWithCoords(board));
   var size = CustomUtils$ReasonReactExamples.Matrix.size(board);
-  return invertGroupMap(List.fold_left((function (map, param) {
-                    var cell = param[0];
-                    if (typeof cell === "number") {
-                      return map;
-                    } else {
-                      var mineCount = cell[0];
-                      if (mineCount === 0) {
+  return List.fold_left((function (map, param) {
+                var cell = param[0];
+                if (typeof cell === "number") {
+                  return map;
+                } else {
+                  var mineCount = cell[0];
+                  if (mineCount === 0) {
+                    return map;
+                  } else {
+                    var group = makeBase(param[1], size, mineCount, board);
+                    var val;
+                    try {
+                      val = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.choose, group[/* coordsSet */2]);
+                    }
+                    catch (exn){
+                      if (exn === Caml_builtin_exceptions.not_found) {
                         return map;
                       } else {
-                        var group = makeBase(param[1], size, mineCount, board);
-                        var val;
-                        try {
-                          val = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.choose, group[/* coordsSet */2]);
-                        }
-                        catch (exn){
-                          if (exn === Caml_builtin_exceptions.not_found) {
-                            return map;
-                          } else {
-                            throw exn;
-                          }
-                        }
-                        return Curry._3(CoordsSetMap.add, group[/* coordsSet */2], group, map);
+                        throw exn;
                       }
                     }
-                  }), CoordsSetMap.empty, cellList));
+                    return Curry._3(DescriminatorMap.add, group[/* descriminatorSet */3], group, map);
+                  }
+                }
+              }), DescriminatorMap.empty, cellList);
 }
-
-var GroupedCellMap = {
-  merge: merge,
-  invertGroupMap: invertGroupMap,
-  make: make$1
-};
-
-var DescriminatorMap = $$Map.Make({
-      compare: DescriminatorSet.compare
-    });
 
 function getIntersectingCellCoords(a, b) {
   return Curry._2(CustomUtils$ReasonReactExamples.CoordsSet.inter, a[/* coordsSet */2], b[/* coordsSet */2]);
@@ -403,11 +363,84 @@ function getConstrainedGroups(a, b) {
             ]);
 }
 
-var GroupComputations = {
-  DescriminatorMap: DescriminatorMap,
-  getIntersectingCellCoords: getIntersectingCellCoords,
-  getConstrainedGroups: getConstrainedGroups
+var GroupSet = $$Set.Make({
+      compare: compare$1
+    });
+
+var merge = Curry._1(CustomUtils$ReasonReactExamples.CoordsMap.merge, (function (param, a, b) {
+        if (a !== undefined) {
+          var group = Caml_option.valFromOption(a);
+          if (b !== undefined) {
+            return Caml_option.some(Curry._2(GroupSet.union, group, Caml_option.valFromOption(b)));
+          } else {
+            return Caml_option.some(group);
+          }
+        } else if (b !== undefined) {
+          return Caml_option.some(Caml_option.valFromOption(b));
+        } else {
+          return ;
+        }
+      }));
+
+function invertGroupMap(groups) {
+  return Curry._3(CoordsSetMap.fold, (function (coordsSet, group, map) {
+                var addMap = Curry._3(CustomUtils$ReasonReactExamples.CoordsSet.fold, (function (coords, map) {
+                        return Curry._3(CustomUtils$ReasonReactExamples.CoordsMap.add, coords, Curry._1(GroupSet.singleton, group), map);
+                      }), coordsSet, CustomUtils$ReasonReactExamples.CoordsMap.empty);
+                return Curry._2(merge, addMap, map);
+              }), groups, CustomUtils$ReasonReactExamples.CoordsMap.empty);
+}
+
+var GroupedCellMap = {
+  GroupSet: GroupSet,
+  merge: merge,
+  invertGroupMap: invertGroupMap
 };
+
+var Groups = {
+  DescriminatorMap: DescriminatorMap,
+  make: make$1,
+  getIntersectingCellCoords: getIntersectingCellCoords,
+  getConstrainedGroups: getConstrainedGroups,
+  GroupedCellMap: GroupedCellMap
+};
+
+function complete(board) {
+  var groups = make$1(board);
+  var action = undefined;
+  var unactionableGroups = /* record */[/* contents */DescriminatorMap.empty];
+  while(action === undefined) {
+    var match = Curry._1(DescriminatorMap.max_binding, Curry._2(DescriminatorMap.filter, (function (desc, param) {
+                try {
+                  Curry._2(DescriminatorMap.find, desc, unactionableGroups[0]);
+                  return false;
+                }
+                catch (exn){
+                  if (exn === Caml_builtin_exceptions.not_found) {
+                    return true;
+                  } else {
+                    throw exn;
+                  }
+                }
+              }), groups));
+    var group = match[1];
+    var coords = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.choose, group[/* coordsSet */2]);
+    action = group[/* flaggable */4] ? /* ToggleFlag */Block.__(1, [coords]) : (
+        group[/* checkable */5] ? /* Check */Block.__(0, [coords]) : undefined
+      );
+    if (action === undefined) {
+      var desc = group[/* descriminatorSet */3];
+      unactionableGroups[0] = Curry._3(DescriminatorMap.add, desc, group, unactionableGroups[0]);
+    }
+    
+  };
+  var match$1 = action;
+  if (match$1 !== undefined) {
+    return match$1;
+  } else {
+    return random(board);
+  }
+}
 
 function make$2(coords, boardSize, numMines, board) {
   return List.fold_left((function (param, param$1) {
@@ -489,7 +522,7 @@ var BaseGroup = {
   noMines: noMines
 };
 
-function solver1(board) {
+function naive(board) {
   var groups = getNumberGroups(board);
   var val;
   try {
@@ -524,6 +557,33 @@ function solver1(board) {
   return /* ToggleFlag */Block.__(1, [Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.choose, val[1][/* coordsSet */1])]);
 }
 
+function register(r) {
+  return Curry._2(CustomUtils$ReasonReactExamples.StrMap.add, r[/* name */0], r);
+}
+
+function add(name, description, engine) {
+  return register(/* record */[
+              /* name */name,
+              /* description */description,
+              /* engine */engine
+            ]);
+}
+
+var registry = Curry._1(add("complete", "some more advanced logic that's hard to explain", complete), Curry._1(add("naive", "if a revealed number has enough confirmed mines it either checks the appropirate square. not perfect.", naive), Curry._1(add("firstAvailable", "picks the first available square to check, from top to bottom, left to right", firstAvailable), Curry._1(add("random", "randomly picks a square to check", random), CustomUtils$ReasonReactExamples.StrMap.empty))));
+
+var Registry = {
+  register: register,
+  add: add,
+  registry: registry
+};
+
+console.log("engines available");
+
+Curry._2(CustomUtils$ReasonReactExamples.StrMap.iter, (function (param, v) {
+        console.log(v);
+        return /* () */0;
+      }), registry);
+
 exports.RestrictedBoard = RestrictedBoard;
 exports.getActionFromEngine = getActionFromEngine;
 exports.firstAvailable = firstAvailable;
@@ -532,10 +592,10 @@ exports.Helpers = Helpers;
 exports.orderValue = orderValue;
 exports.resolveOrdering = resolveOrdering;
 exports.Group = Group;
-exports.GroupSet = GroupSet;
 exports.CoordsSetMap = CoordsSetMap;
-exports.GroupedCellMap = GroupedCellMap;
-exports.GroupComputations = GroupComputations;
+exports.Groups = Groups;
+exports.complete = complete;
 exports.BaseGroup = BaseGroup;
-exports.solver1 = solver1;
+exports.naive = naive;
+exports.Registry = Registry;
 /* DescriminatorSet Not a pure module */

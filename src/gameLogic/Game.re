@@ -7,10 +7,6 @@ type action =
   | ToggleFlag(coords)
   | Rewind(int);
 
-type engineAction =
-  | Check(coords)
-  | ToggleFlag(coords);
-
 type endState =
   | Win
   | Loss;
