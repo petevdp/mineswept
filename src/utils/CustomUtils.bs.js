@@ -13,80 +13,6 @@ var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
 
-function map(f, matrix) {
-  return $$Array.mapi((function (i, row) {
-                return $$Array.mapi((function (j, e) {
-                              return Curry._2(f, e, /* tuple */[
-                                          j,
-                                          i
-                                        ]);
-                            }), row);
-              }), matrix);
-}
-
-function size(matrix) {
-  if (matrix.length === 0 || Caml_array.caml_array_get(matrix, 0).length === 0) {
-    return /* tuple */[
-            0,
-            0
-          ];
-  } else {
-    return /* tuple */[
-            Caml_array.caml_array_get(matrix, 0).length,
-            matrix.length
-          ];
-  }
-}
-
-function toList(matrix) {
-  return $$Array.to_list(Belt_Array.concatMany(matrix));
-}
-
-function flattenWithCoords(matrix) {
-  return Belt_Array.concatMany(map((function (cell, coords) {
-                    return /* tuple */[
-                            cell,
-                            coords
-                          ];
-                  }), matrix));
-}
-
-function reduce(acc, f, matrix) {
-  var cells = Belt_Array.concatMany(matrix);
-  return Belt_Array.reduce(cells, acc, f);
-}
-
-function copy(matrix) {
-  return $$Array.map($$Array.copy, matrix);
-}
-
-function select(f, matrix) {
-  return reduce(/* [] */0, (function (acc, a) {
-                var match = Curry._1(f, a);
-                return List.concat(/* :: */[
-                            acc,
-                            /* :: */[
-                              match ? /* :: */[
-                                  a,
-                                  /* [] */0
-                                ] : /* [] */0,
-                              /* [] */0
-                            ]
-                          ]);
-              }), matrix);
-}
-
-var Matrix = {
-  map: map,
-  size: size,
-  flatten: Belt_Array.concatMany,
-  toList: toList,
-  flattenWithCoords: flattenWithCoords,
-  reduce: reduce,
-  copy: copy,
-  select: select
-};
-
 var BadComparison = Caml_exceptions.create("CustomUtils-ReasonReactExamples.Coords.BadComparison");
 
 function compare(param, param$1) {
@@ -208,6 +134,86 @@ var Coords = {
   getNumAdjacent: getNumAdjacent
 };
 
+function map(f, matrix) {
+  return $$Array.mapi((function (i, row) {
+                return $$Array.mapi((function (j, e) {
+                              return Curry._2(f, e, /* tuple */[
+                                          j,
+                                          i
+                                        ]);
+                            }), row);
+              }), matrix);
+}
+
+function size(matrix) {
+  if (matrix.length === 0 || Caml_array.caml_array_get(matrix, 0).length === 0) {
+    return /* tuple */[
+            0,
+            0
+          ];
+  } else {
+    return /* tuple */[
+            Caml_array.caml_array_get(matrix, 0).length,
+            matrix.length
+          ];
+  }
+}
+
+function make(param, cell) {
+  return $$Array.make_matrix(param[1], param[0], cell);
+}
+
+function toList(matrix) {
+  return $$Array.to_list(Belt_Array.concatMany(matrix));
+}
+
+function flattenWithCoords(matrix) {
+  return Belt_Array.concatMany(map((function (cell, coords) {
+                    return /* tuple */[
+                            cell,
+                            coords
+                          ];
+                  }), matrix));
+}
+
+function reduce(f, acc, matrix) {
+  return $$Array.fold_left((function (acc, param) {
+                return Curry._3(f, acc, param[0], param[1]);
+              }), acc, flattenWithCoords(matrix));
+}
+
+function copy(matrix) {
+  return $$Array.map($$Array.copy, matrix);
+}
+
+function select(f, matrix) {
+  return reduce((function (acc, a, param) {
+                var match = Curry._1(f, a);
+                return List.concat(/* :: */[
+                            acc,
+                            /* :: */[
+                              match ? /* :: */[
+                                  a,
+                                  /* [] */0
+                                ] : /* [] */0,
+                              /* [] */0
+                            ]
+                          ]);
+              }), /* [] */0, matrix);
+}
+
+var Matrix = {
+  map: map,
+  size: size,
+  make: make,
+  flatten: Belt_Array.concatMany,
+  toList: toList,
+  flattenWithCoords: flattenWithCoords,
+  reduce: reduce,
+  copy: copy,
+  select: select
+};
+
 var CoordsSet = $$Set.Make({
       compare: compare
     });
@@ -239,8 +245,8 @@ var MyList = {
   combinationRange: combinationRange
 };
 
-exports.Matrix = Matrix;
 exports.Coords = Coords;
+exports.Matrix = Matrix;
 exports.CoordsSet = CoordsSet;
 exports.CoordsMap = CoordsMap;
 exports.CoordsSetMap = CoordsSetMap;

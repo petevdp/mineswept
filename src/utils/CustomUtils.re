@@ -1,48 +1,5 @@
 open GlobalTypes;
 
-module Matrix = {
-  let map = (~f: ('a, coords) => 'b, matrix: matrix('a)) =>
-    matrix
-    |> Array.mapi((i, row) => Array.mapi((j, e: 'a) => f(e, (j, i)), row));
-
-  let size = (matrix: matrix('a)) =>
-    if (Array.length(matrix) == 0 || Array.length(matrix[0]) == 0) {
-      (0, 0);
-    } else {
-      (Array.length(matrix[0]), Array.length(matrix));
-    };
-
-  let flatten = Belt.Array.concatMany;
-
-  let toList = (matrix: matrix('a)) => matrix->flatten->Array.to_list;
-
-  let flattenWithCoords = (matrix: matrix('a)): array(('a, coords)) =>
-    matrix
-    |> map(~f=(cell, coords) => (cell, coords))
-    |> Belt.Array.concatMany;
-
-  let reduce = (~acc: 'a, ~f: ('a, 'b) => 'a, matrix: matrix('b)): 'a => {
-    let cells = flatten(matrix);
-    Belt.Array.reduce(cells, acc, f);
-  };
-
-  let copy = matrix => Array.map(row => Array.copy(row), matrix);
-  // let forEach = (~f: (~coords: coords, 'a`) => unit, matrix: t('a)) => {
-  //   let (sizeX, sizeY) = size(matrix);
-  //   for (i in 0 to sizeY) {
-  //     for (j in 0 to sizex)
-  //   };
-  // }
-
-  // get a list of cells and their coordinates based on predicate ~f
-  let select = (~f: 'a => bool, matrix: matrix('a)) =>
-    reduce(
-      ~acc=[],
-      ~f=(acc, a) => List.concat([acc, f(a) ? [a] : []]),
-      matrix,
-    );
-};
-
 module Coords = {
   type t = (int, int);
   exception BadComparison(string);
@@ -90,6 +47,54 @@ module Coords = {
       |> List.length;
 };
 
+module Matrix = {
+  let map = (~f: ('a, Coords.t) => 'b, matrix: matrix('a)) =>
+    matrix
+    |> Array.mapi((i, row) => Array.mapi((j, e: 'a) => f(e, (j, i)), row));
+
+  let size = (matrix: matrix('a)) =>
+    if (Array.length(matrix) == 0 || Array.length(matrix[0]) == 0) {
+      (0, 0);
+    } else {
+      (Array.length(matrix[0]), Array.length(matrix));
+    };
+
+  let make = ((x, y): size, cell: 'a) => {
+    Array.make_matrix(y, x, cell);
+  };
+
+  let flatten = Belt.Array.concatMany;
+
+  let toList = (matrix: matrix('a)) => matrix->flatten->Array.to_list;
+
+  let flattenWithCoords = (matrix: matrix('a)): array(('a, coords)) =>
+    matrix
+    |> map(~f=(cell, coords) => (cell, coords))
+    |> Belt.Array.concatMany;
+
+  let reduce =
+      (~f: ('acc, 'cell, Coords.t) => 'acc, acc: 'acc, matrix: matrix('cell)) => {
+    matrix
+    |> flattenWithCoords
+    |> Array.fold_left((acc, (cell, coords)) => f(acc, cell, coords), acc);
+  };
+
+  let copy = matrix => Array.map(row => Array.copy(row), matrix);
+  // let forEach = (~f: (~coords: coords, 'a`) => unit, matrix: t('a)) => {
+  //   let (sizeX, sizeY) = size(matrix);
+  //   for (i in 0 to sizeY) {
+  //     for (j in 0 to sizex)
+  //   };
+  // }
+
+  // get a list of cells and their coordinates based on predicate ~f
+  let select = (~f: 'a => bool, matrix: matrix('a)) =>
+    reduce(
+      ~f=(acc, a, _) => List.concat([acc, f(a) ? [a] : []]),
+      [],
+      matrix,
+    );
+};
 // sets
 module CoordsSet = Set.Make(Coords);
 
