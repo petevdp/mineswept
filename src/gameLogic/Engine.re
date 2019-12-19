@@ -42,10 +42,6 @@ module InterpolatedBoard = {
     constraints: CoordsMap.t(int),
   };
 
-  type action =
-    | ReportBestMove(Game.action)
-    | Reduce(CoordsMap.t(float)); // int = probability to add
-
   let make = (inputBoard: RestrictedBoard.t): t => {
     let probs = Matrix.make(Matrix.size(inputBoard), None);
     Matrix.reduce(
@@ -104,26 +100,32 @@ module InterpolatedBoard = {
     );
   };
 
+  type action =
+    | ReportBestMove(Game.action)
+    | ApplyConstraint(CoordsMap.t(float), coords);
+
   let getAction = (model: t): action => {
+    // TODO optomize where we check for new maxes and mins based on last action
     let (max, min) = maxMin(model);
     let {constraints, probabilities} = model;
-    switch (CoordsMap.choose, max, min) {
-    | (
-        exception Not_found,
-        {mineChance: max, coords: Some(coordsMax)},
-        {mineChance: min, coords: Some(coordsMin)},
-      ) =>
-      let minIsSafer = min < 1.0 - max;
-      ReportBestMove(minIsSafer ? ToggleFlag(coordsMin) : Check(coordsMax));
-    | ({mineChance: 1.0, coords: Some(coords)}, _, _) =>
-      ReportBestMove(Check(coords))
-    | (_, {mineChance: 0.0, coords: Some(coords)}, _) =>
-      ReportBestMove(ToggleFlag(coords))
-    };
+
+    switch (CoordsMap.choose(constraints), max, min) {
+      // no constraints left, so we neeed to choose something
+    | exception Not_found =>
+      // this might not be the best formula for deciding which is safer
+      let minIsSafer = min.mineChance < 1.0 - max.mineChance;
+      ReportBestMove(minIsSafer ? ToggleFlag(min.coords) : Check(max.coords));
+
+      // if we get a guaranteed mine/empty, act on it
+    | (_, {mineChance: 1.0, coords: coords}, _) => ReportBestMove(Check(coords))
+    | (_, _, {mineChance: 0.0, coords: coords}) => ReportBestMove(ToggleFLag(coords))
+
+    // else continue apply constraints
+    | (cellConstraint, _, _) => ApplyConstraint(cellConstraint)
   };
 
   /** Apply some additional info to the board */
-  let reduce = (model: t, additions: CoordsMap.t(float)): model => {};
+  let reduce = (model: t, additions: CoordsMap.t(float)): model => { };
 
   /**  */
   let buildUntilCertaintyReached =
