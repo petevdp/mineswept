@@ -214,16 +214,62 @@ var Matrix = {
   select: select
 };
 
+var NoNumbersProvided = Caml_exceptions.create("CustomUtils-ReasonReactExamples.IntUtils.NoNumbersProvided");
+
+function max(nums) {
+  if (nums) {
+    var rest = nums[1];
+    var num = nums[0];
+    if (rest) {
+      return List.fold_left((function (a, b) {
+                    var match = a > b;
+                    if (match) {
+                      return a;
+                    } else {
+                      return b;
+                    }
+                  }), num, rest);
+    } else {
+      return num;
+    }
+  } else {
+    throw NoNumbersProvided;
+  }
+}
+
+function min(nums) {
+  if (nums) {
+    var rest = nums[1];
+    var num = nums[0];
+    if (rest) {
+      return List.fold_left((function (a, b) {
+                    var match = a < b;
+                    if (match) {
+                      return a;
+                    } else {
+                      return b;
+                    }
+                  }), num, rest);
+    } else {
+      return num;
+    }
+  } else {
+    throw NoNumbersProvided;
+  }
+}
+
+var IntUtils = {
+  NoNumbersProvided: NoNumbersProvided,
+  max: max,
+  min: min
+};
+
 var CoordsSet = $$Set.Make({
       compare: compare
     });
 
 var CoordsMap = $$Map.Make({
       compare: compare
-    });
-
-var CoordsSetMap = $$Map.Make({
-      compare: CoordsSet.compare
     });
 
 var StrMap = $$Map.Make({
@@ -245,11 +291,26 @@ var MyList = {
   combinationRange: combinationRange
 };
 
+function getRange(size) {
+  var coordsSet = /* record */[/* contents */CoordsSet.empty];
+  var ySize = size[1];
+  for(var i = 0 ,i_finish = size[0]; i <= i_finish; ++i){
+    for(var j = 0; j <= ySize; ++j){
+      coordsSet[0] = Curry._2(CoordsSet.add, /* tuple */[
+            i,
+            j
+          ], coordsSet[0]);
+    }
+  }
+  return coordsSet;
+}
+
 exports.Coords = Coords;
 exports.Matrix = Matrix;
+exports.IntUtils = IntUtils;
 exports.CoordsSet = CoordsSet;
 exports.CoordsMap = CoordsMap;
-exports.CoordsSetMap = CoordsSetMap;
 exports.StrMap = StrMap;
 exports.MyList = MyList;
+exports.getRange = getRange;
 /* CoordsSet Not a pure module */

@@ -33,112 +33,156 @@ module RestrictedBoard = {
     };
 };
 
-module InterpolatedBoard = {
+/** a number on the board and how it affects where mines are */
+module BoardConstraint = {
   type t = {
-    /**  mine probablities expressed with floats
-     *- should probably use ratios but couldn't find anything
-     *  for bucklescript */
-    probabilities: matrix(option(float)),
-    constraints: CoordsMap.t(int),
+    mineCount: int,
+    originCoords: Coords.t,
+    coordsSet: CoordsSet.t,
   };
 
-  let make = (inputBoard: RestrictedBoard.t): t => {
-    let probs = Matrix.make(Matrix.size(inputBoard), None);
+  let compare = (a, b) => Coords.compare(a.originCoords, b.originCoords);
+
+  let makeMapFromRestrictedBoard = (board: RestrictedBoard.t) => {
     Matrix.reduce(
       ~f=
-        ({probabilities, constraints}, cell: RestrictedBoard.rCell, coords) => {
-          let (value, mineConstraint) =
-            switch (cell) {
-            | Hidden => (None, None)
-            | Flagged => (None, None)
-            | Visible(int) => (None, Some(int))
-            };
-          let (x, y) = coords;
-          probabilities[y][x] = value;
+        (map, cell: RestrictedBoard.rCell, coords) => {
+          let size = Matrix.size(board);
+          switch (cell) {
+          | Visible(0)
+          | Hidden
+          | Flagged => map
+          | Visible(mineCount) =>
+            let adjacentCoords = Coords.getAdjacent(size, coords);
+            let boardConstraint =
+              List.fold_left(
+                (t, (x, y)) => {
+                  let {mineCount, coordsSet} = t;
+                  switch (board[y][x]) {
+                  | Hidden => {
+                      ...t,
+                      coordsSet: CoordsSet.add((x, y), coordsSet),
+                    }
+                  | Flagged => {...t, mineCount: mineCount - 1}
+                  | Visible(_) => t
+                  };
+                },
+                {mineCount, coordsSet: CoordsSet.empty, originCoords: coords},
+                adjacentCoords,
+              );
 
-          let constraints =
-            switch (mineConstraint) {
-            | None => constraints
-            | Some(num) => CoordsMap.add(coords, num, constraints)
-            };
-
-          {probabilities, constraints};
+            CoordsMap.add(coords, boardConstraint, map);
+          };
         },
-      {probabilities: probs, constraints: CoordsMap.empty},
-      inputBoard,
+      CoordsMap.empty,
+      board,
     );
   };
+};
 
-  type probForCell = {
-    mineChance: float,
-    coords: option(coords),
-  };
-  /**
-   * get the smallest and largest value in mine model
-   */
-  let maxMin = (model: t): (probForCell, probForCell) => {
-    Matrix.reduce(
-      ~f=
-        ((max, min), value, coords) =>
-          switch (value) {
-          | None => (max, min)
-          | Some(value) when value > max.mineChance => (
-              {mineChance: value, coords: Some(coords)},
-              min,
-            )
-          | Some(value) when value < min.mineChance => (
-              max,
-              {mineChance: value, coords: Some(coords)},
-            )
-          | _ => (max, min)
-          },
-      (
-        {mineChance: 0.0, coords: None},
-        {mineChance: infinity, coords: None},
-      ),
-      model.probabilities,
-    );
+module ConstraintSet = Set.Make(BoardConstraint);
+
+/** Groups describe sets of cells with uniforn minimum and maximum possible mines. */
+module Group = {
+  type t = {
+    // minMines should always be less than or equal to maxMines
+    minMines: int,
+    maxMines: int,
+    coordsSet: CoordsSet.t,
   };
 
-  type action =
-    | ReportBestMove(Game.action)
-    | ApplyConstraint(CoordsMap.t(float), coords);
+  let compare = (a, b) => CoordsSet.compare(a.coordsSet, b.coordsSet);
 
-  let getAction = (model: t): action => {
-    // TODO optomize where we check for new maxes and mins based on last action
-    let (max, min) = maxMin(model);
-    let {constraints, probabilities} = model;
-
-    switch (CoordsMap.choose(constraints), max, min) {
-      // no constraints left, so we neeed to choose something
-    | exception Not_found =>
-      // this might not be the best formula for deciding which is safer
-      let minIsSafer = min.mineChance < 1.0 - max.mineChance;
-      ReportBestMove(minIsSafer ? ToggleFlag(min.coords) : Check(max.coords));
-
-      // if we get a guaranteed mine/empty, act on it
-    | (_, {mineChance: 1.0, coords: coords}, _) => ReportBestMove(Check(coords))
-    | (_, _, {mineChance: 0.0, coords: coords}) => ReportBestMove(ToggleFLag(coords))
-
-    // else continue apply constraints
-    | (cellConstraint, _, _) => ApplyConstraint(cellConstraint)
+  let make = boardConstraint => {
+    let {coordsSet, mineCount}: BoardConstraint.t = boardConstraint;
+    {coordsSet, maxMines: mineCount, minMines: mineCount};
   };
 
-  /** Apply some additional info to the board */
-  let reduce = (model: t, additions: CoordsMap.t(float)): model => { };
+  let conflate = (a, b): list(t) => {
+    open CoordsSet;
+    let interCoords = inter(a.coordsSet, b.coordsSet);
+    let exclACoords = filter(e => mem(e, b.coordsSet), a.coordsSet);
+    let exclBCoords = filter(e => mem(e, a.coordsSet), b.coordsSet);
 
-  /**  */
-  let buildUntilCertaintyReached =
-      (inputBoard: RestrictedBoard.t): option(Game.action) => {
-    let model = ref(make(inputBoard));
-    let action = ref(interpolate(model));
+    let interGroup = {
+      coordsSet: interCoords,
+      minMines:
+        IntUtils.max([
+          a.minMines - cardinal(exclACoords),
+          b.minMines - cardinal(exclBCoords),
+        ]),
+      maxMines:
+        IntUtils.min([cardinal(interCoords), a.maxMines, b.maxMines]),
+    };
 
-    // while (action^ != ReportBestMove) {
-    //   model := switch(action^) {
-    //     | Reduce(map) =>
-    //   }
-    // }
+    let exclAGroup = {
+      coordsSet: exclACoords,
+      minMines: b.minMines - interGroup.maxMines,
+      maxMines: b.maxMines - interGroup.minMines,
+    };
 
-    action;
+    let exclBGroup = {
+      coordsSet: exclBCoords,
+      minMines: b.minMines - interGroup.maxMines,
+      maxMines: b.maxMines - interGroup.minMines,
+    };
+
+    [interGroup, exclAGroup, exclBGroup];
   };
+};
+
+let rec addGroup = (groups: CoordsMap.t(Group.t), groupToInclude: Group.t) => {
+  ();
+};
+
+let includeGroup = (groups: CoordsMap.t(Group.t), groupToInclude: Group.t) => {
+  let fromNewGroups = ref(CoordsSet.empty);
+  CoordsSet.fold(
+    (coord, groups: CoordsMap.t(Group.t)) =>
+      CoordsSet.mem(coord, fromNewGroups^)
+        ? groups
+        // there won't be any overlapping coords among these new groups
+        : {
+          let newGroups =
+            switch (CoordsMap.find(coord, groups)) {
+            | exception Not_found => [groupToInclude]
+            | group => Group.conflate(groupToInclude, group)
+            };
+          fromNewGroups :=
+            newGroups
+            |> List.fold_left(
+                 (acc, elt: Group.t) => CoordsSet.add(elt, acc),
+                 fromNewGroups^,
+               );
+
+          // replace the old groups with the new ones
+          List.fold_left(
+            (groups, group: Group.t) =>
+              CoordsSet.fold(
+                (coords, groups) => CoordsMap.add(coords, group, groups),
+                group.coordsSet,
+                groups,
+              ),
+            groups,
+            newGroups,
+          );
+        },
+    groupToInclude.coordsSet,
+    groups,
+  );
+};
+
+type t = RestrictedBoard.t => Game.action;
+
+let computeBoard = ();
+
+type action =
+  | ReportMove(Game.action)
+  | ComputeBoard;
+
+let solve = (board: RestrictedBoard.t) => {
+  let constraints = ref(BoardConstraint.makeMapFromRestrictedBoard(board));
+  let groups = ref(CoordsMap.empty);
+  let break = ref(false);
+  ();
 };

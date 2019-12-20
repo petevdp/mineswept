@@ -95,16 +95,45 @@ module Matrix = {
       matrix,
     );
 };
+
+module IntUtils = {
+  exception NoNumbersProvided;
+  let max = (nums: list(int)) =>
+    switch (nums) {
+    | [num] => num
+    | [num, ...rest] => List.fold_left((a, b) => a > b ? a : b, num, rest)
+    | [] => raise(NoNumbersProvided)
+    };
+
+  let min = (nums: list(int)) =>
+    switch (nums) {
+    | [num] => num
+    | [num, ...rest] => List.fold_left((a, b) => a < b ? a : b, num, rest)
+    | [] => raise(NoNumbersProvided)
+    };
+};
+
 // sets
 module CoordsSet = Set.Make(Coords);
 
 // maps
 module CoordsMap = Map.Make(Coords);
-module CoordsSetMap = Map.Make(CoordsSet);
 module StrMap = Map.Make(String);
 
 module MyList = {
   let combinationRange = (a: int, b: int): list(coords) => {
     Belt.List.makeBy(a, i => Belt.List.makeBy(b, j => (j, i)))->List.concat;
   };
+};
+
+let getRange = size => {
+  let coordsSet = ref(CoordsSet.empty);
+  let (xSize, ySize) = size;
+  for (i in 0 to xSize) {
+    for (j in 0 to ySize) {
+      coordsSet := CoordsSet.add((i, j), coordsSet^);
+    };
+  };
+
+  coordsSet;
 };
