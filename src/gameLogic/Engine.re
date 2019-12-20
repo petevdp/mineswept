@@ -35,13 +35,21 @@ module RestrictedBoard = {
 
 /** a number on the board and how it affects where mines are */
 module BoardConstraint = {
+  type effect =
+    | Include
+    | Exclude;
   type t = {
     mineCount: int,
     originCoords: Coords.t,
     coordsSet: CoordsSet.t,
+    effect,
   };
 
-  let compare = (a, b) => Coords.compare(a.originCoords, b.originCoords);
+  let compare = (a, b) =>
+    switch (Coords.compare(a.originCoords, b.originCoords)) {
+    | 0 => a.effect == b.effect ? 0 : 1
+    | num => num
+    };
 
   let makeMapFromRestrictedBoard = (board: RestrictedBoard.t) => {
     Matrix.reduce(
@@ -67,7 +75,12 @@ module BoardConstraint = {
                   | Visible(_) => t
                   };
                 },
-                {mineCount, coordsSet: CoordsSet.empty, originCoords: coords},
+                {
+                  mineCount,
+                  coordsSet: CoordsSet.empty,
+                  originCoords: coords,
+                  effect: Include,
+                },
                 adjacentCoords,
               );
 
@@ -78,9 +91,17 @@ module BoardConstraint = {
       board,
     );
   };
+
+  let exclude = g => {...g, effect: Exclude};
 };
 
 module ConstraintSet = Set.Make(BoardConstraint);
+
+let excludeConstraints = constraints =>
+  constraints
+  |> ConstraintSet.elements
+  |> List.map((c: BoardConstraint.t) => {...c, effect: Exclude})
+  |> ConstraintSet.of_list;
 
 /** Groups describe sets of cells with uniforn minimum and maximum possible mines. */
 module Group = {
@@ -88,21 +109,28 @@ module Group = {
     // minMines should always be less than or equal to maxMines
     minMines: int,
     maxMines: int,
+    constraintSet: ConstraintSet.t,
     coordsSet: CoordsSet.t,
   };
 
-  let compare = (a, b) => CoordsSet.compare(a.coordsSet, b.coordsSet);
+  let compare = (a, b) =>
+    ConstraintSet.compare(a.constraintSet, b.constraintSet);
 
   let make = boardConstraint => {
     let {coordsSet, mineCount}: BoardConstraint.t = boardConstraint;
-    {coordsSet, maxMines: mineCount, minMines: mineCount};
+    {
+      coordsSet,
+      maxMines: mineCount,
+      minMines: mineCount,
+      constraintSet: ConstraintSet.singleton(boardConstraint),
+    };
   };
 
   let conflate = (a, b): list(t) => {
     open CoordsSet;
     let interCoords = inter(a.coordsSet, b.coordsSet);
-    let exclACoords = filter(e => mem(e, b.coordsSet), a.coordsSet);
-    let exclBCoords = filter(e => mem(e, a.coordsSet), b.coordsSet);
+    let exclACoords = diff(a.coordsSet, interCoords);
+    let exclBCoords = diff(b.coordsSet, interCoords);
 
     let interGroup = {
       coordsSet: interCoords,
@@ -113,32 +141,97 @@ module Group = {
         ]),
       maxMines:
         IntUtils.min([cardinal(interCoords), a.maxMines, b.maxMines]),
+      constraintSet: ConstraintSet.union(a.constraintSet, b.constraintSet),
     };
 
     let exclAGroup = {
       coordsSet: exclACoords,
-      minMines: b.minMines - interGroup.maxMines,
-      maxMines: b.maxMines - interGroup.minMines,
+      minMines: a.minMines - interGroup.maxMines,
+      maxMines: a.maxMines - interGroup.minMines,
+      constraintSet:
+        ConstraintSet.union(
+          a.constraintSet,
+          excludeConstraints(b.constraintSet),
+        ),
     };
 
     let exclBGroup = {
       coordsSet: exclBCoords,
       minMines: b.minMines - interGroup.maxMines,
       maxMines: b.maxMines - interGroup.minMines,
+      constraintSet:
+        ConstraintSet.union(
+          b.constraintSet,
+          excludeConstraints(a.constraintSet),
+        ),
     };
 
     [interGroup, exclAGroup, exclBGroup];
   };
+
+  let mergeAll = (list: list(t)) => {};
 };
 
-let rec addGroup = (groups: CoordsMap.t(Group.t), groupToInclude: Group.t) => {
-  ();
+module GroupSet = Set.Make(Group);
+
+exception InvalidConnection;
+/**
+ * find a connection in a groups mapped based on effected cells.
+ * Will raise Not_found if no connections exist
+ */
+let findConnection = (groups: CoordsMap.t(GroupSet.t)) => {
+  let (coord, connectedGroups) =
+    groups
+    |> CoordsMap.bindings
+    |> List.find(((coords, groupSet)) => GroupSet.cardinal(groupSet) > 1);
+
+  switch (GroupSet.elements(connectedGroups)) {
+  | []
+  | [_] => raise(InvalidConnection)
+  | [a, b, ...rest] => (a, b)
+  };
 };
+
+let replaceGroups = (toReplace: GroupSet.t, toAdd: GroupSet.t, map) => {
+  GroupSet.fold(
+    (group: Group.t, map: CoordsMap.t(GroupSet.t)) =>
+      CoordsSet.fold(
+        (coord, map) => {
+          let groupSet = CoordsMap.find(coord, map);
+          let toReplaceRemoved =
+            GroupSet.diff(groupSet, GroupSet.inter(toReplace, groupSet));
+          let addedGroup = GroupSet.add(group, toReplaceRemoved);
+
+          CoordsMap.add(coord, addedGroup, map);
+        },
+        group.coordsSet,
+        map,
+      ),
+    toAdd,
+    map,
+  );
+};
+
+/**
+ *
+ */
+let rec conflateAll = (groupMap: CoordsMap.t(GroupSet.t)) =>
+  switch (findConnection(groupMap)) {
+  // if there are no eonnctions between cells, we're done
+  | exception Not_found => groupMap
+  | (a, b) =>
+    let groupMapWithReplacements =
+      replaceGroups(
+        [a, b] |> GroupSet.of_list,
+        Group.conflate(a, b) |> GroupSet.of_list,
+      );
+    conflateAll(groupMapWithReplacements);
+  };
 
 let includeGroup = (groups: CoordsMap.t(Group.t), groupToInclude: Group.t) => {
   let fromNewGroups = ref(CoordsSet.empty);
   CoordsSet.fold(
-    (coord, groups: CoordsMap.t(Group.t)) =>
+    (coord, groups: CoordsMap.t(GroupSet.t)) =>
       CoordsSet.mem(coord, fromNewGroups^)
         ? groups
         // there won't be any overlapping coords among these new groups
