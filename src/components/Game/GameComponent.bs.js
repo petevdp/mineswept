@@ -1,12 +1,12 @@
 'use strict';
 
+var List = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
 var Game$ReasonReactExamples = require("../../gameLogic/Game.bs.js");
 var Engine$ReasonReactExamples = require("../../gameLogic/Engine.bs.js");
-var CustomUtils$ReasonReactExamples = require("../../utils/CustomUtils.bs.js");
 var BoardComponent$ReasonReactExamples = require("../Board/BoardComponent.bs.js");
 var ControlPanelComponent$ReasonReactExamples = require("../ControlPanel/ControlPanelComponent.bs.js");
 
@@ -28,12 +28,12 @@ var startingAppState_000 = /* gameHistory : :: */[
   /* [] */0
 ];
 
-var startingAppState_001 = /* engineRegistry */Engine$ReasonReactExamples.Registry.registry;
+var startingAppState_002 = /* selectedEngineEntry */List.hd(Engine$ReasonReactExamples.registry);
 
 var startingAppState = /* record */[
   startingAppState_000,
-  startingAppState_001,
-  /* selectedEngineName */"naive",
+  /* engineRegistry */Engine$ReasonReactExamples.registry,
+  startingAppState_002,
   /* playGameOutWithEngine */false,
   /* fallbackGameInitOptions */gameOptions
 ];
@@ -43,22 +43,24 @@ function GameComponent(Props) {
           if (typeof action === "number") {
             if (action === /* EngineGameAction */0) {
               var gameHistory = prevState[/* gameHistory */0];
-              var match = Curry._2(CustomUtils$ReasonReactExamples.StrMap.find, prevState[/* selectedEngineName */2], prevState[/* engineRegistry */1]);
-              var engine = match[/* engine */2];
+              var partial_arg = prevState[/* selectedEngineEntry */2][/* engine */1];
+              var getActionFromEngine = function (param) {
+                return Engine$ReasonReactExamples.getActionFromEngine(partial_arg, param);
+              };
               var gameHistory$1;
               if (gameHistory) {
-                gameHistory$1 = Game$ReasonReactExamples.reduce(gameHistory, Engine$ReasonReactExamples.getActionFromEngine(engine, gameHistory[0][/* board */1]));
+                gameHistory$1 = Game$ReasonReactExamples.reduce(gameHistory, Curry._1(getActionFromEngine, gameHistory[0][/* board */1]));
               } else {
                 var gameState = Game$ReasonReactExamples.make(prevState[/* fallbackGameInitOptions */4]);
                 gameHistory$1 = Game$ReasonReactExamples.reduce(/* :: */[
                       gameState,
                       /* [] */0
-                    ], Engine$ReasonReactExamples.getActionFromEngine(engine, gameState[/* board */1]));
+                    ], Curry._1(getActionFromEngine, gameState[/* board */1]));
               }
               return /* record */[
                       /* gameHistory */gameHistory$1,
                       /* engineRegistry */prevState[/* engineRegistry */1],
-                      /* selectedEngineName */prevState[/* selectedEngineName */2],
+                      /* selectedEngineEntry */prevState[/* selectedEngineEntry */2],
                       /* playGameOutWithEngine */prevState[/* playGameOutWithEngine */3],
                       /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                     ];
@@ -66,7 +68,7 @@ function GameComponent(Props) {
               return /* record */[
                       /* gameHistory */prevState[/* gameHistory */0],
                       /* engineRegistry */prevState[/* engineRegistry */1],
-                      /* selectedEngineName */prevState[/* selectedEngineName */2],
+                      /* selectedEngineEntry */prevState[/* selectedEngineEntry */2],
                       /* playGameOutWithEngine */true,
                       /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                     ];
@@ -75,7 +77,7 @@ function GameComponent(Props) {
             return /* record */[
                     /* gameHistory */Game$ReasonReactExamples.reduce(prevState[/* gameHistory */0], action[0]),
                     /* engineRegistry */prevState[/* engineRegistry */1],
-                    /* selectedEngineName */prevState[/* selectedEngineName */2],
+                    /* selectedEngineEntry */prevState[/* selectedEngineEntry */2],
                     /* playGameOutWithEngine */prevState[/* playGameOutWithEngine */3],
                     /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                   ];
@@ -86,7 +88,7 @@ function GameComponent(Props) {
                       /* [] */0
                     ],
                     /* engineRegistry */prevState[/* engineRegistry */1],
-                    /* selectedEngineName */prevState[/* selectedEngineName */2],
+                    /* selectedEngineEntry */prevState[/* selectedEngineEntry */2],
                     /* playGameOutWithEngine */false,
                     /* fallbackGameInitOptions */prevState[/* fallbackGameInitOptions */4]
                   ];
@@ -173,7 +175,7 @@ function GameComponent(Props) {
             Caml_builtin_exceptions.match_failure,
             /* tuple */[
               "GameComponent.re",
-              93,
+              86,
               6
             ]
           ];
@@ -183,7 +185,7 @@ function GameComponent(Props) {
           Caml_builtin_exceptions.match_failure,
           /* tuple */[
             "GameComponent.re",
-            75,
+            68,
             6
           ]
         ];

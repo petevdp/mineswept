@@ -116,7 +116,7 @@ module Group = {
   let compare = (a, b) =>
     ConstraintSet.compare(a.constraintSet, b.constraintSet);
 
-  let make = boardConstraint => {
+  let make = (boardConstraint: BoardConstraint.t) => {
     let {coordsSet, mineCount}: BoardConstraint.t = boardConstraint;
     {
       coordsSet,
@@ -126,7 +126,7 @@ module Group = {
     };
   };
 
-  let conflate = (a, b): list(t) => {
+  let conflate = (a, b) => {
     open CoordsSet;
     let interCoords = inter(a.coordsSet, b.coordsSet);
     let exclACoords = diff(a.coordsSet, interCoords);
@@ -166,116 +166,129 @@ module Group = {
         ),
     };
 
-    [interGroup, exclAGroup, exclBGroup];
+    (interGroup, exclAGroup, exclBGroup);
   };
 
-  let mergeAll = (list: list(t)) => {};
+  let getActionIfCertain =
+      ({coordsSet, minMines, maxMines}): option(Game.action) => {
+    let canCheck = maxMines == 0;
+    let canFlag = CoordsSet.cardinal(coordsSet) == minMines;
+    let coords = CoordsSet.choose(coordsSet);
+    switch (canCheck, canFlag) {
+    | (true, _) => Some(Check(coords))
+    | (_, true) => Some(ToggleFlag(coords))
+    | (false, false) => None
+    };
+  };
 };
 
 module GroupSet = Set.Make(Group);
 
 exception InvalidConnection;
-/**
- * find a connection in a groups mapped based on effected cells.
- * Will raise Not_found if no connections exist
- */
-let findConnection = (groups: CoordsMap.t(GroupSet.t)) => {
-  let (coord, connectedGroups) =
-    groups
-    |> CoordsMap.bindings
-    |> List.find(((coords, groupSet)) => GroupSet.cardinal(groupSet) > 1);
 
-  switch (GroupSet.elements(connectedGroups)) {
-  | []
-  | [_] => raise(InvalidConnection)
-  | [a, b, ...rest] => (a, b)
-  };
-};
-
-let replaceGroups = (toReplace: GroupSet.t, toAdd: GroupSet.t, map) => {
-  GroupSet.fold(
-    (group: Group.t, map: CoordsMap.t(GroupSet.t)) =>
-      CoordsSet.fold(
-        (coord, map) => {
-          let groupSet = CoordsMap.find(coord, map);
-          let toReplaceRemoved =
-            GroupSet.diff(groupSet, GroupSet.inter(toReplace, groupSet));
-          let addedGroup = GroupSet.add(group, toReplaceRemoved);
-
-          CoordsMap.add(coord, addedGroup, map);
+let applyConstraint = (groups, const: BoardConstraint.t) => {
+  let constraintGroup = Group.make(const);
+  let targetGroup = ref(constraintGroup);
+  let toNormalize = ref(groups);
+  let normalizedGroups = ref([]);
+  let break = ref(false);
+  while (! break^) {
+    let (unConnected, connected) =
+      List.partition(
+        (g: Group.t) => {
+          let numInter =
+            CoordsSet.inter(g.coordsSet, targetGroup^.coordsSet)
+            |> CoordsSet.cardinal;
+          numInter == 0;
         },
-        group.coordsSet,
-        map,
-      ),
-    toAdd,
-    map,
-  );
-};
-
-/**
- *
- */
-let rec conflateAll = (groupMap: CoordsMap.t(GroupSet.t)) =>
-  switch (findConnection(groupMap)) {
-  // if there are no eonnctions between cells, we're done
-  | exception Not_found => groupMap
-  | (a, b) =>
-    let groupMapWithReplacements =
-      replaceGroups(
-        [a, b] |> GroupSet.of_list,
-        Group.conflate(a, b) |> GroupSet.of_list,
+        toNormalize^,
       );
-    conflateAll(groupMapWithReplacements);
+    normalizedGroups := List.concat([normalizedGroups^, unConnected]);
+
+    switch (connected) {
+    | [] => break := true
+    | [first, ...rest] =>
+      let (onlyTarget, inter, onlyFirst) =
+        Group.conflate(targetGroup^, first);
+      normalizedGroups :=
+        List.concat([normalizedGroups^, [inter, onlyFirst]]);
+      targetGroup := onlyTarget;
+    };
   };
 
-let includeGroup = (groups: CoordsMap.t(Group.t), groupToInclude: Group.t) => {
-  let fromNewGroups = ref(CoordsSet.empty);
-  CoordsSet.fold(
-    (coord, groups: CoordsMap.t(GroupSet.t)) =>
-      CoordsSet.mem(coord, fromNewGroups^)
-        ? groups
-        // there won't be any overlapping coords among these new groups
-        : {
-          let newGroups =
-            switch (CoordsMap.find(coord, groups)) {
-            | exception Not_found => [groupToInclude]
-            | group => Group.conflate(groupToInclude, group)
-            };
-          fromNewGroups :=
-            newGroups
-            |> List.fold_left(
-                 (acc, elt: Group.t) => CoordsSet.add(elt, acc),
-                 fromNewGroups^,
-               );
-
-          // replace the old groups with the new ones
-          List.fold_left(
-            (groups, group: Group.t) =>
-              CoordsSet.fold(
-                (coords, groups) => CoordsMap.add(coords, group, groups),
-                group.coordsSet,
-                groups,
-              ),
-            groups,
-            newGroups,
-          );
-        },
-    groupToInclude.coordsSet,
-    groups,
-  );
+  // this is dumb
+  List.concat([normalizedGroups^, [targetGroup^]]);
 };
 
 type t = RestrictedBoard.t => Game.action;
 
-let computeBoard = ();
+let getActionFromEngine = (t, unrestrictedBoard) => {
+  let restrictedBoard = RestrictedBoard.make(unrestrictedBoard);
+  t(restrictedBoard);
+};
+
+let random: t =
+  board => {
+    let (_, coords) =
+      board
+      |> Matrix.flattenWithCoords
+      |> Belt.Array.shuffle
+      |> Array.to_list
+      |> List.filter(((c: RestrictedBoard.rCell, _)) => c == Hidden)
+      |> List.hd;
+
+    Check(coords);
+  };
 
 type action =
   | ReportMove(Game.action)
   | ComputeBoard;
 
-let solve = (board: RestrictedBoard.t) => {
-  let constraints = ref(BoardConstraint.makeMapFromRestrictedBoard(board));
-  let groups = ref(CoordsMap.empty);
-  let break = ref(false);
-  ();
+let solver = (board: RestrictedBoard.t) => {
+  let unAppliedConstraints =
+    ref(
+      BoardConstraint.makeMapFromRestrictedBoard(board)->CoordsMap.bindings,
+    );
+
+  let normalizedGroups = ref([]);
+  let action = ref(None);
+
+  while (action^ == None) {
+    switch (unAppliedConstraints^) {
+    | [] => action := Some(random(board))
+    | [(_, firstConstraint), ...rest] =>
+      unAppliedConstraints := rest;
+      normalizedGroups := applyConstraint(normalizedGroups^, firstConstraint);
+
+      // TODO: optimize
+      action :=
+        (
+          switch (
+            List.find(
+              g => Group.getActionIfCertain(g) != None,
+              normalizedGroups^,
+            )
+          ) {
+          | exception Not_found => None
+          | group => Group.getActionIfCertain(group)
+          }
+        );
+    };
+  };
+
+  switch (action^) {
+  | Some(action) => action
+  | None => raise(Not_found)
+  };
 };
+
+type engineEntry = {
+  name: string,
+  engine: t,
+};
+
+type registry = list(engineEntry);
+let registry = [
+  {name: "solver", engine: solver},
+  {name: "random", engine: random},
+];
