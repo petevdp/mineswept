@@ -51,48 +51,50 @@ module BoardConstraint = {
     | num => num
     };
 
-  let makeMapFromRestrictedBoard = (board: RestrictedBoard.t) => {
-    Matrix.reduce(
-      ~f=
-        (map, cell: RestrictedBoard.rCell, coords) => {
-          let size = Matrix.size(board);
-          switch (cell) {
-          | Visible(0)
-          | Hidden
-          | Flagged => map
-          | Visible(mineCount) =>
-            let adjacentCoords = Coords.getAdjacent(size, coords);
-            let boardConstraint =
-              List.fold_left(
-                (t, (x, y)) => {
-                  let {mineCount, coordsSet} = t;
-                  switch (board[y][x]) {
-                  | Hidden => {
-                      ...t,
-                      coordsSet: CoordsSet.add((x, y), coordsSet),
-                    }
-                  | Flagged => {...t, mineCount: mineCount - 1}
-                  | Visible(_) => t
-                  };
-                },
-                {
-                  mineCount,
-                  coordsSet: CoordsSet.empty,
-                  originCoords: coords,
-                  effect: Include,
-                },
-                adjacentCoords,
-              );
+  let exclude = g => {...g, effect: Exclude};
 
-            CoordsMap.add(coords, boardConstraint, map);
-          };
+  let make = (originCoords, mineCount, board) => {
+    let coordsSet = ref(CoordsSet.empty);
+    let mineCount = ref(mineCount);
+
+    let adjacent = Matrix.getAdjacentWithCoords(originCoords, board);
+    List.iter(
+      ((cell: RestrictedBoard.rCell, adjCoord)) =>
+        switch (cell) {
+        | Hidden => coordsSet := CoordsSet.add(adjCoord, coordsSet^)
+        | Visible(_) => ()
+        | Flagged => mineCount := mineCount^ - 1
         },
-      CoordsMap.empty,
-      board,
+      adjacent,
     );
+
+    {
+      originCoords,
+      coordsSet: coordsSet^,
+      mineCount: mineCount^,
+      effect: Include,
+    };
   };
 
-  let exclude = g => {...g, effect: Exclude};
+  let makeListFromRestrictedBoard = board => {
+    let constraints = ref([]);
+
+    board
+    |> Matrix.flattenWithCoords
+    |> Array.to_list
+    |> List.iter(((cell: RestrictedBoard.rCell, coords)) =>
+         switch (cell) {
+         | Visible(mineCount) =>
+           let newConstraint = make(coords, mineCount, board);
+           if (newConstraint.mineCount > 0) {
+             constraints := [newConstraint, ...constraints^];
+           };
+         | _ => ()
+         }
+       );
+
+    constraints^;
+  };
 };
 
 module ConstraintSet = Set.Make(BoardConstraint);
@@ -126,6 +128,8 @@ module Group = {
     };
   };
 
+  let isEmpty = t => CoordsSet.is_empty(t.coordsSet);
+
   let conflate = (a, b) => {
     open CoordsSet;
     let interCoords = inter(a.coordsSet, b.coordsSet);
@@ -138,6 +142,7 @@ module Group = {
         IntUtils.max([
           a.minMines - cardinal(exclACoords),
           b.minMines - cardinal(exclBCoords),
+          0,
         ]),
       maxMines:
         IntUtils.min([cardinal(interCoords), a.maxMines, b.maxMines]),
@@ -166,13 +171,15 @@ module Group = {
         ),
     };
 
-    (interGroup, exclAGroup, exclBGroup);
+    (exclAGroup, interGroup, exclBGroup);
   };
 
   let getActionIfCertain =
       ({coordsSet, minMines, maxMines}): option(Game.action) => {
     let canCheck = maxMines == 0;
     let canFlag = CoordsSet.cardinal(coordsSet) == minMines;
+    Js.log("min mines: " ++ string_of_int(minMines));
+    Js.log("numCells: " ++ string_of_int(CoordsSet.cardinal(coordsSet)));
     let coords = CoordsSet.choose(coordsSet);
     switch (canCheck, canFlag) {
     | (true, _) => Some(Check(coords))
@@ -210,14 +217,22 @@ let applyConstraint = (groups, const: BoardConstraint.t) => {
     | [first, ...rest] =>
       let (onlyTarget, inter, onlyFirst) =
         Group.conflate(targetGroup^, first);
-      normalizedGroups :=
-        List.concat([normalizedGroups^, [inter, onlyFirst]]);
+      let nonEmpty = [inter, onlyFirst] |> List.filter(Group.isEmpty);
+      normalizedGroups := List.concat([normalizedGroups^, nonEmpty]);
+      // targetGroup could be empty now, but that would break
+      // the while loop next iteration
       targetGroup := onlyTarget;
+      toNormalize := rest;
     };
   };
-
-  // this is dumb
-  List.concat([normalizedGroups^, [targetGroup^]]);
+  let normalizedGroups = normalizedGroups^;
+  let targetGroup = targetGroup^;
+  Js.log("is empty: " ++ string_of_bool(Group.isEmpty(targetGroup)));
+  Js.log(
+    "len: " ++ string_of_int(CoordsSet.cardinal(targetGroup.coordsSet)),
+  );
+  Group.isEmpty(targetGroup)
+    ? normalizedGroups : List.concat([normalizedGroups, [targetGroup]]);
 };
 
 type t = RestrictedBoard.t => Game.action;
@@ -246,21 +261,33 @@ type action =
 
 let solver = (board: RestrictedBoard.t) => {
   let unAppliedConstraints =
-    ref(
-      BoardConstraint.makeMapFromRestrictedBoard(board)->CoordsMap.bindings,
-    );
+    ref(BoardConstraint.makeListFromRestrictedBoard(board));
 
   let normalizedGroups = ref([]);
   let action = ref(None);
 
   while (action^ == None) {
     switch (unAppliedConstraints^) {
-    | [] => action := Some(random(board))
-    | [(_, firstConstraint), ...rest] =>
+    | [] =>
+      Js.log("making random move");
+      action := Some(random(board));
+    | [firstConstraint, ...rest] =>
       unAppliedConstraints := rest;
+      let (x, y) = firstConstraint.originCoords;
+      let {mineCount, coordsSet}: BoardConstraint.t = firstConstraint;
+      Js.log(
+        "adding constraint "
+        ++ string_of_int(x)
+        ++ " "
+        ++ string_of_int(y)
+        ++ " ("
+        ++ string_of_int(mineCount)
+        ++ ")"
+        ++ " num cells: "
+        ++ string_of_int(CoordsSet.cardinal(coordsSet)),
+      );
       normalizedGroups := applyConstraint(normalizedGroups^, firstConstraint);
-
-      // TODO: optimize
+      Js.log("norm len: " ++ string_of_int(List.length(normalizedGroups^)));
       action :=
         (
           switch (
@@ -270,7 +297,14 @@ let solver = (board: RestrictedBoard.t) => {
             )
           ) {
           | exception Not_found => None
-          | group => Group.getActionIfCertain(group)
+          | group =>
+            let a = Group.getActionIfCertain(group);
+            if (a != None) {
+              Js.log("making certain move");
+            } else {
+              Js.log("couldn't find move");
+            };
+            a;
           }
         );
     };

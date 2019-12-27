@@ -94,6 +94,14 @@ module Matrix = {
       [],
       matrix,
     );
+
+  let getAdjacentWithCoords = (coords, t) => {
+    Coords.getAdjacent(coords, size(t))
+    |> List.map(coord => {
+         let (x, y) = coord;
+         (t[x][y], coord);
+       });
+  };
 };
 
 module IntUtils = {

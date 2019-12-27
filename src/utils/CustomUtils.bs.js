@@ -12,6 +12,7 @@ var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
+var Caml_chrome_debugger = require("bs-platform/lib/js/caml_chrome_debugger.js");
 
 var BadComparison = Caml_exceptions.create("CustomUtils-ReasonReactExamples.Coords.BadComparison");
 
@@ -40,55 +41,55 @@ function compare(param, param$1) {
   }
 }
 
-var adjacentDiff = /* :: */[
-  /* tuple */[
-    1,
-    1
-  ],
-  /* :: */[
+var adjacentDiff = /* :: */Caml_chrome_debugger.simpleVariant("::", [
     /* tuple */[
       1,
-      0
+      1
     ],
-    /* :: */[
-      /* tuple */[
-        1,
-        -1
-      ],
-      /* :: */[
+    /* :: */Caml_chrome_debugger.simpleVariant("::", [
         /* tuple */[
-          0,
-          1
+          1,
+          0
         ],
-        /* :: */[
-          /* tuple */[
-            0,
-            -1
-          ],
-          /* :: */[
+        /* :: */Caml_chrome_debugger.simpleVariant("::", [
             /* tuple */[
-              -1,
-              1
+              1,
+              -1
             ],
-            /* :: */[
-              /* tuple */[
-                -1,
-                0
-              ],
-              /* :: */[
+            /* :: */Caml_chrome_debugger.simpleVariant("::", [
                 /* tuple */[
-                  -1,
-                  -1
+                  0,
+                  1
                 ],
-                /* [] */0
-              ]
-            ]
-          ]
-        ]
-      ]
-    ]
-  ]
-];
+                /* :: */Caml_chrome_debugger.simpleVariant("::", [
+                    /* tuple */[
+                      0,
+                      -1
+                    ],
+                    /* :: */Caml_chrome_debugger.simpleVariant("::", [
+                        /* tuple */[
+                          -1,
+                          1
+                        ],
+                        /* :: */Caml_chrome_debugger.simpleVariant("::", [
+                            /* tuple */[
+                              -1,
+                              0
+                            ],
+                            /* :: */Caml_chrome_debugger.simpleVariant("::", [
+                                /* tuple */[
+                                  -1,
+                                  -1
+                                ],
+                                /* [] */0
+                              ])
+                          ])
+                      ])
+                  ])
+              ])
+          ])
+      ])
+  ]);
 
 function getAdjacent(param, param$1) {
   var ySize = param$1[1];
@@ -189,17 +190,26 @@ function copy(matrix) {
 function select(f, matrix) {
   return reduce((function (acc, a, param) {
                 var match = Curry._1(f, a);
-                return List.concat(/* :: */[
-                            acc,
-                            /* :: */[
-                              match ? /* :: */[
-                                  a,
+                return List.concat(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+                              acc,
+                              /* :: */Caml_chrome_debugger.simpleVariant("::", [
+                                  match ? /* :: */Caml_chrome_debugger.simpleVariant("::", [
+                                        a,
+                                        /* [] */0
+                                      ]) : /* [] */0,
                                   /* [] */0
-                                ] : /* [] */0,
-                              /* [] */0
-                            ]
-                          ]);
+                                ])
+                            ]));
               }), /* [] */0, matrix);
+}
+
+function getAdjacentWithCoords(coords, t) {
+  return List.map((function (coord) {
+                return /* tuple */[
+                        Caml_array.caml_array_get(Caml_array.caml_array_get(t, coord[0]), coord[1]),
+                        coord
+                      ];
+              }), getAdjacent(coords, size(t)));
 }
 
 var Matrix = {
@@ -211,7 +221,8 @@ var Matrix = {
   flattenWithCoords: flattenWithCoords,
   reduce: reduce,
   copy: copy,
-  select: select
+  select: select,
+  getAdjacentWithCoords: getAdjacentWithCoords
 };
 
 var NoNumbersProvided = Caml_exceptions.create("CustomUtils-ReasonReactExamples.IntUtils.NoNumbersProvided");
@@ -292,7 +303,7 @@ var MyList = {
 };
 
 function getRange(size) {
-  var coordsSet = /* record */[/* contents */CoordsSet.empty];
+  var coordsSet = /* record */Caml_chrome_debugger.record(["contents"], [CoordsSet.empty]);
   var ySize = size[1];
   for(var i = 0 ,i_finish = size[0]; i <= i_finish; ++i){
     for(var j = 0; j <= ySize; ++j){

@@ -4,6 +4,7 @@ var Css = require("bs-css/src/Css.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
+var Caml_chrome_debugger = require("bs-platform/lib/js/caml_chrome_debugger.js");
 var CustomUtils$ReasonReactExamples = require("../../utils/CustomUtils.bs.js");
 var CellComponent$ReasonReactExamples = require("../Cell/CellComponent.bs.js");
 
@@ -41,13 +42,19 @@ function BoardComponent(Props) {
                 }
                 return /* () */0;
               };
-              return /* record */[
-                      /* state */param[/* state */0],
-                      /* mined */param[/* mined */1],
-                      /* numAdjacentMines */param[/* numAdjacentMines */2],
-                      /* handleClick */handleClick,
-                      /* isGameOver */isGameOver
-                    ];
+              return /* record */Caml_chrome_debugger.record([
+                        "state",
+                        "mined",
+                        "numAdjacentMines",
+                        "handleClick",
+                        "isGameOver"
+                      ], [
+                        param[/* state */0],
+                        param[/* mined */1],
+                        param[/* numAdjacentMines */2],
+                        handleClick,
+                        isGameOver
+                      ]);
             }), model));
   var onContextMenu = function (e) {
     e.preventDefault();

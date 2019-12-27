@@ -36,12 +36,7 @@ let staticCellCheck = (state: Board.Cell.state): Board.Cell.state =>
   };
 
 let cellCheck =
-    (
-      prevPhase: phase,
-      prevBoard: Board.model,
-      ~mineCount: int,
-      ~coords: coords,
-    )
+    (prevPhase: phase, prevBoard: Board.model, ~coords: coords)
     : (Board.model, phase) => {
   let (x, y) = coords;
   let cell = prevBoard[y][x];
@@ -108,6 +103,13 @@ module MinePopulationStrategy = {
 /* produce new game models from actions **/
 let reduce = (history: history, action: action): history => {
   // only the below variables should be used in computing the next game model
+  switch (action) {
+  | Check((x, y)) =>
+    Js.log("coords: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
+  | ToggleFlag((x, y)) =>
+    Js.log("coords: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
+  | _ => ()
+  };
   let prevBoard = List.hd(history);
   let {phase as prevPhase, board as prevBoard, mineCount} = prevBoard;
 
@@ -129,7 +131,7 @@ let reduce = (history: history, action: action): history => {
 
     // the game might end when the action is Check
     | (Check(coords), Playing | Start) =>
-      cellCheck(phase, newBoard, ~mineCount, ~coords)
+      cellCheck(phase, newBoard, ~coords)
 
     | (ToggleFlag(coords), Playing | Start) => toggleFlag(coords, board)
 

@@ -6,6 +6,7 @@ var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
+var Caml_chrome_debugger = require("bs-platform/lib/js/caml_chrome_debugger.js");
 var CustomUtils$ReasonReactExamples = require("../utils/CustomUtils.bs.js");
 
 var Cell = { };
@@ -43,10 +44,13 @@ function makeRaw(param, minedCoords) {
                                                   i
                                                 ]);
                                     }), minedCoords);
-                              return /* record */[
-                                      /* state : Hidden */0,
-                                      /* mined */mined
-                                    ];
+                              return /* record */Caml_chrome_debugger.record([
+                                        "state",
+                                        "mined"
+                                      ], [
+                                        0,
+                                        mined
+                                      ]);
                             }));
               }));
 }
@@ -54,11 +58,15 @@ function makeRaw(param, minedCoords) {
 function make(size, minedCoords) {
   return CustomUtils$ReasonReactExamples.Matrix.map((function (param, coords) {
                 var numAdjacentMines = CustomUtils$ReasonReactExamples.Coords.getNumAdjacent(coords, minedCoords);
-                return /* record */[
-                        /* state */param[/* state */0],
-                        /* mined */param[/* mined */1],
-                        /* numAdjacentMines */numAdjacentMines
-                      ];
+                return /* record */Caml_chrome_debugger.record([
+                          "state",
+                          "mined",
+                          "numAdjacentMines"
+                        ], [
+                          param[/* state */0],
+                          param[/* mined */1],
+                          numAdjacentMines
+                        ]);
               }), makeRaw(size, minedCoords));
 }
 
@@ -67,11 +75,15 @@ var InvalidBoardState = Caml_exceptions.create("Board-ReasonReactExamples.Invali
 function revealAllMines(board) {
   return CustomUtils$ReasonReactExamples.Matrix.map((function (cell, param) {
                 if (cell[/* mined */1]) {
-                  return /* record */[
-                          /* state : Visible */1,
-                          /* mined */cell[/* mined */1],
-                          /* numAdjacentMines */cell[/* numAdjacentMines */2]
-                        ];
+                  return /* record */Caml_chrome_debugger.record([
+                            "state",
+                            "mined",
+                            "numAdjacentMines"
+                          ], [
+                            1,
+                            cell[/* mined */1],
+                            cell[/* numAdjacentMines */2]
+                          ]);
                 } else {
                   return cell;
                 }
@@ -82,11 +94,15 @@ function checkAndReveal(coords, board) {
   var y = coords[1];
   var x = coords[0];
   var cell = Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x);
-  Caml_array.caml_array_set(Caml_array.caml_array_get(board, y), x, /* record */[
-        /* state : Visible */1,
-        /* mined */cell[/* mined */1],
-        /* numAdjacentMines */cell[/* numAdjacentMines */2]
-      ]);
+  Caml_array.caml_array_set(Caml_array.caml_array_get(board, y), x, /* record */Caml_chrome_debugger.record([
+          "state",
+          "mined",
+          "numAdjacentMines"
+        ], [
+          1,
+          cell[/* mined */1],
+          cell[/* numAdjacentMines */2]
+        ]));
   if (cell[/* numAdjacentMines */2] === 0) {
     var adjacentCoords = CustomUtils$ReasonReactExamples.Coords.getAdjacent(coords, CustomUtils$ReasonReactExamples.Matrix.size(board));
     var hiddenAdjacentCoords = List.filter((function (param) {

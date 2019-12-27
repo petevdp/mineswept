@@ -3,89 +3,90 @@
 var Css = require("bs-css/src/Css.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
+var Caml_chrome_debugger = require("bs-platform/lib/js/caml_chrome_debugger.js");
 var GlobalTypes$ReasonReactExamples = require("../../GlobalTypes.bs.js");
 
 var cellSize = Css.px(30);
 
-var base = Css.style(/* :: */[
-      Css.width(cellSize),
-      /* :: */[
-        Css.height(cellSize),
-        /* [] */0
-      ]
-    ]);
+var base = Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        Css.width(cellSize),
+        /* :: */Caml_chrome_debugger.simpleVariant("::", [
+            Css.height(cellSize),
+            /* [] */0
+          ])
+      ]));
 
-var hidden = Css.style(/* :: */[
-      Css.backgroundColor(Css.grey),
-      /* :: */[
-        Css.hover(/* :: */[
-              Css.backgroundColor(Css.darkgrey),
-              /* [] */0
-            ]),
-        /* [] */0
-      ]
-    ]);
+var hidden = Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        Css.backgroundColor(Css.grey),
+        /* :: */Caml_chrome_debugger.simpleVariant("::", [
+            Css.hover(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+                    Css.backgroundColor(Css.darkgrey),
+                    /* [] */0
+                  ])),
+            /* [] */0
+          ])
+      ]));
 
-var flagged = Css.style(/* :: */[
-      Css.backgroundColor(Css.green),
-      /* :: */[
-        Css.hover(/* :: */[
-              Css.backgroundColor(Css.lightgreen),
-              /* [] */0
-            ]),
-        /* [] */0
-      ]
-    ]);
+var flagged = Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        Css.backgroundColor(Css.green),
+        /* :: */Caml_chrome_debugger.simpleVariant("::", [
+            Css.hover(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+                    Css.backgroundColor(Css.lightgreen),
+                    /* [] */0
+                  ])),
+            /* [] */0
+          ])
+      ]));
 
 var iconSize = Css.px(25);
 
-var flag = Css.style(/* :: */[
-      Css.width(iconSize),
-      /* :: */[
-        Css.height(iconSize),
+var flag = Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        Css.width(iconSize),
+        /* :: */Caml_chrome_debugger.simpleVariant("::", [
+            Css.height(iconSize),
+            /* [] */0
+          ])
+      ]));
+
+var bomb = Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        Css.width(iconSize),
+        /* :: */Caml_chrome_debugger.simpleVariant("::", [
+            Css.height(iconSize),
+            /* :: */Caml_chrome_debugger.simpleVariant("::", [
+                Css.paddingTop(Css.px(2)),
+                /* [] */0
+              ])
+          ])
+      ]));
+
+var mined = Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        Css.backgroundColor(Css.salmon),
         /* [] */0
-      ]
-    ]);
+      ]));
 
-var bomb = Css.style(/* :: */[
-      Css.width(iconSize),
-      /* :: */[
-        Css.height(iconSize),
-        /* :: */[
-          Css.paddingTop(Css.px(2)),
-          /* [] */0
-        ]
-      ]
-    ]);
-
-var mined = Css.style(/* :: */[
-      Css.backgroundColor(Css.salmon),
-      /* [] */0
-    ]);
-
-var empty = Css.style(/* :: */[
-      Css.backgroundColor(Css.hex("f3f3f3")),
-      /* [] */0
-    ]);
+var empty = Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        Css.backgroundColor(Css.hex("f3f3f3")),
+        /* [] */0
+      ]));
 
 var Visible = {
   mined: mined,
   empty: empty
 };
 
-var hidden$1 = Css.merge(/* :: */[
-      hidden,
-      /* :: */[
-        Css.style(/* :: */[
-              Css.hover(/* :: */[
-                    Css.backgroundColor(Css.grey),
+var hidden$1 = Css.merge(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+        hidden,
+        /* :: */Caml_chrome_debugger.simpleVariant("::", [
+            Css.style(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+                    Css.hover(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+                            Css.backgroundColor(Css.grey),
+                            /* [] */0
+                          ])),
                     /* [] */0
-                  ]),
-              /* [] */0
-            ]),
-        /* [] */0
-      ]
-    ]);
+                  ])),
+            /* [] */0
+          ])
+      ]));
 
 var GameOver = {
   hidden: hidden$1
@@ -150,13 +151,13 @@ function CellComponent(Props) {
     e.preventDefault();
     return Curry._1(handleClick, /* Right */0);
   };
-  var classStyles = Css.merge(/* :: */[
-        base,
-        /* :: */[
-          match[0],
-          /* [] */0
-        ]
-      ]);
+  var classStyles = Css.merge(/* :: */Caml_chrome_debugger.simpleVariant("::", [
+          base,
+          /* :: */Caml_chrome_debugger.simpleVariant("::", [
+              match[0],
+              /* [] */0
+            ])
+        ]));
   return React.createElement("section", {
               className: classStyles,
               onClick: onClick,
