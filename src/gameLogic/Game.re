@@ -102,14 +102,6 @@ module MinePopulationStrategy = {
 
 /* produce new game models from actions **/
 let reduce = (history: history, action: action): history => {
-  // only the below variables should be used in computing the next game model
-  switch (action) {
-  | Check((x, y)) =>
-    Js.log("coords: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
-  | ToggleFlag((x, y)) =>
-    Js.log("coords: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
-  | _ => ()
-  };
   let prevBoard = List.hd(history);
   let {phase as prevPhase, board as prevBoard, mineCount} = prevBoard;
 

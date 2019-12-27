@@ -88,33 +88,20 @@ var MinePopulationStrategy = {
 };
 
 function reduce(history, action) {
-  switch (action.tag | 0) {
-    case /* Check */0 :
-        var match = action[0];
-        console.log("coords: " + (String(match[0]) + (" " + String(match[1]))));
-        break;
-    case /* ToggleFlag */1 :
-        var match$1 = action[0];
-        console.log("coords: " + (String(match$1[0]) + (" " + String(match$1[1]))));
-        break;
-    case /* Rewind */2 :
-        break;
-    
-  }
   var prevBoard = List.hd(history);
   var prevBoard$1 = prevBoard[/* board */1];
   var prevPhase = prevBoard[/* phase */0];
   var newBoard = $$Array.map($$Array.copy, prevBoard$1);
-  var match$2;
+  var match;
   switch (action.tag | 0) {
     case /* Check */0 :
-        match$2 = typeof prevPhase === "number" ? cellCheck(prevPhase, newBoard, action[0]) : /* tuple */[
+        match = typeof prevPhase === "number" ? cellCheck(prevPhase, newBoard, action[0]) : /* tuple */[
             newBoard,
             /* Ended */Caml_chrome_debugger.simpleVariant("Ended", [prevPhase[0]])
           ];
         break;
     case /* ToggleFlag */1 :
-        match$2 = typeof prevPhase === "number" ? toggleFlag(action[0], prevBoard$1) : /* tuple */[
+        match = typeof prevPhase === "number" ? toggleFlag(action[0], prevBoard$1) : /* tuple */[
             newBoard,
             /* Ended */Caml_chrome_debugger.simpleVariant("Ended", [prevPhase[0]])
           ];
@@ -122,25 +109,25 @@ function reduce(history, action) {
     case /* Rewind */2 :
         var steps = action[0];
         var length = List.length(history) - 1 | 0;
-        var match$3 = length > steps;
-        var steps$1 = match$3 ? steps : length;
-        var match$4 = List.nth(history, steps$1);
-        match$2 = /* tuple */[
-          match$4[/* board */1],
-          match$4[/* phase */0]
+        var match$1 = length > steps;
+        var steps$1 = match$1 ? steps : length;
+        var match$2 = List.nth(history, steps$1);
+        match = /* tuple */[
+          match$2[/* board */1],
+          match$2[/* phase */0]
         ];
         break;
     
   }
-  var newBoard$1 = match$2[0];
-  var match$5 = List.length(history);
+  var newBoard$1 = match[0];
+  var match$3 = List.length(history);
   switch (action.tag | 0) {
     case /* Check */0 :
     case /* ToggleFlag */1 :
         break;
     case /* Rewind */2 :
-        if (match$5 !== 0) {
-          if (match$5 !== 1) {
+        if (match$3 !== 0) {
+          if (match$3 !== 1) {
             return List.tl(history);
           } else {
             return history;
@@ -161,7 +148,7 @@ function reduce(history, action) {
                 "mineCount",
                 "lastAction"
               ], [
-                match$2[1],
+                match[1],
                 newBoard$1,
                 flagCount,
                 prevBoard[/* mineCount */3],

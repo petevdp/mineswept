@@ -5,7 +5,7 @@ var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
-var Pervasives = require("bs-platform/lib/js/pervasives.js");
+var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
 var Caml_chrome_debugger = require("bs-platform/lib/js/caml_chrome_debugger.js");
 var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
@@ -70,7 +70,24 @@ function exclude(g) {
 function make$1(originCoords, mineCount, board) {
   var coordsSet = /* record */Caml_chrome_debugger.record(["contents"], [CustomUtils$ReasonReactExamples.CoordsSet.empty]);
   var mineCount$1 = /* record */Caml_chrome_debugger.record(["contents"], [mineCount]);
-  var adjacent = CustomUtils$ReasonReactExamples.Matrix.getAdjacentWithCoords(originCoords, board);
+  console.log(/* array */[
+        "Origin: ",
+        String(originCoords[0]),
+        String(originCoords[1])
+      ]);
+  console.log("board: ");
+  console.log(board);
+  var adjacent = List.map((function (param) {
+          var y = param[1];
+          var x = param[0];
+          return /* tuple */[
+                  Caml_array.caml_array_get(Caml_array.caml_array_get(board, y), x),
+                  /* tuple */[
+                    x,
+                    y
+                  ]
+                ];
+        }), CustomUtils$ReasonReactExamples.Coords.getAdjacent(originCoords, CustomUtils$ReasonReactExamples.Matrix.size(board)));
   List.iter((function (param) {
           var cell = param[0];
           if (typeof cell === "number") {
@@ -85,6 +102,10 @@ function make$1(originCoords, mineCount, board) {
             return /* () */0;
           }
         }), adjacent);
+  console.log("adjacent: ");
+  console.log($$Array.of_list(CustomUtils$ReasonReactExamples.Coords.getAdjacent(originCoords, CustomUtils$ReasonReactExamples.Matrix.size(board))));
+  console.log("hidden:");
+  console.log($$Array.of_list(Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.elements, coordsSet[0])));
   return /* record */Caml_chrome_debugger.record([
             "mineCount",
             "originCoords",
@@ -243,11 +264,8 @@ function conflate(a, b) {
 
 function getActionIfCertain(param) {
   var coordsSet = param[/* coordsSet */3];
-  var minMines = param[/* minMines */0];
   var canCheck = param[/* maxMines */1] === 0;
-  var canFlag = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.cardinal, coordsSet) === minMines;
-  console.log("min mines: " + String(minMines));
-  console.log("numCells: " + String(Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.cardinal, coordsSet)));
+  var canFlag = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.cardinal, coordsSet) === param[/* minMines */0];
   var coords = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.choose, coordsSet);
   if (canCheck) {
     return /* Check */Caml_chrome_debugger.variant("Check", 0, [coords]);
@@ -315,8 +333,6 @@ function applyConstraint(groups, $$const) {
   };
   var normalizedGroups$1 = normalizedGroups;
   var targetGroup$1 = targetGroup[0];
-  console.log("is empty: " + Pervasives.string_of_bool(Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.is_empty, targetGroup$1[/* coordsSet */3])));
-  console.log("len: " + String(Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.cardinal, targetGroup$1[/* coordsSet */3])));
   var match$2 = Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.is_empty, targetGroup$1[/* coordsSet */3]);
   if (match$2) {
     return normalizedGroups$1;
@@ -335,7 +351,22 @@ function applyConstraint(groups, $$const) {
 }
 
 function getActionFromEngine(t, unrestrictedBoard) {
-  return Curry._1(t, make(unrestrictedBoard));
+  var restrictedBoard = make(unrestrictedBoard);
+  var action = Curry._1(t, restrictedBoard);
+  switch (action.tag | 0) {
+    case /* Check */0 :
+        var match = action[0];
+        console.log("Check: " + (String(match[0]) + (" " + String(match[1]))));
+        break;
+    case /* ToggleFlag */1 :
+        var match$1 = action[0];
+        console.log("Flag: " + (String(match$1[0]) + (" " + String(match$1[1]))));
+        break;
+    case /* Rewind */2 :
+        break;
+    
+  }
+  return action;
 }
 
 function random(board) {
@@ -352,12 +383,8 @@ function solver(board) {
   while(action === undefined) {
     var match = unAppliedConstraints;
     if (match) {
-      var firstConstraint = match[0];
       unAppliedConstraints = match[1];
-      var match$1 = firstConstraint[/* originCoords */1];
-      console.log("adding constraint " + (String(match$1[0]) + (" " + (String(match$1[1]) + (" (" + (String(firstConstraint[/* mineCount */0]) + (") num cells: " + String(Curry._1(CustomUtils$ReasonReactExamples.CoordsSet.cardinal, firstConstraint[/* coordsSet */2])))))))));
-      normalizedGroups = applyConstraint(normalizedGroups, firstConstraint);
-      console.log("norm len: " + String(List.length(normalizedGroups)));
+      normalizedGroups = applyConstraint(normalizedGroups, match[0]);
       var tmp;
       var exit = 0;
       var group;
@@ -389,9 +416,9 @@ function solver(board) {
       action = random(board);
     }
   };
-  var match$2 = action;
-  if (match$2 !== undefined) {
-    return match$2;
+  var match$1 = action;
+  if (match$1 !== undefined) {
+    return match$1;
   } else {
     throw Caml_builtin_exceptions.not_found;
   }

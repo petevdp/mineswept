@@ -56,17 +56,36 @@ module BoardConstraint = {
   let make = (originCoords, mineCount, board) => {
     let coordsSet = ref(CoordsSet.empty);
     let mineCount = ref(mineCount);
-
-    let adjacent = Matrix.getAdjacentWithCoords(originCoords, board);
+    let (x, y) = originCoords;
+    Js.log([|"Origin: ", string_of_int(x), string_of_int(y)|]);
+    Js.log("board: ");
+    Js.log(board);
+    // let adjacent = Matrix.getAdjacentWithCoords(originCoords, board);
+    let adjacent =
+      Coords.getAdjacent(originCoords, Matrix.size(board))
+      |> List.map(((x, y)) => (board[y][x], (x, y)));
     List.iter(
       ((cell: RestrictedBoard.rCell, adjCoord)) =>
         switch (cell) {
-        | Hidden => coordsSet := CoordsSet.add(adjCoord, coordsSet^)
+        | Hidden =>
+          (
+            () => {
+              let (x, y) = adjCoord;
+              coordsSet := CoordsSet.add(adjCoord, coordsSet^);
+            }
+          )()
         | Visible(_) => ()
-        | Flagged => mineCount := mineCount^ - 1
+        | Flagged => (() => mineCount := mineCount^ - 1)()
         },
       adjacent,
     );
+
+    Js.logMany([|"adjacent: "|]);
+    Js.log(
+      Coords.getAdjacent(originCoords, Matrix.size(board)) |> Array.of_list,
+    );
+    Js.log("hidden:");
+    Js.log(coordsSet^ |> CoordsSet.elements |> Array.of_list);
 
     {
       originCoords,
@@ -178,8 +197,8 @@ module Group = {
       ({coordsSet, minMines, maxMines}): option(Game.action) => {
     let canCheck = maxMines == 0;
     let canFlag = CoordsSet.cardinal(coordsSet) == minMines;
-    Js.log("min mines: " ++ string_of_int(minMines));
-    Js.log("numCells: " ++ string_of_int(CoordsSet.cardinal(coordsSet)));
+    // Js.log("min mines: " ++ string_of_int(minMines));
+    // Js.log("numCells: " ++ string_of_int(CoordsSet.cardinal(coordsSet)));
     let coords = CoordsSet.choose(coordsSet);
     switch (canCheck, canFlag) {
     | (true, _) => Some(Check(coords))
@@ -227,10 +246,10 @@ let applyConstraint = (groups, const: BoardConstraint.t) => {
   };
   let normalizedGroups = normalizedGroups^;
   let targetGroup = targetGroup^;
-  Js.log("is empty: " ++ string_of_bool(Group.isEmpty(targetGroup)));
-  Js.log(
-    "len: " ++ string_of_int(CoordsSet.cardinal(targetGroup.coordsSet)),
-  );
+  // Js.log("is empty: " ++ string_of_bool(Group.isEmpty(targetGroup)));
+  // Js.log(
+  //   "len: " ++ string_of_int(CoordsSet.cardinal(targetGroup.coordsSet)),
+  // );
   Group.isEmpty(targetGroup)
     ? normalizedGroups : List.concat([normalizedGroups, [targetGroup]]);
 };
@@ -239,7 +258,16 @@ type t = RestrictedBoard.t => Game.action;
 
 let getActionFromEngine = (t, unrestrictedBoard) => {
   let restrictedBoard = RestrictedBoard.make(unrestrictedBoard);
-  t(restrictedBoard);
+  let action: Game.action = t(restrictedBoard);
+  switch (action) {
+  | Check((x, y)) =>
+    Js.log("Check: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
+  | ToggleFlag((x, y)) =>
+    Js.log("Flag: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
+  | _ => ()
+  };
+
+  action;
 };
 
 let random: t =
@@ -275,19 +303,20 @@ let solver = (board: RestrictedBoard.t) => {
       unAppliedConstraints := rest;
       let (x, y) = firstConstraint.originCoords;
       let {mineCount, coordsSet}: BoardConstraint.t = firstConstraint;
-      Js.log(
-        "adding constraint "
-        ++ string_of_int(x)
-        ++ " "
-        ++ string_of_int(y)
-        ++ " ("
-        ++ string_of_int(mineCount)
-        ++ ")"
-        ++ " num cells: "
-        ++ string_of_int(CoordsSet.cardinal(coordsSet)),
-      );
+      // Js.log(
+      //   "adding constraint "
+      //   ++ string_of_int(x)
+      //   ++ " "
+      //   ++ string_of_int(y)
+      //   ++ " ("
+      //   ++ string_of_int(mineCount)
+      //   ++ ")"
+      //   ++ "cells: ",
+      // );
+      // Js.log(coordsSet |> CoordsSet.elements |> Array.of_list);
+
       normalizedGroups := applyConstraint(normalizedGroups^, firstConstraint);
-      Js.log("norm len: " ++ string_of_int(List.length(normalizedGroups^)));
+      // Js.log("norm len: " ++ string_of_int(List.length(normalizedGroups^)));
       action :=
         (
           switch (
