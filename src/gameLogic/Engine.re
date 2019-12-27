@@ -118,7 +118,7 @@ module BoardConstraint = {
          switch (cell) {
          | Visible(mineCount) =>
            let newConstraint = make(coords, mineCount, board);
-           if (newConstraint.mineCount > 0) {
+           if (CoordsSet.cardinal(newConstraint.coordsSet) > 0) {
              constraints := [newConstraint, ...constraints^];
            };
          | _ => ()
@@ -273,10 +273,8 @@ let getActionFromEngine = (t, unrestrictedBoard) => {
   let restrictedBoard = RestrictedBoard.make(unrestrictedBoard);
   let action: Game.action = t(restrictedBoard);
   switch (action) {
-  | Check((x, y)) =>
-    Js.log("Check: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
-  | ToggleFlag((x, y)) =>
-    Js.log("Flag: " ++ string_of_int(x) ++ " " ++ string_of_int(y))
+  | Check((x, y)) => Js.log({j|Check: ($x $y)|j})
+  | ToggleFlag((x, y)) => Js.log({j|Flag: ($x $y)|j})
   | _ => ()
   };
 
