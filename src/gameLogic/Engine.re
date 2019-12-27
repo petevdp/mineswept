@@ -53,13 +53,24 @@ module BoardConstraint = {
 
   let exclude = g => {...g, effect: Exclude};
 
+  // let printable = ({mineCount, originCoords, coordsSet, effect}) => {
+  //   let (x, y) = originCoords;
+  //   [|
+  //     "Constraint",
+  //     "x: " ++ string_of_int(x),
+  //     "y: " ++ string_of_int(y),
+  //     "mineCount: " ++ string_of_int(mineCount),
+  //     [|"coordsSet: " Coords|]
+  //   |];
+  // };
+
   let make = (originCoords, mineCount, board) => {
     let coordsSet = ref(CoordsSet.empty);
     let mineCount = ref(mineCount);
     let (x, y) = originCoords;
-    Js.log([|"Origin: ", string_of_int(x), string_of_int(y)|]);
-    Js.log("board: ");
-    Js.log(board);
+    // Js.log([|"Origin: ", string_of_int(x), string_of_int(y)|]);
+    // Js.log("board: ");
+    // Js.log(board);
     // let adjacent = Matrix.getAdjacentWithCoords(originCoords, board);
     let adjacent =
       Coords.getAdjacent(originCoords, Matrix.size(board))
@@ -70,7 +81,6 @@ module BoardConstraint = {
         | Hidden =>
           (
             () => {
-              let (x, y) = adjCoord;
               coordsSet := CoordsSet.add(adjCoord, coordsSet^);
             }
           )()
@@ -80,19 +90,22 @@ module BoardConstraint = {
       adjacent,
     );
 
-    Js.logMany([|"adjacent: "|]);
-    Js.log(
-      Coords.getAdjacent(originCoords, Matrix.size(board)) |> Array.of_list,
-    );
-    Js.log("hidden:");
-    Js.log(coordsSet^ |> CoordsSet.elements |> Array.of_list);
+    // Js.logMany([|"adjacent: "|]);
+    // Js.log(
+    //   Coords.getAdjacent(originCoords, Matrix.size(board)) |> Array.of_list,
+    // );
+    // Js.log("hidden:");
+    // Js.log(coordsSet^ |> CoordsSet.elements |> Array.of_list);
 
-    {
+    let const = {
       originCoords,
       coordsSet: coordsSet^,
       mineCount: mineCount^,
       effect: Include,
     };
+    Js.log(const);
+
+    const;
   };
 
   let makeListFromRestrictedBoard = board => {
@@ -298,25 +311,25 @@ let solver = (board: RestrictedBoard.t) => {
     switch (unAppliedConstraints^) {
     | [] =>
       Js.log("making random move");
+      Js.log(normalizedGroups^ |> Array.of_list);
       action := Some(random(board));
     | [firstConstraint, ...rest] =>
       unAppliedConstraints := rest;
       let (x, y) = firstConstraint.originCoords;
       let {mineCount, coordsSet}: BoardConstraint.t = firstConstraint;
-      // Js.log(
-      //   "adding constraint "
-      //   ++ string_of_int(x)
-      //   ++ " "
-      //   ++ string_of_int(y)
-      //   ++ " ("
-      //   ++ string_of_int(mineCount)
-      //   ++ ")"
-      //   ++ "cells: ",
-      // );
-      // Js.log(coordsSet |> CoordsSet.elements |> Array.of_list);
+      Js.log(
+        "adding constraint "
+        ++ string_of_int(x)
+        ++ " "
+        ++ string_of_int(y)
+        ++ " ("
+        ++ string_of_int(mineCount)
+        ++ ")",
+      );
+      Js.log("cells: ");
+      Js.log(coordsSet |> CoordsSet.elements |> Array.of_list);
 
       normalizedGroups := applyConstraint(normalizedGroups^, firstConstraint);
-      // Js.log("norm len: " ++ string_of_int(List.length(normalizedGroups^)));
       action :=
         (
           switch (
@@ -330,8 +343,10 @@ let solver = (board: RestrictedBoard.t) => {
             let a = Group.getActionIfCertain(group);
             if (a != None) {
               Js.log("making certain move");
+              Js.log(normalizedGroups^ |> Array.of_list);
             } else {
               Js.log("couldn't find move");
+              Js.log(normalizedGroups^ |> Array.of_list);
             };
             a;
           }
