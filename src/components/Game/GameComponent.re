@@ -13,10 +13,10 @@ type action =
   | EngineGameAction
   | PlayGameWithEngine;
 
-let gameSize = 6;
+let gameSize = 10;
 let gameOptions: Game.initOptions = {
   size: (gameSize, gameSize),
-  mineCount: gameSize * gameSize / 8,
+  mineCount: gameSize * gameSize / 6,
   minePopulationStrategy: Game.MinePopulationStrategy.random,
 };
 let initialGameState = Game.make(gameOptions);

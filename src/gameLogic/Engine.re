@@ -51,6 +51,13 @@ module BoardConstraint = {
     | num => num
     };
 
+  let print = ({mineCount, originCoords, coordsSet, effect}) => {
+    Js.log(
+      {j|Constraint: $originCoords, mineCount: $mineCount, effect: $effect|j},
+    );
+    Js.log(coordsSet |> CoordsSet.elements |> Array.of_list);
+  };
+
   let exclude = g => {...g, effect: Exclude};
 
   // let printable = ({mineCount, originCoords, coordsSet, effect}) => {
@@ -67,11 +74,6 @@ module BoardConstraint = {
   let make = (originCoords, mineCount, board) => {
     let coordsSet = ref(CoordsSet.empty);
     let mineCount = ref(mineCount);
-    let (x, y) = originCoords;
-    // Js.log([|"Origin: ", string_of_int(x), string_of_int(y)|]);
-    // Js.log("board: ");
-    // Js.log(board);
-    // let adjacent = Matrix.getAdjacentWithCoords(originCoords, board);
     let adjacent =
       Coords.getAdjacent(originCoords, Matrix.size(board))
       |> List.map(((x, y)) => (board[y][x], (x, y)));
@@ -90,20 +92,12 @@ module BoardConstraint = {
       adjacent,
     );
 
-    // Js.logMany([|"adjacent: "|]);
-    // Js.log(
-    //   Coords.getAdjacent(originCoords, Matrix.size(board)) |> Array.of_list,
-    // );
-    // Js.log("hidden:");
-    // Js.log(coordsSet^ |> CoordsSet.elements |> Array.of_list);
-
     let const = {
       originCoords,
       coordsSet: coordsSet^,
       mineCount: mineCount^,
       effect: Include,
     };
-    Js.log(const);
 
     const;
   };
@@ -143,24 +137,24 @@ module Group = {
     // minMines should always be less than or equal to maxMines
     minMines: int,
     maxMines: int,
-    constraintSet: ConstraintSet.t,
     coordsSet: CoordsSet.t,
   };
 
-  let compare = (a, b) =>
-    ConstraintSet.compare(a.constraintSet, b.constraintSet);
-
   let make = (boardConstraint: BoardConstraint.t) => {
     let {coordsSet, mineCount}: BoardConstraint.t = boardConstraint;
-    {
-      coordsSet,
-      maxMines: mineCount,
-      minMines: mineCount,
-      constraintSet: ConstraintSet.singleton(boardConstraint),
-    };
+    {coordsSet, maxMines: mineCount, minMines: mineCount};
   };
 
   let isEmpty = t => CoordsSet.is_empty(t.coordsSet);
+  let print = ({coordsSet, maxMines, minMines}) => {
+    Js.log("Group:");
+    Js.log([|
+      "max/min: ",
+      string_of_int(maxMines),
+      string_of_int(minMines),
+    |]);
+    Js.log(coordsSet |> CoordsSet.elements |> Array.of_list);
+  };
 
   let conflate = (a, b) => {
     open CoordsSet;
@@ -178,29 +172,18 @@ module Group = {
         ]),
       maxMines:
         IntUtils.min([cardinal(interCoords), a.maxMines, b.maxMines]),
-      constraintSet: ConstraintSet.union(a.constraintSet, b.constraintSet),
     };
 
     let exclAGroup = {
       coordsSet: exclACoords,
-      minMines: a.minMines - interGroup.maxMines,
-      maxMines: a.maxMines - interGroup.minMines,
-      constraintSet:
-        ConstraintSet.union(
-          a.constraintSet,
-          excludeConstraints(b.constraintSet),
-        ),
+      minMines: IntUtils.max([a.minMines - interGroup.maxMines, 0]),
+      maxMines: IntUtils.max([a.maxMines - interGroup.minMines, 0]),
     };
 
     let exclBGroup = {
       coordsSet: exclBCoords,
-      minMines: b.minMines - interGroup.maxMines,
-      maxMines: b.maxMines - interGroup.minMines,
-      constraintSet:
-        ConstraintSet.union(
-          b.constraintSet,
-          excludeConstraints(a.constraintSet),
-        ),
+      minMines: IntUtils.max([b.minMines - interGroup.maxMines, 0]),
+      maxMines: IntUtils.max([b.maxMines - interGroup.minMines, 0]),
     };
 
     (exclAGroup, interGroup, exclBGroup);
@@ -221,16 +204,18 @@ module Group = {
   };
 };
 
-module GroupSet = Set.Make(Group);
-
 exception InvalidConnection;
 
 let applyConstraint = (groups, const: BoardConstraint.t) => {
+  Js.log("applying constraint");
+  BoardConstraint.print(const);
   let constraintGroup = Group.make(const);
   let targetGroup = ref(constraintGroup);
   let toNormalize = ref(groups);
   let normalizedGroups = ref([]);
   let break = ref(false);
+
+  Group.print(targetGroup^);
   while (! break^) {
     let (unConnected, connected) =
       List.partition(
@@ -249,13 +234,15 @@ let applyConstraint = (groups, const: BoardConstraint.t) => {
     | [first, ...rest] =>
       let (onlyTarget, inter, onlyFirst) =
         Group.conflate(targetGroup^, first);
-      let nonEmpty = [inter, onlyFirst] |> List.filter(Group.isEmpty);
+      let nonEmpty =
+        [inter, onlyFirst] |> List.filter(g => !Group.isEmpty(g));
       normalizedGroups := List.concat([normalizedGroups^, nonEmpty]);
       // targetGroup could be empty now, but that would break
       // the while loop next iteration
       targetGroup := onlyTarget;
       toNormalize := rest;
     };
+    Group.print(targetGroup^);
   };
   let normalizedGroups = normalizedGroups^;
   let targetGroup = targetGroup^;
@@ -315,17 +302,6 @@ let solver = (board: RestrictedBoard.t) => {
       unAppliedConstraints := rest;
       let (x, y) = firstConstraint.originCoords;
       let {mineCount, coordsSet}: BoardConstraint.t = firstConstraint;
-      Js.log(
-        "adding constraint "
-        ++ string_of_int(x)
-        ++ " "
-        ++ string_of_int(y)
-        ++ " ("
-        ++ string_of_int(mineCount)
-        ++ ")",
-      );
-      Js.log("cells: ");
-      Js.log(coordsSet |> CoordsSet.elements |> Array.of_list);
 
       normalizedGroups := applyConstraint(normalizedGroups^, firstConstraint);
       action :=
@@ -341,10 +317,10 @@ let solver = (board: RestrictedBoard.t) => {
             let a = Group.getActionIfCertain(group);
             if (a != None) {
               Js.log("making certain move");
-              Js.log(normalizedGroups^ |> Array.of_list);
+              Js.log(normalizedGroups^);
             } else {
               Js.log("couldn't find move");
-              Js.log(normalizedGroups^ |> Array.of_list);
+              Js.log(normalizedGroups^);
             };
             a;
           }

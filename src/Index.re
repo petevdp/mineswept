@@ -1,3 +1,4 @@
+[%%debugger.chrome];
 // Entry point;
 [@bs.val] external document: Js.t({..}) = "document";
 // We're using raw DOM manipulations here, to avoid making you read
