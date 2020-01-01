@@ -26,4 +26,9 @@ let makeContainer = text => {
   content;
 };
 
-ReactDOMRe.render(<GameComponent />, makeContainer("minesweeper"));
+// ReactDOMRe.render(<GameComponent />, makeContainer("minesweeper"));
+ReactDOMRe.render(
+  // <TestComponent name="test" type_="ayy" />,
+  <GameComponent />,
+  makeContainer("minesweeper"),
+);

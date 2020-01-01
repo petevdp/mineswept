@@ -1,5 +1,5 @@
 {
-  "name": "reason-react-examples",
+  "name": "reason-react-starter",
   "reason": {
     "react-jsx": 3
   },
@@ -7,7 +7,7 @@
     "dir": "src",
     "subdirs": true
   },
-  "bsc-flags": ["-bs-super-errors", "-bs-no-version-header", "-bs-g"],
+  "bsc-flags": ["-bs-super-errors", "-bs-no-version-header"],
   "package-specs": [
     {
       "module": "commonjs",
