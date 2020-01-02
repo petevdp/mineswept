@@ -1,4 +1,5 @@
-open GlobalTypes;
+open CustomUtils;
+
 type handlers = {
   onRewindGame: int => unit,
   onMakeEngineMove: unit => unit,

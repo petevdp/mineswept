@@ -158,5 +158,6 @@ let make = () => {
       handlers=panelGameActionHandlers
     />
     <BoardComponent model=board handlers=boardHandlers isGameOver />
+    <ReactToolTip />
   </React.Fragment>;
 };

@@ -1,4 +1,0 @@
-module ReactTooltip = {
-  [@bs.module "./TestComponent.re"] [@react.component]
-  external make: unit => React.element = "default";
-};

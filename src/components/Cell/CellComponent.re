@@ -1,4 +1,14 @@
-open GlobalTypes;
+open CustomUtils;
+
+module FlagImage = {
+  [@bs.module "../../../assets/flag.svg"] external flag: string = "default";
+};
+
+module MineImage = {
+  [@bs.module "../../../assets/bomb.svg"] external flag: string = "default";
+};
+
+Js.log(FlagImage.flag);
 
 module Styles = {
   open Css;
@@ -33,6 +43,7 @@ type click =
 type handleClick = click => unit;
 
 type props = {
+  coords: Coords.t,
   state: Board.Cell.state,
   mined: bool,
   numAdjacentMines: int,
@@ -43,6 +54,7 @@ type props = {
 [@react.component]
 let make =
     (
+      ~coords: Coords.t,
       ~state: Board.Cell.state,
       ~mined: bool,
       ~numAdjacentMines: int,
@@ -55,11 +67,11 @@ let make =
     | (Hidden, _, true) => (Styles.GameOver.hidden, str(" "))
     | (Flagged, _, _) => (
         Styles.flagged,
-        <img className=Styles.flag src="/assets/flag.svg" />,
+        <img className=Styles.flag src=FlagImage.flag />,
       )
     | (Visible, true, _) => (
         Styles.Visible.mined,
-        <img className=Styles.bomb src="/assets/bomb.svg" />,
+        <img className=Styles.bomb src=MineImage.flag />,
       )
     | (Visible, false, _) => (
         Styles.Visible.empty,
@@ -75,6 +87,11 @@ let make =
   };
 
   let classStyles = Css.merge([Styles.base, stateClass]);
+  let (x, y) = coords;
 
-  <section className=classStyles onClick onContextMenu> inner </section>;
+  <React.Fragment>
+    <DataAttributesProvider data=[("data-tip", {j|$x, $y|j})]>
+      <section className=classStyles onClick onContextMenu> inner </section>
+    </DataAttributesProvider>
+  </React.Fragment>;
 };

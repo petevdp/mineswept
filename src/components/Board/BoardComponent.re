@@ -30,7 +30,14 @@ let make = (~model: Board.model, ~handlers: handlers, ~isGameOver: bool) => {
                };
                ();
              };
-             {state, mined, numAdjacentMines, handleClick, isGameOver};
+             {
+               state,
+               mined,
+               numAdjacentMines,
+               handleClick,
+               isGameOver,
+               coords,
+             };
            }: CellComponent.props
          )
        )
@@ -40,7 +47,14 @@ let make = (~model: Board.model, ~handlers: handlers, ~isGameOver: bool) => {
            Array.mapi(
              (
                x,
-               {state, mined, numAdjacentMines, handleClick, isGameOver}: CellComponent.props,
+               {
+                 state,
+                 mined,
+                 numAdjacentMines,
+                 handleClick,
+                 isGameOver,
+                 coords,
+               }: CellComponent.props,
              ) =>
                <th key={string_of_int(x)}>
                  <CellComponent
@@ -49,6 +63,7 @@ let make = (~model: Board.model, ~handlers: handlers, ~isGameOver: bool) => {
                    numAdjacentMines
                    handleClick
                    isGameOver
+                   coords
                  />
                </th>,
              modelRow,
@@ -58,7 +73,9 @@ let make = (~model: Board.model, ~handlers: handlers, ~isGameOver: bool) => {
   // swallow this default behaviour so we don't get right clicks in between the cells
   let onContextMenu = e => ReactEvent.Mouse.preventDefault(e);
 
-  <table className=Style.board onContextMenu>
-    <tbody> {React.array(cellComponents)} </tbody>
-  </table>;
+  <React.Fragment>
+    <table className=Style.board onContextMenu>
+      <tbody> {React.array(cellComponents)} </tbody>
+    </table>
+  </React.Fragment>;
 };

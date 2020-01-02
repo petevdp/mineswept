@@ -145,3 +145,5 @@ let getRange = size => {
 
   coordsSet;
 };
+
+let str = ReasonReact.string;
