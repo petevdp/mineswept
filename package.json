@@ -1,6 +1,8 @@
 {
   "name": "mineswept",
   "version": "0.2.0",
+  "private": true,
+  "homepage": "https://petevdp.github.io/mineswept",
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w -ws _ ",
@@ -8,7 +10,9 @@
     "webpack": "webpack -w",
     "webpack:production": "NODE_ENV=production webpack",
     "server": "webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy": "yarn build && yarn webpack:production",
+    "deploy": "gh-pages -d build"
   },
   "keywords": [
     "BuckleScript",
@@ -20,6 +24,7 @@
   "dependencies": {
     "bs-css": "^11.0.0",
     "file-loader": "^5.0.2",
+    "gh-pages": "^2.1.1",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "react-tooltip": "^3.11.1",
