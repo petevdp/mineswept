@@ -9,7 +9,9 @@ module.exports = {
   mode: isProd ? "production" : "development",
   devtool: "source-map",
   output: {
-    path: outputDir,
+    // gh-pages requires links to be like <appname>/file.js so when we're
+    // developing we have to output Index.jj to /build/mineswept
+    path: isProd ? outputDir : path.join(outputDir, "mineswept"),
     filename: "Index.js"
   },
   plugins: [
