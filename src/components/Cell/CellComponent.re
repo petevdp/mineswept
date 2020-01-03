@@ -32,13 +32,22 @@ module Styles = {
   };
 
   module GameOver = {
-    let hidden = merge([hidden, style([hover([backgroundColor(grey)])])]);
+    let hidden = style([hover([backgroundColor(grey)])]);
+  };
+
+  module Recommended = {
+    let shouldFlag = style([backgroundColor(red)]);
+    let shouldCheck = style([backgroundColor(green)]);
   };
 };
 
 type click =
   | Right
   | Left;
+
+type recommendedMoveForCell =
+  | Check
+  | ToggleFlag;
 
 type handleClick = click => unit;
 
@@ -49,6 +58,8 @@ type props = {
   numAdjacentMines: int,
   handleClick,
   isGameOver: bool,
+  recommendedMoveForCell: option(recommendedMoveForCell),
+  showOverlay: bool,
 };
 
 [@react.component]
@@ -60,20 +71,31 @@ let make =
       ~numAdjacentMines: int,
       ~handleClick: handleClick,
       ~isGameOver: bool,
+      ~recommendedMoveForCell: option(recommendedMoveForCell),
+      ~showOverlay: bool,
     ) => {
   let (stateClass, inner) =
-    switch (state, mined, isGameOver) {
-    | (Hidden, _, false) => (Styles.hidden, str(" "))
-    | (Hidden, _, true) => (Styles.GameOver.hidden, str(" "))
-    | (Flagged, _, _) => (
+    switch (state, mined, isGameOver, recommendedMoveForCell, showOverlay) {
+    | (Hidden, _, false, Some(Check), true) => (
+        Styles.Recommended.shouldCheck,
+        str(" "),
+      )
+    | (Hidden, _, false, Some(ToggleFlag), true) => (
+        Styles.Recommended.shouldFlag,
+        str(" "),
+      )
+    | (Hidden, _, false, _, false)
+    | (Hidden, _, false, None, _) => (Styles.hidden, str(" "))
+    | (Hidden, _, true, _, _) => (Styles.GameOver.hidden, str(" "))
+    | (Flagged, _, _, _, _) => (
         Styles.flagged,
         <img className=Styles.flag src=FlagImage.flag />,
       )
-    | (Visible, true, _) => (
+    | (Visible, true, _, _, _) => (
         Styles.Visible.mined,
         <img className=Styles.bomb src=MineImage.flag />,
       )
-    | (Visible, false, _) => (
+    | (Visible, false, _, _, _) => (
         Styles.Visible.empty,
         str(string_of_int(numAdjacentMines)),
       )
@@ -88,10 +110,16 @@ let make =
 
   let classStyles = Css.merge([Styles.base, stateClass]);
   let (x, y) = coords;
+  let cell =
+    <section className=classStyles onClick onContextMenu> inner </section>;
+  let cellDataAttributes = [
+    ("data-tip", {j|$x, $y|j}),
+    ("data-tip-disable", string_of_bool(!showOverlay)),
+  ];
 
   <React.Fragment>
-    <DataAttributesProvider data=[("data-tip", {j|$x, $y|j})]>
-      <section className=classStyles onClick onContextMenu> inner </section>
+    <DataAttributesProvider data=cellDataAttributes>
+      cell
     </DataAttributesProvider>
   </React.Fragment>;
 };

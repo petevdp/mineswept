@@ -5,13 +5,15 @@ type appState = {
   playGameOutWithEngine: bool,
   fallbackGameInitOptions: Game.initOptions,
   recommendedMove: option(Game.action),
+  showOverlay: bool,
 };
 
 type action =
   | NewGame(Game.initOptions)
   | HumanGameAction(Game.action)
   | EngineGameAction
-  | PlayGameWithEngine;
+  | PlayGameWithEngine
+  | ToggleOverlay;
 
 let gameSize = 10;
 let gameOptions: Game.initOptions = {
@@ -29,6 +31,7 @@ let startingAppState = {
   selectedEngineEntry: List.hd(Engine.registry),
   playGameOutWithEngine: false,
   fallbackGameInitOptions: gameOptions,
+  showOverlay: true,
   recommendedMove,
 };
 
@@ -64,6 +67,10 @@ let make = () => {
 
             {...prevState, gameHistory};
           | PlayGameWithEngine => {...prevState, playGameOutWithEngine: true}
+          | ToggleOverlay => {
+              ...prevState,
+              showOverlay: !prevState.showOverlay,
+            }
           };
 
         let newGameState =
@@ -74,6 +81,10 @@ let make = () => {
 
         let {selectedEngineEntry} = newState;
 
+        /**
+         *  We're essentialy sorting things implicitly by the gamestate, so maybe we should
+         *  compare directly against that when deciding to update the recommendedMove
+         */
         let recommendedMove =
           switch (action, newGameState.phase) {
           | (
@@ -86,7 +97,8 @@ let make = () => {
                 newGameState.board,
               ),
             )
-          | (PlayGameWithEngine, _)
+          | (PlayGameWithEngine | ToggleOverlay, _) =>
+            prevState.recommendedMove
           | (_, Ended(_)) => None
           };
 
@@ -135,19 +147,22 @@ let make = () => {
         onRewindGame: _ => (),
         onMakeEngineMove: _ => (),
         onPlayGameWithEngine: _ => (),
+        onToggleOverlay: () => dispatch(ToggleOverlay),
       }
       : {
         onRewindGame: steps => dispatch(HumanGameAction(Rewind(steps))),
         onMakeEngineMove: () => dispatch(EngineGameAction),
         onPlayGameWithEngine: () => dispatch(PlayGameWithEngine),
+        onToggleOverlay: () => dispatch(ToggleOverlay),
       };
   };
 
   let onNewGame = () => dispatch(NewGame(gameOptions));
 
+  let {recommendedMove, showOverlay} = appState;
   let {mineCount, flagCount, phase: gamePhase, board}: Game.model = currGameModel;
 
-  // this might be innacurate since the player might misplace a flag
+  // this might be inaccurate since the player might misplace a flag
   let minesLeft = mineCount - flagCount;
 
   <React.Fragment>
@@ -157,7 +172,13 @@ let make = () => {
       minesLeft
       handlers=panelGameActionHandlers
     />
-    <BoardComponent model=board handlers=boardHandlers isGameOver />
+    <BoardComponent
+      model=board
+      handlers=boardHandlers
+      isGameOver
+      recommendedMove
+      showOverlay
+    />
     <ReactToolTip />
   </React.Fragment>;
 };

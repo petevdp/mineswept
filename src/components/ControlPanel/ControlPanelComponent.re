@@ -4,6 +4,7 @@ type handlers = {
   onRewindGame: int => unit,
   onMakeEngineMove: unit => unit,
   onPlayGameWithEngine: unit => unit,
+  onToggleOverlay: unit => unit,
 };
 
 [@react.component]
@@ -22,7 +23,7 @@ let make =
     | Ended(Loss) => "You lose"
     };
 
-  let {onRewindGame, onMakeEngineMove, onPlayGameWithEngine} = handlers;
+  let {onRewindGame, onMakeEngineMove, onPlayGameWithEngine, onToggleOverlay} = handlers;
   <section>
     <button onClick={_ => onNewGame()}> {str("new game")} </button>
     <button onClick={_ => onRewindGame(1)}> {str("rewind game")} </button>
@@ -31,6 +32,9 @@ let make =
     </button>
     <button onClick={_ => onPlayGameWithEngine()}>
       {str("Play game out with engine")}
+    </button>
+    <button onClick={_ => onToggleOverlay()}>
+      {str("Toggle Overlay")}
     </button>
     <span> {str(gamePhaseMsg)} </span>
     <span> {str("  mines left: " ++ string_of_int(minesLeft))} </span>
