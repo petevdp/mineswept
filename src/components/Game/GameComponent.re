@@ -1,16 +1,18 @@
+open CustomUtils;
+
 type appState = {
   gameHistory: Game.history,
   engineRegistry: Engine.registry,
   selectedEngineEntry: Engine.engineEntry,
   playGameOutWithEngine: bool,
   fallbackGameInitOptions: Game.initOptions,
-  recommendedMove: option(Game.action),
   showOverlay: bool,
+  engineOutput: option(Engine.engineOutput),
 };
 
 type action =
   | NewGame(Game.initOptions)
-  | HumanGameAction(Game.action)
+  | HumanGameAction(GameModel.action)
   | EngineGameAction
   | PlayGameWithEngine
   | ToggleOverlay;
@@ -21,9 +23,10 @@ let gameOptions: Game.initOptions = {
   mineCount: gameSize * gameSize / 6,
   minePopulationStrategy: Game.MinePopulationStrategy.random,
 };
+
 let initialGameState = Game.make(gameOptions);
-let recommendedMove =
-  Some(Engine.getActionFromEngine(Engine.random, initialGameState.board));
+let engineOutput =
+  Some(Engine.getOutputFromEngine(Engine.solver, initialGameState.board));
 
 let startingAppState = {
   gameHistory: [initialGameState],
@@ -32,7 +35,76 @@ let startingAppState = {
   playGameOutWithEngine: false,
   fallbackGameInitOptions: gameOptions,
   showOverlay: true,
-  recommendedMove,
+  engineOutput,
+};
+
+let reducer = (prevState: appState, action: action) => {
+  let newState =
+    switch (action) {
+    | NewGame(options) =>
+      let {selectedEngineEntry} = prevState;
+      let newGame = Game.make(options);
+
+      let engineOutput =
+        Some(
+          Engine.getOutputFromEngine(
+            selectedEngineEntry.engine,
+            newGame.board,
+          ),
+        );
+
+      {
+        ...prevState,
+        playGameOutWithEngine: false,
+        gameHistory: [newGame],
+        engineOutput,
+      };
+    | HumanGameAction(action) =>
+      let {gameHistory, selectedEngineEntry} = prevState;
+
+      let newGameHistory = Game.reduce(gameHistory, action);
+      let currentGameState = List.hd(newGameHistory);
+      let {phase, board}: Game.model = currentGameState;
+
+      let engineOutput =
+        switch (phase) {
+        | Start
+        | Playing =>
+          Some(Engine.getOutputFromEngine(selectedEngineEntry.engine, board))
+        | Ended(_) => None
+        };
+
+      {...prevState, gameHistory: newGameHistory, engineOutput};
+    | EngineGameAction =>
+      let {engineOutput, selectedEngineEntry, gameHistory} = prevState;
+
+      let action =
+        switch (engineOutput) {
+        | None => raise(Not_found)
+        | Some(Analysis({recommendedMove})) => recommendedMove
+        | Some(RecommendedMove(recommendedMove)) => recommendedMove
+        };
+
+      let newGameHistory = Game.reduce(gameHistory, action);
+
+      let currentGameState = List.hd(newGameHistory);
+
+      let {phase, board}: Game.model = currentGameState;
+
+      let engineOutput =
+        switch (phase) {
+        | Start
+        | Playing =>
+          Some(Engine.getOutputFromEngine(selectedEngineEntry.engine, board))
+        | Ended(_) => None
+        };
+
+      {...prevState, engineOutput, gameHistory: newGameHistory};
+    | PlayGameWithEngine => {...prevState, playGameOutWithEngine: true}
+    | ToggleOverlay => {...prevState, showOverlay: !prevState.showOverlay}
+    };
+
+  newState;
 };
 
 exception NoGameHistory;
@@ -40,72 +112,8 @@ exception NoMovePossible;
 
 [@react.component]
 let make = () => {
-  let (appState, dispatch) =
-    React.useReducer(
-      (prevState: appState, action: action) => {
-        let newState =
-          switch (action) {
-          | NewGame(options) =>
-            let newGame = Game.make(options);
-            {
-              ...prevState,
-              playGameOutWithEngine: false,
-              gameHistory: [newGame],
-            };
-          | HumanGameAction(action) =>
-            let gameHistory = Game.reduce(prevState.gameHistory, action);
-            {...prevState, gameHistory};
-          | EngineGameAction =>
-            let {gameHistory, recommendedMove} = prevState;
-            let gameHistory =
-              switch (gameHistory, recommendedMove) {
-              | (_, None) => raise(NoMovePossible)
-              | ([], _) => raise(NoGameHistory)
-              | (gameHistory, Some(action)) =>
-                Game.reduce(gameHistory, action)
-              };
+  let (appState, dispatch) = React.useReducer(reducer, startingAppState);
 
-            {...prevState, gameHistory};
-          | PlayGameWithEngine => {...prevState, playGameOutWithEngine: true}
-          | ToggleOverlay => {
-              ...prevState,
-              showOverlay: !prevState.showOverlay,
-            }
-          };
-
-        let newGameState =
-          switch (newState.gameHistory) {
-          | [] => raise(NoGameHistory)
-          | [newGameState, ..._] => newGameState
-          };
-
-        let {selectedEngineEntry} = newState;
-
-        /**
-         *  We're essentialy sorting things implicitly by the gamestate, so maybe we should
-         *  compare directly against that when deciding to update the recommendedMove
-         */
-        let recommendedMove =
-          switch (action, newGameState.phase) {
-          | (
-              NewGame(_) | EngineGameAction | HumanGameAction(_),
-              Start | Playing,
-            ) =>
-            Some(
-              Engine.getActionFromEngine(
-                selectedEngineEntry.engine,
-                newGameState.board,
-              ),
-            )
-          | (PlayGameWithEngine | ToggleOverlay, _) =>
-            prevState.recommendedMove
-          | (_, Ended(_)) => None
-          };
-
-        {...newState, recommendedMove};
-      },
-      startingAppState,
-    );
   let {gameHistory, playGameOutWithEngine} = appState;
   let currGameModel =
     switch (gameHistory) {
@@ -136,9 +144,10 @@ let make = () => {
       // if game is over these handlers won't do anything
       ? {onCheck: _ => (), onFlagToggle: _ => ()}
       : {
-        onCheck: coords => dispatch(HumanGameAction(Game.Check(coords))),
+        onCheck: coords =>
+          dispatch(HumanGameAction(GameModel.Check(coords))),
         onFlagToggle: coords =>
-          dispatch(HumanGameAction(Game.ToggleFlag(coords))),
+          dispatch(HumanGameAction(GameModel.ToggleFlag(coords))),
       };
 
   let panelGameActionHandlers: ControlPanelComponent.handlers = {
@@ -159,11 +168,21 @@ let make = () => {
 
   let onNewGame = () => dispatch(NewGame(gameOptions));
 
-  let {recommendedMove, showOverlay} = appState;
+  let {engineOutput, showOverlay} = appState;
   let {mineCount, flagCount, phase: gamePhase, board}: Game.model = currGameModel;
 
   // this might be inaccurate since the player might misplace a flag
   let minesLeft = mineCount - flagCount;
+
+  let (groupMap, recommendedMove) =
+    switch (engineOutput) {
+    | Some(Analysis({groupMap, recommendedMove})) => (
+        groupMap,
+        Some(recommendedMove),
+      )
+    | Some(RecommendedMove(move)) => (CoordsMap.empty, Some(move))
+    | _ => (CoordsMap.empty, None)
+    };
 
   <React.Fragment>
     <ControlPanelComponent
@@ -178,6 +197,7 @@ let make = () => {
       isGameOver
       recommendedMove
       showOverlay
+      groupMap
     />
     <ReactToolTip />
   </React.Fragment>;

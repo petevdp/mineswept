@@ -11,7 +11,7 @@ type handlers = {
 let make =
     (
       ~onNewGame: unit => unit,
-      ~gamePhase: Game.phase,
+      ~gamePhase: GameModel.phase,
       ~minesLeft: int,
       ~handlers: handlers,
     ) => {

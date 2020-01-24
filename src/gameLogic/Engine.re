@@ -190,7 +190,7 @@ module Group = {
   };
 
   let getActionIfCertain =
-      ({coordsSet, minMines, maxMines}): option(Game.action) => {
+      ({coordsSet, minMines, maxMines}): option(GameModel.action) => {
     let canCheck = maxMines == 0;
     let canFlag = CoordsSet.cardinal(coordsSet) == minMines;
     // Js.log("min mines: " ++ string_of_int(minMines));
@@ -202,6 +202,22 @@ module Group = {
     | (false, false) => None
     };
   };
+};
+
+type engineAnalysis = {
+  recommendedMove: GameModel.action,
+  groupMap: CoordsMap.t(Group.t),
+};
+
+type engineOutput =
+  | Analysis(engineAnalysis)
+  | RecommendedMove(GameModel.action);
+
+type t = RestrictedBoard.t => engineOutput;
+
+let getOutputFromEngine = (t, board): engineOutput => {
+  let restrictedBoard = RestrictedBoard.make(board);
+  t(restrictedBoard);
 };
 
 exception InvalidConnection;
@@ -254,20 +270,6 @@ let applyConstraint = (groups, const: BoardConstraint.t) => {
     ? normalizedGroups : List.concat([normalizedGroups, [targetGroup]]);
 };
 
-type t = RestrictedBoard.t => Game.action;
-
-let getActionFromEngine = (t, unrestrictedBoard) => {
-  let restrictedBoard = RestrictedBoard.make(unrestrictedBoard);
-  let action: Game.action = t(restrictedBoard);
-  switch (action) {
-  | Check((x, y)) => Js.log({j|Check: ($x $y)|j})
-  | ToggleFlag((x, y)) => Js.log({j|Flag: ($x $y)|j})
-  | _ => ()
-  };
-
-  action;
-};
-
 let random: t =
   board => {
     let (_, coords) =
@@ -278,12 +280,8 @@ let random: t =
       |> List.filter(((c: RestrictedBoard.rCell, _)) => c == Hidden)
       |> List.hd;
 
-    Check(coords);
+    RecommendedMove(Check(coords));
   };
-
-type action =
-  | ReportMove(Game.action)
-  | ComputeBoard;
 
 let solver = (board: RestrictedBoard.t) => {
   let unAppliedConstraints =
@@ -297,11 +295,17 @@ let solver = (board: RestrictedBoard.t) => {
     | [] =>
       Js.log("making random move");
       Js.log(normalizedGroups^ |> Array.of_list);
-      action := Some(random(board));
+
+      action :=
+        (
+          switch (random(board)) {
+          | RecommendedMove(action) => Some(action)
+          | _ => raise(Not_found)
+          }
+        );
+
     | [firstConstraint, ...rest] =>
       unAppliedConstraints := rest;
-      let (x, y) = firstConstraint.originCoords;
-      let {mineCount, coordsSet}: BoardConstraint.t = firstConstraint;
 
       normalizedGroups := applyConstraint(normalizedGroups^, firstConstraint);
       action :=
@@ -328,8 +332,20 @@ let solver = (board: RestrictedBoard.t) => {
     };
   };
 
+  let groupMap = ref(CoordsMap.empty);
+
+  List.iter(
+    (group: Group.t) => {
+      CoordsSet.iter(
+        coord => {groupMap := CoordsMap.add(coord, group, groupMap^)},
+        group.coordsSet,
+      )
+    },
+    normalizedGroups^,
+  );
+
   switch (action^) {
-  | Some(action) => action
+  | Some(action) => Analysis({groupMap: groupMap^, recommendedMove: action})
   | None => raise(Not_found)
   };
 };

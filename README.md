@@ -3,17 +3,17 @@
 Minesweeper that plays itself without cheating!
 
 Fun little project I made to learn ReasonML/ReasonReact with bucklescript.
+The engine implementation isn't the best, but I wanted to see what I could come up
+with without any reference material.
 
 [Try it out!](https://petevdp.github.io/mineswept)
 
-### Dependencies:
+### Dependencies
 
-```
 node >= v12
 yarn >= 1.21
-```
 
-### Installation:
+### Installation
 
 ```bash
 git clone github.com/petevdp/mineswept

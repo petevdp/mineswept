@@ -1,32 +1,17 @@
 open GlobalTypes;
 open CustomUtils;
 
-type action =
-  // board, minecount
-  | Check(coords)
-  | ToggleFlag(coords)
-  | Rewind(int);
-
-type endState =
-  | Win
-  | Loss;
-
-type phase =
-  | Start
-  | Playing
-  | Ended(endState);
-
 type model = {
-  phase,
+  phase: GameModel.phase,
   board: Board.model,
   flagCount: int,
   mineCount: int,
-  lastAction: option(action),
+  lastAction: option(GameModel.action),
 };
 
 type history = list(model);
 
-type actionHandler = action => unit;
+type actionHandler = GameModel.action => unit;
 
 let staticCellCheck = (state: Board.Cell.state): Board.Cell.state =>
   switch (state) {
@@ -36,8 +21,8 @@ let staticCellCheck = (state: Board.Cell.state): Board.Cell.state =>
   };
 
 let cellCheck =
-    (prevPhase: phase, prevBoard: Board.model, ~coords: coords)
-    : (Board.model, phase) => {
+    (prevPhase: GameModel.phase, prevBoard: Board.model, ~coords: coords)
+    : (Board.model, GameModel.phase) => {
   let (x, y) = coords;
   let cell = prevBoard[y][x];
 
@@ -54,7 +39,7 @@ let cellCheck =
   let phase =
     switch (prevPhase, cell.mined, Board.hasUnfinishedCells(board)) {
     // if the game is already over, it's still over
-    | (Ended(endState), _, _) => Ended(endState)
+    | (Ended(endState), _, _) => GameModel.Ended(endState)
     // if you click on a mine, you lose
     | (Start | Playing, true, _) => Ended(Loss)
     // if there are no unfinished cells, you win
@@ -65,7 +50,8 @@ let cellCheck =
   (board, phase);
 };
 
-let toggleFlag = ((x, y): coords, board: Board.model): (Board.model, phase) => {
+let toggleFlag =
+    ((x, y): coords, board: Board.model): (Board.model, GameModel.phase) => {
   let cell: Board.Cell.model = board[y][x];
   let board = Matrix.copy(board);
   let state: Board.Cell.state =
@@ -76,7 +62,8 @@ let toggleFlag = ((x, y): coords, board: Board.model): (Board.model, phase) => {
     };
   board[y][x] = {...cell, state};
 
-  let phase = Board.hasUnfinishedCells(board) ? Playing : Ended(Win);
+  let phase: GameModel.phase =
+    Board.hasUnfinishedCells(board) ? Playing : Ended(Win);
   (board, phase);
 };
 
@@ -101,7 +88,7 @@ module MinePopulationStrategy = {
 };
 
 /* produce new game models from actions **/
-let reduce = (history: history, action: action): history => {
+let reduce = (history: history, action: GameModel.action): history => {
   let prevBoard = List.hd(history);
   let {phase as prevPhase, board as prevBoard, mineCount} = prevBoard;
 
@@ -122,7 +109,7 @@ let reduce = (history: history, action: action): history => {
       (board, phase);
 
     // the game might end when the action is Check
-    | (Check(coords), Playing | Start) =>
+    | (Check(coords), GameModel.Playing | GameModel.Start) =>
       cellCheck(phase, newBoard, ~coords)
 
     | (ToggleFlag(coords), Playing | Start) => toggleFlag(coords, board)
@@ -169,15 +156,10 @@ type initOptions = {
 };
 
 let make = ({size, minePopulationStrategy, mineCount}: initOptions) => {
-  {
-    board:
-      Board.make(
-        ~size,
-        ~minedCoords=minePopulationStrategy(~size, ~mineCount),
-      ),
-    phase: Start,
-    flagCount: 0,
-    mineCount,
-    lastAction: None,
-  };
+  let board =
+    Board.make(
+      ~size,
+      ~minedCoords=minePopulationStrategy(~size, ~mineCount),
+    );
+  {board, phase: Start, flagCount: 0, mineCount, lastAction: None};
 };

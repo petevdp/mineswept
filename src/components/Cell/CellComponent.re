@@ -26,6 +26,8 @@ module Styles = {
   let bomb =
     style([width(iconSize), height(iconSize), paddingTop(px(2))]);
 
+  let groupHovered = style([backgroundColor(yellow)]);
+
   module Visible = {
     let mined = style([backgroundColor(salmon)]);
     let empty = style([backgroundColor(hex("f3f3f3"))]);
@@ -51,15 +53,24 @@ type recommendedMoveForCell =
 
 type handleClick = click => unit;
 
+type hoverStateChange =
+  | Leave
+  | Enter;
+
+type onCellHoverStateChange = hoverStateChange => unit;
+
 type props = {
   coords: Coords.t,
   state: Board.Cell.state,
   mined: bool,
   numAdjacentMines: int,
   handleClick,
+  onCellHoverStateChange,
   isGameOver: bool,
   recommendedMoveForCell: option(recommendedMoveForCell),
   showOverlay: bool,
+  /* will be present when this cell's group is highlighted */
+  highlightedCellGroup: option(Engine.Group.t),
 };
 
 [@react.component]
@@ -70,32 +81,48 @@ let make =
       ~mined: bool,
       ~numAdjacentMines: int,
       ~handleClick: handleClick,
+      ~onCellHoverStateChange: onCellHoverStateChange,
       ~isGameOver: bool,
       ~recommendedMoveForCell: option(recommendedMoveForCell),
       ~showOverlay: bool,
+      ~highlightedCellGroup: option(Engine.Group.t),
     ) => {
+  let isCellGroupHighlighted =
+    switch (highlightedCellGroup) {
+    | Some(_) => true
+    | None => false
+    };
+
   let (stateClass, inner) =
-    switch (state, mined, isGameOver, recommendedMoveForCell, showOverlay) {
-    | (Hidden, _, false, Some(Check), true) => (
+    switch (
+      state,
+      mined,
+      isGameOver,
+      isCellGroupHighlighted,
+      recommendedMoveForCell,
+      showOverlay,
+    ) {
+    | (Hidden, _, false, true, _, true) => (Styles.groupHovered, str(" "))
+    | (Hidden, _, false, _, Some(Check), true) => (
         Styles.Recommended.shouldCheck,
         str(" "),
       )
-    | (Hidden, _, false, Some(ToggleFlag), true) => (
+    | (Hidden, _, false, _, Some(ToggleFlag), true) => (
         Styles.Recommended.shouldFlag,
         str(" "),
       )
-    | (Hidden, _, false, _, false)
-    | (Hidden, _, false, None, _) => (Styles.hidden, str(" "))
-    | (Hidden, _, true, _, _) => (Styles.GameOver.hidden, str(" "))
-    | (Flagged, _, _, _, _) => (
+    | (Hidden, _, false, _, _, false)
+    | (Hidden, _, false, _, None, _) => (Styles.hidden, str(" "))
+    | (Hidden, _, true, _, _, _) => (Styles.GameOver.hidden, str(" "))
+    | (Flagged, _, _, _, _, _) => (
         Styles.flagged,
         <img className=Styles.flag src=FlagImage.flag />,
       )
-    | (Visible, true, _, _, _) => (
+    | (Visible, true, _, _, _, _) => (
         Styles.Visible.mined,
         <img className=Styles.bomb src=MineImage.flag />,
       )
-    | (Visible, false, _, _, _) => (
+    | (Visible, false, _, _, _, _) => (
         Styles.Visible.empty,
         str(string_of_int(numAdjacentMines)),
       )
@@ -108,12 +135,24 @@ let make =
     handleClick(Right);
   };
 
+  let onMouseEnter = _ => onCellHoverStateChange(Enter);
+  let onMouseLeave = _ => onCellHoverStateChange(Leave);
+
   let classStyles = Css.merge([Styles.base, stateClass]);
   let (x, y) = coords;
   let cell =
-    <section className=classStyles onClick onContextMenu> inner </section>;
+    <section
+      className=classStyles onClick onContextMenu onMouseLeave onMouseEnter>
+      inner
+    </section>;
+  let groupStatus =
+    switch (highlightedCellGroup) {
+    | None => ""
+    | Some({minMines, maxMines}) => {j|min: $minMines, max: $maxMines|j}
+    };
+
   let cellDataAttributes = [
-    ("data-tip", {j|$x, $y|j}),
+    ("data-tip", {j|$x, $y, \n $groupStatus |j}),
     ("data-tip-disable", string_of_bool(!showOverlay)),
   ];
 
