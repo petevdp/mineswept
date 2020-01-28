@@ -293,7 +293,6 @@ let solver = (board: RestrictedBoard.t) => {
   while (action^ == None) {
     switch (unAppliedConstraints^) {
     | [] =>
-      Js.log("making random move");
       Js.log(normalizedGroups^ |> Array.of_list);
 
       action :=

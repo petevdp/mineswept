@@ -89,6 +89,7 @@ module MinePopulationStrategy = {
 
 /* produce new game models from actions **/
 let reduce = (history: history, action: GameModel.action): history => {
+  Js.log("reduce");
   let prevBoard = List.hd(history);
   let {phase as prevPhase, board as prevBoard, mineCount} = prevBoard;
 

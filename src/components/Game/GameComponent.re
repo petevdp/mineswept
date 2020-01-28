@@ -99,7 +99,20 @@ let reducer = (prevState: appState, action: action) => {
         | Ended(_) => None
         };
 
-      {...prevState, engineOutput, gameHistory: newGameHistory};
+      let {playGameOutWithEngine} = prevState;
+
+      let playGameOutWithEngine =
+        switch (playGameOutWithEngine, phase) {
+        | (true, Ended(_)) => false
+        | (_, _) => playGameOutWithEngine
+        };
+
+      {
+        ...prevState,
+        engineOutput,
+        gameHistory: newGameHistory,
+        playGameOutWithEngine,
+      };
     | PlayGameWithEngine => {...prevState, playGameOutWithEngine: true}
     | ToggleOverlay => {...prevState, showOverlay: !prevState.showOverlay}
     };
@@ -153,7 +166,7 @@ let make = () => {
   let panelGameActionHandlers: ControlPanelComponent.handlers = {
     isGameOver
       ? {
-        onRewindGame: _ => (),
+        onRewindGame: steps => dispatch(HumanGameAction(Rewind(steps))),
         onMakeEngineMove: _ => (),
         onPlayGameWithEngine: _ => (),
         onToggleOverlay: () => dispatch(ToggleOverlay),
