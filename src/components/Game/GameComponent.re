@@ -17,16 +17,21 @@ type action =
   | PlayGameWithEngine
   | ToggleOverlay;
 
-let gameSize = 10;
+let gameSize = 20;
+let mineCount = gameSize * gameSize / 6;
+
 let gameOptions: Game.initOptions = {
   size: (gameSize, gameSize),
-  mineCount: gameSize * gameSize / 6,
+  mineCount,
   minePopulationStrategy: Game.MinePopulationStrategy.random,
 };
 
+let getOutputFromEngineWithSize = Engine.getOutputFromEngine(mineCount);
+
 let initialGameState = Game.make(gameOptions);
+
 let engineOutput =
-  Some(Engine.getOutputFromEngine(Engine.solver, initialGameState.board));
+  Some(getOutputFromEngineWithSize(Engine.solver, initialGameState.board));
 
 let startingAppState = {
   gameHistory: [initialGameState],
@@ -47,7 +52,7 @@ let reducer = (prevState: appState, action: action) => {
 
       let engineOutput =
         Some(
-          Engine.getOutputFromEngine(
+          getOutputFromEngineWithSize(
             selectedEngineEntry.engine,
             newGame.board,
           ),
@@ -70,7 +75,9 @@ let reducer = (prevState: appState, action: action) => {
         switch (phase) {
         | Start
         | Playing =>
-          Some(Engine.getOutputFromEngine(selectedEngineEntry.engine, board))
+          Some(
+            getOutputFromEngineWithSize(selectedEngineEntry.engine, board),
+          )
         | Ended(_) => None
         };
 
@@ -95,7 +102,9 @@ let reducer = (prevState: appState, action: action) => {
         switch (phase) {
         | Start
         | Playing =>
-          Some(Engine.getOutputFromEngine(selectedEngineEntry.engine, board))
+          Some(
+            getOutputFromEngineWithSize(selectedEngineEntry.engine, board),
+          )
         | Ended(_) => None
         };
 

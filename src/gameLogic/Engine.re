@@ -33,6 +33,11 @@ module RestrictedBoard = {
     };
 };
 
+type restrictedBoardInfo = {
+  board: RestrictedBoard.t,
+  totalNumMines: int,
+};
+
 /** a number on the board and how it affects where mines are */
 module BoardConstraint = {
   type effect =
@@ -105,9 +110,9 @@ module BoardConstraint = {
   let makeListFromRestrictedBoard = board => {
     let constraints = ref([]);
 
-    board
-    |> Matrix.flattenWithCoords
-    |> Array.to_list
+    let cellList = board |> Matrix.flattenWithCoords |> Array.to_list;
+
+    cellList
     |> List.iter(((cell: RestrictedBoard.rCell, coords)) =>
          switch (cell) {
          | Visible(mineCount) =>
@@ -213,11 +218,11 @@ type engineOutput =
   | Analysis(engineAnalysis)
   | RecommendedMove(GameModel.action);
 
-type t = RestrictedBoard.t => engineOutput;
+type t = restrictedBoardInfo => engineOutput;
 
-let getOutputFromEngine = (t, board): engineOutput => {
-  let restrictedBoard = RestrictedBoard.make(board);
-  t(restrictedBoard);
+let getOutputFromEngine = (totalNumMines, t, board): engineOutput => {
+  let board = RestrictedBoard.make(board);
+  t({board, totalNumMines});
 };
 
 exception InvalidConnection;
@@ -271,7 +276,7 @@ let applyConstraint = (groups, const: BoardConstraint.t) => {
 };
 
 let random: t =
-  board => {
+  ({board}) => {
     let (_, coords) =
       board
       |> Matrix.flattenWithCoords
@@ -283,11 +288,34 @@ let random: t =
     RecommendedMove(Check(coords));
   };
 
-let solver = (board: RestrictedBoard.t) => {
+let solver = restrictedBoardInfo => {
+  let {board, totalNumMines} = restrictedBoardInfo;
   let unAppliedConstraints =
     ref(BoardConstraint.makeListFromRestrictedBoard(board));
 
-  let normalizedGroups = ref([]);
+  let cellList = Matrix.flattenWithCoords(board) |> Array.to_list;
+
+  let fullCellSet =
+    cellList
+    |> List.filter(((cell: RestrictedBoard.rCell, _)) => cell == Hidden)
+    |> List.map(((_, coords): (RestrictedBoard.rCell, Coords.t)) => coords)
+    |> CoordsSet.of_list;
+
+  let numFlaggedMines =
+    cellList
+    |> List.filter(((cell: RestrictedBoard.rCell, _)) => cell == Flagged)
+    |> List.length;
+
+  let numMinesLeft = totalNumMines - numFlaggedMines;
+
+  let fullBoardGroup: Group.t = {
+    minMines: numMinesLeft,
+    maxMines: numMinesLeft,
+    coordsSet: fullCellSet,
+  };
+
+  let normalizedGroups = ref([fullBoardGroup]);
+
   let action = ref(None);
 
   while (action^ == None) {
@@ -297,7 +325,7 @@ let solver = (board: RestrictedBoard.t) => {
 
       action :=
         (
-          switch (random(board)) {
+          switch (random(restrictedBoardInfo)) {
           | RecommendedMove(action) => Some(action)
           | _ => raise(Not_found)
           }
