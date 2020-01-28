@@ -39,7 +39,7 @@ let startingAppState = {
   selectedEngineEntry: List.hd(Engine.registry),
   playGameOutWithEngine: false,
   fallbackGameInitOptions: gameOptions,
-  showOverlay: true,
+  showOverlay: false,
   engineOutput,
 };
 
