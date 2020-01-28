@@ -34,7 +34,7 @@ module Styles = {
   };
 
   module GameOver = {
-    let hidden = style([hover([backgroundColor(grey)])]);
+    let hidden = style([hover([backgroundColor(darkgrey)])]);
   };
 
   module Recommended = {
@@ -113,7 +113,10 @@ let make =
       )
     | (Hidden, _, false, _, _, false)
     | (Hidden, _, false, _, None, _) => (Styles.hidden, str(" "))
-    | (Hidden, _, true, _, _, _) => (Styles.GameOver.hidden, str(" "))
+    | (Hidden, _, true, _, _, _) => (
+        Styles.GameOver.hidden,
+        numAdjacentMines->string_of_int->str,
+      )
     | (Flagged, _, _, _, _, _) => (
         Styles.flagged,
         <img className=Styles.flag src=FlagImage.flag />,
