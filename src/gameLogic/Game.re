@@ -101,7 +101,7 @@ let reduce = (history: history, action: GameModel.action): history => {
     );
 
   let (newBoard, newPhase) =
-    switch (action, phase) {
+    switch (action, prevPhase) {
     | (Rewind(steps), _) =>
       // -1 because the first entry in history is the initial state
       let length = List.length(history) - 1;

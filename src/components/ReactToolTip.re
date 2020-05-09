@@ -1,2 +1,2 @@
-[@bs.module] [@react.component]
-external make: unit => React.element = "react-tooltip";
+[@bs.module "react-tooltip"] [@react.component]
+external make: unit => React.element = "default";
