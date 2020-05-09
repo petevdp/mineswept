@@ -117,7 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../node_modules/object-assign/index.js":[function(require,module,exports) {
+})({"node_modules/object-assign/index.js":[function(require,module,exports) {
 /*
 object-assign
 (c) Sindre Sorhus
@@ -213,7 +213,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
   return to;
 };
-},{}],"../node_modules/prop-types/lib/ReactPropTypesSecret.js":[function(require,module,exports) {
+},{}],"node_modules/prop-types/lib/ReactPropTypesSecret.js":[function(require,module,exports) {
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -227,7 +227,7 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
 
-},{}],"../node_modules/prop-types/checkPropTypes.js":[function(require,module,exports) {
+},{}],"node_modules/prop-types/checkPropTypes.js":[function(require,module,exports) {
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -323,7 +323,7 @@ checkPropTypes.resetWarningCache = function () {
 };
 
 module.exports = checkPropTypes;
-},{"./lib/ReactPropTypesSecret":"../node_modules/prop-types/lib/ReactPropTypesSecret.js"}],"../node_modules/react/cjs/react.development.js":[function(require,module,exports) {
+},{"./lib/ReactPropTypesSecret":"node_modules/prop-types/lib/ReactPropTypesSecret.js"}],"node_modules/react/cjs/react.development.js":[function(require,module,exports) {
 /** @license React v16.13.1
  * react.development.js
  *
@@ -2200,7 +2200,7 @@ if ("development" !== "production") {
     exports.version = ReactVersion;
   })();
 }
-},{"object-assign":"../node_modules/object-assign/index.js","prop-types/checkPropTypes":"../node_modules/prop-types/checkPropTypes.js"}],"../node_modules/react/index.js":[function(require,module,exports) {
+},{"object-assign":"node_modules/object-assign/index.js","prop-types/checkPropTypes":"node_modules/prop-types/checkPropTypes.js"}],"node_modules/react/index.js":[function(require,module,exports) {
 'use strict';
 
 if ("development" === 'production') {
@@ -2208,7 +2208,7 @@ if ("development" === 'production') {
 } else {
   module.exports = require('./cjs/react.development.js');
 }
-},{"./cjs/react.development.js":"../node_modules/react/cjs/react.development.js"}],"../node_modules/scheduler/cjs/scheduler.development.js":[function(require,module,exports) {
+},{"./cjs/react.development.js":"node_modules/react/cjs/react.development.js"}],"node_modules/scheduler/cjs/scheduler.development.js":[function(require,module,exports) {
 /** @license React v0.19.1
  * scheduler.development.js
  *
@@ -3063,7 +3063,7 @@ if ("development" !== "production") {
     exports.unstable_wrapCallback = unstable_wrapCallback;
   })();
 }
-},{}],"../node_modules/scheduler/index.js":[function(require,module,exports) {
+},{}],"node_modules/scheduler/index.js":[function(require,module,exports) {
 'use strict';
 
 if ("development" === 'production') {
@@ -3071,7 +3071,7 @@ if ("development" === 'production') {
 } else {
   module.exports = require('./cjs/scheduler.development.js');
 }
-},{"./cjs/scheduler.development.js":"../node_modules/scheduler/cjs/scheduler.development.js"}],"../node_modules/scheduler/cjs/scheduler-tracing.development.js":[function(require,module,exports) {
+},{"./cjs/scheduler.development.js":"node_modules/scheduler/cjs/scheduler.development.js"}],"node_modules/scheduler/cjs/scheduler-tracing.development.js":[function(require,module,exports) {
 /** @license React v0.19.1
  * scheduler-tracing.development.js
  *
@@ -3419,7 +3419,7 @@ if ("development" !== "production") {
     exports.unstable_wrap = unstable_wrap;
   })();
 }
-},{}],"../node_modules/scheduler/tracing.js":[function(require,module,exports) {
+},{}],"node_modules/scheduler/tracing.js":[function(require,module,exports) {
 'use strict';
 
 if ("development" === 'production') {
@@ -3427,7 +3427,7 @@ if ("development" === 'production') {
 } else {
   module.exports = require('./cjs/scheduler-tracing.development.js');
 }
-},{"./cjs/scheduler-tracing.development.js":"../node_modules/scheduler/cjs/scheduler-tracing.development.js"}],"../node_modules/react-dom/cjs/react-dom.development.js":[function(require,module,exports) {
+},{"./cjs/scheduler-tracing.development.js":"node_modules/scheduler/cjs/scheduler-tracing.development.js"}],"node_modules/react-dom/cjs/react-dom.development.js":[function(require,module,exports) {
 /** @license React v16.13.1
  * react-dom.development.js
  *
@@ -28247,7 +28247,7 @@ if ("development" !== "production") {
     exports.version = ReactVersion;
   })();
 }
-},{"react":"../node_modules/react/index.js","object-assign":"../node_modules/object-assign/index.js","scheduler":"../node_modules/scheduler/index.js","prop-types/checkPropTypes":"../node_modules/prop-types/checkPropTypes.js","scheduler/tracing":"../node_modules/scheduler/tracing.js"}],"../node_modules/react-dom/index.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","object-assign":"node_modules/object-assign/index.js","scheduler":"node_modules/scheduler/index.js","prop-types/checkPropTypes":"node_modules/prop-types/checkPropTypes.js","scheduler/tracing":"node_modules/scheduler/tracing.js"}],"node_modules/react-dom/index.js":[function(require,module,exports) {
 'use strict';
 
 function checkDCE() {
@@ -28285,7 +28285,7 @@ if ("development" === 'production') {
 } else {
   module.exports = require('./cjs/react-dom.development.js');
 }
-},{"./cjs/react-dom.development.js":"../node_modules/react-dom/cjs/react-dom.development.js"}],"exampleComponents/ExampleStyles.bs.js":[function(require,module,exports) {
+},{"./cjs/react-dom.development.js":"node_modules/react-dom/cjs/react-dom.development.js"}],"src/exampleComponents/ExampleStyles.bs.js":[function(require,module,exports) {
 'use strict';
 
 var reasonReactBlue = "#48a9dc";
@@ -28293,7 +28293,7 @@ var style = "\n  body {\n    background-color: rgb(224, 226, 229);\n    display:
 exports.reasonReactBlue = reasonReactBlue;
 exports.style = style;
 /* style Not a pure module */
-},{}],"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js":[function(require,module,exports) {
 'use strict';
 
 
@@ -28395,7 +28395,7 @@ exports.assert_failure = assert_failure;
 exports.undefined_recursive_module = undefined_recursive_module;
 /*  Not a pure module */
 
-},{}],"../node_modules/bs-platform/lib/js/caml_array.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_array.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_builtin_exceptions = require("./caml_builtin_exceptions.js");
@@ -28521,7 +28521,7 @@ exports.caml_array_get = caml_array_get;
 exports.caml_array_set = caml_array_set;
 /* No side effect */
 
-},{"./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/curry.js":[function(require,module,exports) {
+},{"./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/curry.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_array = require("./caml_array.js");
@@ -29087,7 +29087,7 @@ exports._8 = _8;
 exports.__8 = __8;
 /* No side effect */
 
-},{"./caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js"}],"../node_modules/bs-platform/lib/js/block.js":[function(require,module,exports) {
+},{"./caml_array.js":"node_modules/bs-platform/lib/js/caml_array.js"}],"node_modules/bs-platform/lib/js/block.js":[function(require,module,exports) {
 'use strict';
 
 
@@ -29099,7 +29099,7 @@ function __(tag, block) {
 exports.__ = __;
 /* No side effect */
 
-},{}],"../node_modules/bs-platform/lib/js/caml_primitive.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_primitive.js":[function(require,module,exports) {
 'use strict';
 
 
@@ -29333,7 +29333,7 @@ exports.caml_nativeint_max = caml_nativeint_max;
 exports.caml_int32_max = caml_int32_max;
 /* No side effect */
 
-},{}],"../node_modules/bs-platform/lib/js/caml_obj.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_obj.js":[function(require,module,exports) {
 'use strict';
 
 var Block = require("./block.js");
@@ -29831,7 +29831,7 @@ exports.caml_max = caml_max;
 exports.caml_obj_set_tag = caml_obj_set_tag;
 /* No side effect */
 
-},{"./block.js":"../node_modules/bs-platform/lib/js/block.js","./caml_primitive.js":"../node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/process/browser.js":[function(require,module,exports) {
+},{"./block.js":"node_modules/bs-platform/lib/js/block.js","./caml_primitive.js":"node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../../.config/yarn/global/node_modules/process/browser.js":[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {}; // cached from whatever global is present so that test runners that stub it
@@ -30040,7 +30040,7 @@ process.chdir = function (dir) {
 process.umask = function () {
   return 0;
 };
-},{}],"../node_modules/bs-platform/lib/js/caml_io.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_io.js":[function(require,module,exports) {
 var process = require("process");
 'use strict';
 
@@ -30129,7 +30129,7 @@ exports.caml_ml_output_char = caml_ml_output_char;
 exports.caml_ml_out_channels_list = caml_ml_out_channels_list;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","process":"../node_modules/process/browser.js"}],"../node_modules/bs-platform/lib/js/caml_sys.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","process":"../../.config/yarn/global/node_modules/process/browser.js"}],"node_modules/bs-platform/lib/js/caml_sys.js":[function(require,module,exports) {
 var process = require("process");
 'use strict';
 
@@ -30235,7 +30235,7 @@ exports.caml_sys_is_directory = caml_sys_is_directory;
 exports.caml_sys_file_exists = caml_sys_file_exists;
 /* No side effect */
 
-},{"./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","process":"../node_modules/process/browser.js"}],"../node_modules/bs-platform/lib/js/caml_bytes.js":[function(require,module,exports) {
+},{"./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","process":"../../.config/yarn/global/node_modules/process/browser.js"}],"node_modules/bs-platform/lib/js/caml_bytes.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_builtin_exceptions = require("./caml_builtin_exceptions.js");
@@ -30385,7 +30385,7 @@ exports.caml_blit_string = caml_blit_string;
 exports.bytes_of_string = bytes_of_string;
 /* No side effect */
 
-},{"./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/caml_int32.js":[function(require,module,exports) {
+},{"./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/caml_int32.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_builtin_exceptions = require("./caml_builtin_exceptions.js");
@@ -30426,7 +30426,7 @@ exports.caml_nativeint_bswap = caml_nativeint_bswap;
 exports.imul = imul;
 /* imul Not a pure module */
 
-},{"./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/caml_utils.js":[function(require,module,exports) {
+},{"./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/caml_utils.js":[function(require,module,exports) {
 'use strict';
 
 
@@ -30460,7 +30460,7 @@ var repeat = (function(count,self){
 exports.repeat = repeat;
 /* No side effect */
 
-},{}],"../node_modules/bs-platform/lib/js/caml_int64.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_int64.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_int32 = require("./caml_int32.js");
@@ -31103,7 +31103,7 @@ exports.discard_sign = discard_sign;
 exports.to_string = to_string;
 /* Caml_int32 Not a pure module */
 
-},{"./caml_int32.js":"../node_modules/bs-platform/lib/js/caml_int32.js","./caml_utils.js":"../node_modules/bs-platform/lib/js/caml_utils.js","./caml_primitive.js":"../node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/caml_format.js":[function(require,module,exports) {
+},{"./caml_int32.js":"node_modules/bs-platform/lib/js/caml_int32.js","./caml_utils.js":"node_modules/bs-platform/lib/js/caml_utils.js","./caml_primitive.js":"node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/caml_format.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_int32 = require("./caml_int32.js");
@@ -31964,7 +31964,7 @@ exports.caml_int64_of_string = caml_int64_of_string;
 exports.caml_nativeint_of_string = caml_nativeint_of_string;
 /* No side effect */
 
-},{"./caml_int32.js":"../node_modules/bs-platform/lib/js/caml_int32.js","./caml_int64.js":"../node_modules/bs-platform/lib/js/caml_int64.js","./caml_utils.js":"../node_modules/bs-platform/lib/js/caml_utils.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/caml_string.js":[function(require,module,exports) {
+},{"./caml_int32.js":"node_modules/bs-platform/lib/js/caml_int32.js","./caml_int64.js":"node_modules/bs-platform/lib/js/caml_int64.js","./caml_utils.js":"node_modules/bs-platform/lib/js/caml_utils.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/caml_string.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_builtin_exceptions = require("./caml_builtin_exceptions.js");
@@ -31982,7 +31982,7 @@ function get(s, i) {
 exports.get = get;
 /* No side effect */
 
-},{"./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/caml_exceptions.js":[function(require,module,exports) {
+},{"./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/caml_exceptions.js":[function(require,module,exports) {
 'use strict';
 
 
@@ -32032,7 +32032,7 @@ exports.create = create;
 exports.caml_is_extension = caml_is_extension;
 /* No side effect */
 
-},{}],"../node_modules/bs-platform/lib/js/caml_option.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_option.js":[function(require,module,exports) {
 'use strict';
 
 
@@ -32124,7 +32124,7 @@ exports.option_get = option_get;
 exports.option_get_unwrap = option_get_unwrap;
 /* No side effect */
 
-},{}],"../node_modules/bs-platform/lib/js/caml_js_exceptions.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/caml_js_exceptions.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_option = require("./caml_option.js");
@@ -32155,7 +32155,7 @@ exports.internalToOCamlException = internalToOCamlException;
 exports.caml_as_js_exn = caml_as_js_exn;
 /* No side effect */
 
-},{"./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./caml_exceptions.js":"../node_modules/bs-platform/lib/js/caml_exceptions.js"}],"../node_modules/bs-platform/lib/js/caml_external_polyfill.js":[function(require,module,exports) {
+},{"./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js","./caml_exceptions.js":"node_modules/bs-platform/lib/js/caml_exceptions.js"}],"node_modules/bs-platform/lib/js/caml_external_polyfill.js":[function(require,module,exports) {
 var global = arguments[3];
 'use strict';
 
@@ -32188,7 +32188,7 @@ exports.resolve = resolve;
 exports.register = register;
 /* No side effect */
 
-},{}],"../node_modules/bs-platform/lib/js/camlinternalFormatBasics.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/camlinternalFormatBasics.js":[function(require,module,exports) {
 'use strict';
 
 var Block = require("./block.js");
@@ -32421,7 +32421,7 @@ exports.erase_rel = erase_rel;
 exports.concat_fmt = concat_fmt;
 /* No side effect */
 
-},{"./block.js":"../node_modules/bs-platform/lib/js/block.js"}],"../node_modules/bs-platform/lib/js/pervasives.js":[function(require,module,exports) {
+},{"./block.js":"node_modules/bs-platform/lib/js/block.js"}],"node_modules/bs-platform/lib/js/pervasives.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -33146,7 +33146,7 @@ exports.unsafe_really_input = unsafe_really_input;
 exports.do_at_exit = do_at_exit;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_io.js":"../node_modules/bs-platform/lib/js/caml_io.js","./caml_sys.js":"../node_modules/bs-platform/lib/js/caml_sys.js","./caml_bytes.js":"../node_modules/bs-platform/lib/js/caml_bytes.js","./caml_format.js":"../node_modules/bs-platform/lib/js/caml_format.js","./caml_string.js":"../node_modules/bs-platform/lib/js/caml_string.js","./caml_exceptions.js":"../node_modules/bs-platform/lib/js/caml_exceptions.js","./caml_js_exceptions.js":"../node_modules/bs-platform/lib/js/caml_js_exceptions.js","./caml_external_polyfill.js":"../node_modules/bs-platform/lib/js/caml_external_polyfill.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","./camlinternalFormatBasics.js":"../node_modules/bs-platform/lib/js/camlinternalFormatBasics.js"}],"../node_modules/bs-platform/lib/js/list.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_io.js":"node_modules/bs-platform/lib/js/caml_io.js","./caml_sys.js":"node_modules/bs-platform/lib/js/caml_sys.js","./caml_bytes.js":"node_modules/bs-platform/lib/js/caml_bytes.js","./caml_format.js":"node_modules/bs-platform/lib/js/caml_format.js","./caml_string.js":"node_modules/bs-platform/lib/js/caml_string.js","./caml_exceptions.js":"node_modules/bs-platform/lib/js/caml_exceptions.js","./caml_js_exceptions.js":"node_modules/bs-platform/lib/js/caml_js_exceptions.js","./caml_external_polyfill.js":"node_modules/bs-platform/lib/js/caml_external_polyfill.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","./camlinternalFormatBasics.js":"node_modules/bs-platform/lib/js/camlinternalFormatBasics.js"}],"node_modules/bs-platform/lib/js/list.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -34901,7 +34901,7 @@ exports.sort_uniq = sort_uniq;
 exports.merge = merge;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_obj.js":"../node_modules/bs-platform/lib/js/caml_obj.js","./pervasives.js":"../node_modules/bs-platform/lib/js/pervasives.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/array.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_obj.js":"node_modules/bs-platform/lib/js/caml_obj.js","./pervasives.js":"node_modules/bs-platform/lib/js/pervasives.js","./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/array.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -35431,7 +35431,7 @@ exports.fast_sort = fast_sort;
 exports.Floatarray = Floatarray;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_obj.js":"../node_modules/bs-platform/lib/js/caml_obj.js","./caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js","./caml_exceptions.js":"../node_modules/bs-platform/lib/js/caml_exceptions.js","./caml_js_exceptions.js":"../node_modules/bs-platform/lib/js/caml_js_exceptions.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/js_int.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_obj.js":"node_modules/bs-platform/lib/js/caml_obj.js","./caml_array.js":"node_modules/bs-platform/lib/js/caml_array.js","./caml_exceptions.js":"node_modules/bs-platform/lib/js/caml_exceptions.js","./caml_js_exceptions.js":"node_modules/bs-platform/lib/js/caml_js_exceptions.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/js_int.js":[function(require,module,exports) {
 'use strict';
 
 
@@ -35448,7 +35448,7 @@ exports.max = max;
 exports.min = min;
 /* No side effect */
 
-},{}],"../node_modules/bs-platform/lib/js/js_math.js":[function(require,module,exports) {
+},{}],"node_modules/bs-platform/lib/js/js_math.js":[function(require,module,exports) {
 'use strict';
 
 var Js_int = require("./js_int.js");
@@ -35498,7 +35498,7 @@ exports.floor = floor;
 exports.random_int = random_int;
 /* No side effect */
 
-},{"./js_int.js":"../node_modules/bs-platform/lib/js/js_int.js"}],"../node_modules/bs-platform/lib/js/belt_Array.js":[function(require,module,exports) {
+},{"./js_int.js":"node_modules/bs-platform/lib/js/js_int.js"}],"node_modules/bs-platform/lib/js/belt_Array.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -36232,7 +36232,7 @@ exports.eqU = eqU;
 exports.eq = eq;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./js_math.js":"../node_modules/bs-platform/lib/js/js_math.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./caml_primitive.js":"../node_modules/bs-platform/lib/js/caml_primitive.js"}],"../node_modules/bs-platform/lib/js/belt_SortArray.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./js_math.js":"node_modules/bs-platform/lib/js/js_math.js","./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js","./caml_primitive.js":"node_modules/bs-platform/lib/js/caml_primitive.js"}],"node_modules/bs-platform/lib/js/belt_SortArray.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -36685,7 +36685,7 @@ exports.diffU = diffU;
 exports.diff = diff;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./belt_Array.js":"../node_modules/bs-platform/lib/js/belt_Array.js"}],"../node_modules/bs-platform/lib/js/belt_List.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./belt_Array.js":"node_modules/bs-platform/lib/js/belt_Array.js"}],"node_modules/bs-platform/lib/js/belt_List.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -38238,7 +38238,7 @@ exports.sortU = sortU;
 exports.sort = sort;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./belt_Array.js":"../node_modules/bs-platform/lib/js/belt_Array.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./belt_SortArray.js":"../node_modules/bs-platform/lib/js/belt_SortArray.js"}],"../node_modules/bs-platform/lib/js/map.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./belt_Array.js":"node_modules/bs-platform/lib/js/belt_Array.js","./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js","./belt_SortArray.js":"node_modules/bs-platform/lib/js/belt_SortArray.js"}],"node_modules/bs-platform/lib/js/map.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -39208,7 +39208,7 @@ function Make(funarg) {
 exports.Make = Make;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/set.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/set.js":[function(require,module,exports) {
 'use strict';
 
 var List = require("./list.js");
@@ -40209,7 +40209,7 @@ function Make(funarg) {
 exports.Make = Make;
 /* No side effect */
 
-},{"./list.js":"../node_modules/bs-platform/lib/js/list.js","./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/int32.js":[function(require,module,exports) {
+},{"./list.js":"node_modules/bs-platform/lib/js/list.js","./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/int32.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_format = require("./caml_format.js");
@@ -40286,7 +40286,7 @@ exports.compare = compare;
 exports.equal = equal;
 /* No side effect */
 
-},{"./caml_format.js":"../node_modules/bs-platform/lib/js/caml_format.js","./caml_primitive.js":"../node_modules/bs-platform/lib/js/caml_primitive.js","./caml_js_exceptions.js":"../node_modules/bs-platform/lib/js/caml_js_exceptions.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/char.js":[function(require,module,exports) {
+},{"./caml_format.js":"node_modules/bs-platform/lib/js/caml_format.js","./caml_primitive.js":"node_modules/bs-platform/lib/js/caml_primitive.js","./caml_js_exceptions.js":"node_modules/bs-platform/lib/js/caml_js_exceptions.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/char.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_bytes = require("./caml_bytes.js");
@@ -40414,7 +40414,7 @@ exports.compare = compare;
 exports.equal = equal;
 /* No side effect */
 
-},{"./caml_bytes.js":"../node_modules/bs-platform/lib/js/caml_bytes.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/bytes.js":[function(require,module,exports) {
+},{"./caml_bytes.js":"node_modules/bs-platform/lib/js/caml_bytes.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/bytes.js":[function(require,module,exports) {
 'use strict';
 
 var Char = require("./char.js");
@@ -41048,7 +41048,7 @@ exports.unsafe_to_string = unsafe_to_string;
 exports.unsafe_of_string = unsafe_of_string;
 /* No side effect */
 
-},{"./char.js":"../node_modules/bs-platform/lib/js/char.js","./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_bytes.js":"../node_modules/bs-platform/lib/js/caml_bytes.js","./caml_primitive.js":"../node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"../node_modules/bs-platform/lib/js/string.js":[function(require,module,exports) {
+},{"./char.js":"node_modules/bs-platform/lib/js/char.js","./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_bytes.js":"node_modules/bs-platform/lib/js/caml_bytes.js","./caml_primitive.js":"node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"node_modules/bs-platform/lib/js/string.js":[function(require,module,exports) {
 'use strict';
 
 var Bytes = require("./bytes.js");
@@ -41470,7 +41470,7 @@ exports.equal = equal;
 exports.split_on_char = split_on_char;
 /* No side effect */
 
-},{"./bytes.js":"../node_modules/bs-platform/lib/js/bytes.js","./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_bytes.js":"../node_modules/bs-platform/lib/js/caml_bytes.js","./caml_primitive.js":"../node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"utils/CustomUtils.bs.js":[function(require,module,exports) {
+},{"./bytes.js":"node_modules/bs-platform/lib/js/bytes.js","./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_bytes.js":"node_modules/bs-platform/lib/js/caml_bytes.js","./caml_primitive.js":"node_modules/bs-platform/lib/js/caml_primitive.js","./caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js"}],"src/utils/CustomUtils.bs.js":[function(require,module,exports) {
 'use strict';
 
 var $$Map = require("bs-platform/lib/js/map.js");
@@ -41802,7 +41802,7 @@ exports.MyList = MyList;
 exports.getRange = getRange;
 exports.str = str;
 /* CoordsSet Not a pure module */
-},{"bs-platform/lib/js/map.js":"../node_modules/bs-platform/lib/js/map.js","bs-platform/lib/js/set.js":"../node_modules/bs-platform/lib/js/set.js","bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/int32.js":"../node_modules/bs-platform/lib/js/int32.js","bs-platform/lib/js/string.js":"../node_modules/bs-platform/lib/js/string.js","bs-platform/lib/js/caml_obj.js":"../node_modules/bs-platform/lib/js/caml_obj.js","bs-platform/lib/js/belt_List.js":"../node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/belt_Array.js":"../node_modules/bs-platform/lib/js/belt_Array.js","bs-platform/lib/js/caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/caml_exceptions.js":"../node_modules/bs-platform/lib/js/caml_exceptions.js"}],"gameLogic/Board.bs.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/map.js":"node_modules/bs-platform/lib/js/map.js","bs-platform/lib/js/set.js":"node_modules/bs-platform/lib/js/set.js","bs-platform/lib/js/list.js":"node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/int32.js":"node_modules/bs-platform/lib/js/int32.js","bs-platform/lib/js/string.js":"node_modules/bs-platform/lib/js/string.js","bs-platform/lib/js/caml_obj.js":"node_modules/bs-platform/lib/js/caml_obj.js","bs-platform/lib/js/belt_List.js":"node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/belt_Array.js":"node_modules/bs-platform/lib/js/belt_Array.js","bs-platform/lib/js/caml_array.js":"node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/caml_exceptions.js":"node_modules/bs-platform/lib/js/caml_exceptions.js"}],"src/gameLogic/Board.bs.js":[function(require,module,exports) {
 'use strict';
 
 var List = require("bs-platform/lib/js/list.js");
@@ -41964,7 +41964,7 @@ exports.checkAndReveal = checkAndReveal;
 exports.hasUnfinishedCells = hasUnfinishedCells;
 exports.hasVisibleMines = hasVisibleMines;
 /* CustomUtils-ReasonReactStarter Not a pure module */
-},{"bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/caml_obj.js":"../node_modules/bs-platform/lib/js/caml_obj.js","bs-platform/lib/js/belt_List.js":"../node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/caml_exceptions.js":"../node_modules/bs-platform/lib/js/caml_exceptions.js","../utils/CustomUtils.bs.js":"utils/CustomUtils.bs.js"}],"gameLogic/Game.bs.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/list.js":"node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/caml_obj.js":"node_modules/bs-platform/lib/js/caml_obj.js","bs-platform/lib/js/belt_List.js":"node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/caml_array.js":"node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/caml_exceptions.js":"node_modules/bs-platform/lib/js/caml_exceptions.js","../utils/CustomUtils.bs.js":"src/utils/CustomUtils.bs.js"}],"src/gameLogic/Game.bs.js":[function(require,module,exports) {
 'use strict';
 
 var List = require("bs-platform/lib/js/list.js");
@@ -42202,7 +42202,7 @@ exports.MinePopulationStrategy = MinePopulationStrategy;
 exports.reduce = reduce;
 exports.make = make;
 /* Board-ReasonReactStarter Not a pure module */
-},{"bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/belt_List.js":"../node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js","./Board.bs.js":"gameLogic/Board.bs.js","../utils/CustomUtils.bs.js":"utils/CustomUtils.bs.js"}],"gameLogic/Engine.bs.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/list.js":"node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/belt_List.js":"node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/caml_array.js":"node_modules/bs-platform/lib/js/caml_array.js","./Board.bs.js":"src/gameLogic/Board.bs.js","../utils/CustomUtils.bs.js":"src/utils/CustomUtils.bs.js"}],"src/gameLogic/Engine.bs.js":[function(require,module,exports) {
 'use strict';
 
 var $$Set = require("bs-platform/lib/js/set.js");
@@ -42774,7 +42774,7 @@ exports.random = random;
 exports.solver = solver;
 exports.registry = registry;
 /* ConstraintSet Not a pure module */
-},{"bs-platform/lib/js/set.js":"../node_modules/bs-platform/lib/js/set.js","bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/block.js":"../node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/belt_Array.js":"../node_modules/bs-platform/lib/js/belt_Array.js","bs-platform/lib/js/caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/caml_exceptions.js":"../node_modules/bs-platform/lib/js/caml_exceptions.js","bs-platform/lib/js/caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","./Board.bs.js":"gameLogic/Board.bs.js","../utils/CustomUtils.bs.js":"utils/CustomUtils.bs.js"}],"../node_modules/bs-platform/lib/js/js_dict.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/set.js":"node_modules/bs-platform/lib/js/set.js","bs-platform/lib/js/list.js":"node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/block.js":"node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/belt_Array.js":"node_modules/bs-platform/lib/js/belt_Array.js","bs-platform/lib/js/caml_array.js":"node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/caml_exceptions.js":"node_modules/bs-platform/lib/js/caml_exceptions.js","bs-platform/lib/js/caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","./Board.bs.js":"src/gameLogic/Board.bs.js","../utils/CustomUtils.bs.js":"src/utils/CustomUtils.bs.js"}],"node_modules/bs-platform/lib/js/js_dict.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_option = require("./caml_option.js");
@@ -42861,7 +42861,7 @@ exports.fromArray = fromArray;
 exports.map = map;
 /* No side effect */
 
-},{"./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js"}],"../node_modules/@emotion/sheet/dist/sheet.browser.esm.js":[function(require,module,exports) {
+},{"./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js"}],"node_modules/@emotion/sheet/dist/sheet.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43002,7 +43002,7 @@ var StyleSheet = /*#__PURE__*/function () {
 }();
 
 exports.StyleSheet = StyleSheet;
-},{}],"../node_modules/@emotion/stylis/dist/stylis.browser.esm.js":[function(require,module,exports) {
+},{}],"node_modules/@emotion/stylis/dist/stylis.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43625,7 +43625,7 @@ function stylis_min(W) {
 
 var _default = stylis_min;
 exports.default = _default;
-},{}],"../node_modules/@emotion/weak-memoize/dist/weak-memoize.browser.esm.js":[function(require,module,exports) {
+},{}],"node_modules/@emotion/weak-memoize/dist/weak-memoize.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43650,7 +43650,7 @@ var weakMemoize = function weakMemoize(func) {
 
 var _default = weakMemoize;
 exports.default = _default;
-},{}],"../node_modules/@emotion/cache/dist/cache.browser.esm.js":[function(require,module,exports) {
+},{}],"node_modules/@emotion/cache/dist/cache.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43873,7 +43873,7 @@ var createCache = function createCache(options) {
 
 var _default = createCache;
 exports.default = _default;
-},{"@emotion/sheet":"../node_modules/@emotion/sheet/dist/sheet.browser.esm.js","@emotion/stylis":"../node_modules/@emotion/stylis/dist/stylis.browser.esm.js","@emotion/weak-memoize":"../node_modules/@emotion/weak-memoize/dist/weak-memoize.browser.esm.js"}],"../node_modules/@emotion/hash/dist/hash.browser.esm.js":[function(require,module,exports) {
+},{"@emotion/sheet":"node_modules/@emotion/sheet/dist/sheet.browser.esm.js","@emotion/stylis":"node_modules/@emotion/stylis/dist/stylis.browser.esm.js","@emotion/weak-memoize":"node_modules/@emotion/weak-memoize/dist/weak-memoize.browser.esm.js"}],"node_modules/@emotion/hash/dist/hash.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43919,7 +43919,7 @@ function murmurhash2_32_gc(str) {
 
 var _default = murmurhash2_32_gc;
 exports.default = _default;
-},{}],"../node_modules/@emotion/unitless/dist/unitless.browser.esm.js":[function(require,module,exports) {
+},{}],"node_modules/@emotion/unitless/dist/unitless.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43976,7 +43976,7 @@ var unitlessKeys = {
 };
 var _default = unitlessKeys;
 exports.default = _default;
-},{}],"../node_modules/@emotion/memoize/dist/memoize.browser.esm.js":[function(require,module,exports) {
+},{}],"node_modules/@emotion/memoize/dist/memoize.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -43994,7 +43994,7 @@ function memoize(fn) {
 
 var _default = memoize;
 exports.default = _default;
-},{}],"../node_modules/@emotion/serialize/dist/serialize.browser.esm.js":[function(require,module,exports) {
+},{}],"node_modules/@emotion/serialize/dist/serialize.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44329,7 +44329,7 @@ var serializeStyles = function serializeStyles(args, registered, mergedProps) {
 };
 
 exports.serializeStyles = serializeStyles;
-},{"@emotion/hash":"../node_modules/@emotion/hash/dist/hash.browser.esm.js","@emotion/unitless":"../node_modules/@emotion/unitless/dist/unitless.browser.esm.js","@emotion/memoize":"../node_modules/@emotion/memoize/dist/memoize.browser.esm.js"}],"../node_modules/@emotion/utils/dist/utils.browser.esm.js":[function(require,module,exports) {
+},{"@emotion/hash":"node_modules/@emotion/hash/dist/hash.browser.esm.js","@emotion/unitless":"node_modules/@emotion/unitless/dist/unitless.browser.esm.js","@emotion/memoize":"node_modules/@emotion/memoize/dist/memoize.browser.esm.js"}],"node_modules/@emotion/utils/dist/utils.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44378,7 +44378,7 @@ var insertStyles = function insertStyles(cache, serialized, isStringTag) {
 };
 
 exports.insertStyles = insertStyles;
-},{}],"../node_modules/create-emotion/dist/create-emotion.browser.esm.js":[function(require,module,exports) {
+},{}],"node_modules/create-emotion/dist/create-emotion.browser.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44535,7 +44535,7 @@ var classnames = function classnames(args) {
 
 var _default = createEmotion;
 exports.default = _default;
-},{"@emotion/cache":"../node_modules/@emotion/cache/dist/cache.browser.esm.js","@emotion/serialize":"../node_modules/@emotion/serialize/dist/serialize.browser.esm.js","@emotion/utils":"../node_modules/@emotion/utils/dist/utils.browser.esm.js"}],"../node_modules/emotion/dist/emotion.esm.js":[function(require,module,exports) {
+},{"@emotion/cache":"node_modules/@emotion/cache/dist/cache.browser.esm.js","@emotion/serialize":"node_modules/@emotion/serialize/dist/serialize.browser.esm.js","@emotion/utils":"node_modules/@emotion/utils/dist/utils.browser.esm.js"}],"node_modules/emotion/dist/emotion.esm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44569,7 +44569,7 @@ exports.merge = merge;
 exports.cx = cx;
 exports.hydrate = hydrate;
 exports.flush = flush;
-},{"create-emotion":"../node_modules/create-emotion/dist/create-emotion.browser.esm.js"}],"../node_modules/bs-platform/lib/js/js_option.js":[function(require,module,exports) {
+},{"create-emotion":"node_modules/create-emotion/dist/create-emotion.browser.esm.js"}],"node_modules/bs-platform/lib/js/js_option.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_option = require("./caml_option.js");
@@ -44676,7 +44676,7 @@ exports.filter = filter;
 exports.firstSome = firstSome;
 /* No side effect */
 
-},{"./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js"}],"../node_modules/bs-css/src/Css_AtomicTypes.js":[function(require,module,exports) {
+},{"./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js"}],"node_modules/bs-css/src/Css_AtomicTypes.js":[function(require,module,exports) {
 // Generated by BUCKLESCRIPT, PLEASE EDIT WITH CARE
 'use strict';
 
@@ -47125,7 +47125,7 @@ exports.TransformStyle = TransformStyle;
 exports.ListStyleImage = ListStyleImage;
 /* No side effect */
 
-},{"bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/string.js":"../node_modules/bs-platform/lib/js/string.js","bs-platform/lib/js/belt_List.js":"../node_modules/bs-platform/lib/js/belt_List.js"}],"../node_modules/bs-css/src/Css_Colors.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/list.js":"node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/string.js":"node_modules/bs-platform/lib/js/string.js","bs-platform/lib/js/belt_List.js":"node_modules/bs-platform/lib/js/belt_List.js"}],"node_modules/bs-css/src/Css_Colors.js":[function(require,module,exports) {
 // Generated by BUCKLESCRIPT, PLEASE EDIT WITH CARE
 'use strict';
 
@@ -47580,7 +47580,7 @@ exports.yellowgreen = yellowgreen;
 exports.transparent = transparent;
 /* aliceblue Not a pure module */
 
-},{"./Css_AtomicTypes.js":"../node_modules/bs-css/src/Css_AtomicTypes.js"}],"../node_modules/bs-platform/lib/js/belt_Option.js":[function(require,module,exports) {
+},{"./Css_AtomicTypes.js":"node_modules/bs-css/src/Css_AtomicTypes.js"}],"node_modules/bs-platform/lib/js/belt_Option.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("./curry.js");
@@ -47708,7 +47708,7 @@ exports.cmpU = cmpU;
 exports.cmp = cmp;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js"}],"../node_modules/bs-css/src/Css.js":[function(require,module,exports) {
+},{"./curry.js":"node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"node_modules/bs-platform/lib/js/caml_option.js"}],"node_modules/bs-css/src/Css.js":[function(require,module,exports) {
 // Generated by BUCKLESCRIPT, PLEASE EDIT WITH CARE
 'use strict';
 
@@ -51761,7 +51761,7 @@ exports.yellow = yellow;
 exports.yellowgreen = yellowgreen;
 /* cache Not a pure module */
 
-},{"bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/block.js":"../node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/string.js":"../node_modules/bs-platform/lib/js/string.js","bs-platform/lib/js/js_dict.js":"../node_modules/bs-platform/lib/js/js_dict.js","emotion":"../node_modules/emotion/dist/emotion.esm.js","bs-platform/lib/js/belt_List.js":"../node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/js_option.js":"../node_modules/bs-platform/lib/js/js_option.js","./Css_Colors.js":"../node_modules/bs-css/src/Css_Colors.js","bs-platform/lib/js/belt_Option.js":"../node_modules/bs-platform/lib/js/belt_Option.js","./Css_AtomicTypes.js":"../node_modules/bs-css/src/Css_AtomicTypes.js"}],"../assets/bomb.svg":[function(require,module,exports) {
+},{"bs-platform/lib/js/list.js":"node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/block.js":"node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/string.js":"node_modules/bs-platform/lib/js/string.js","bs-platform/lib/js/js_dict.js":"node_modules/bs-platform/lib/js/js_dict.js","emotion":"node_modules/emotion/dist/emotion.esm.js","bs-platform/lib/js/belt_List.js":"node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/js_option.js":"node_modules/bs-platform/lib/js/js_option.js","./Css_Colors.js":"node_modules/bs-css/src/Css_Colors.js","bs-platform/lib/js/belt_Option.js":"node_modules/bs-platform/lib/js/belt_Option.js","./Css_AtomicTypes.js":"node_modules/bs-css/src/Css_AtomicTypes.js"}],"assets/bomb.svg":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51811,7 +51811,7 @@ function SvgBomb(props) {
 
 var _default = SvgBomb;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js"}],"../assets/flag.svg":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js"}],"assets/flag.svg":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51861,7 +51861,7 @@ function SvgFlag(props) {
 
 var _default = SvgFlag;
 exports.default = _default;
-},{"react":"../node_modules/react/index.js"}],"components/DataAttributesProvider.bs.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js"}],"src/components/DataAttributesProvider.bs.js":[function(require,module,exports) {
 'use strict';
 
 var React = require("react");
@@ -51877,7 +51877,7 @@ function DataAttributesProvider(Props) {
 var make = DataAttributesProvider;
 exports.make = make;
 /* react Not a pure module */
-},{"react":"../node_modules/react/index.js","bs-platform/lib/js/js_dict.js":"../node_modules/bs-platform/lib/js/js_dict.js"}],"components/Cell/CellComponent.bs.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","bs-platform/lib/js/js_dict.js":"node_modules/bs-platform/lib/js/js_dict.js"}],"src/components/Cell/CellComponent.bs.js":[function(require,module,exports) {
 'use strict';
 
 var Css = require("bs-css/src/Css.js");
@@ -52154,7 +52154,7 @@ exports.MineImage = MineImage;
 exports.Styles = Styles;
 exports.make = make$2;
 /* make Not a pure module */
-},{"bs-css/src/Css.js":"../node_modules/bs-css/src/Css.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","react":"../node_modules/react/index.js","bs-platform/lib/js/pervasives.js":"../node_modules/bs-platform/lib/js/pervasives.js","../../../assets/bomb.svg":"../assets/bomb.svg","../../../assets/flag.svg":"../assets/flag.svg","../../utils/CustomUtils.bs.js":"utils/CustomUtils.bs.js","../DataAttributesProvider.bs.js":"components/DataAttributesProvider.bs.js"}],"components/Board/BoardComponent.bs.js":[function(require,module,exports) {
+},{"bs-css/src/Css.js":"node_modules/bs-css/src/Css.js","bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","react":"node_modules/react/index.js","bs-platform/lib/js/pervasives.js":"node_modules/bs-platform/lib/js/pervasives.js","../../../assets/bomb.svg":"assets/bomb.svg","../../../assets/flag.svg":"assets/flag.svg","../../utils/CustomUtils.bs.js":"src/utils/CustomUtils.bs.js","../DataAttributesProvider.bs.js":"src/components/DataAttributesProvider.bs.js"}],"src/components/Board/BoardComponent.bs.js":[function(require,module,exports) {
 'use strict';
 
 var Css = require("bs-css/src/Css.js");
@@ -52356,7 +52356,7 @@ exports.Style = Style;
 exports.reduceHoveredCells = reduceHoveredCells;
 exports.make = make;
 /* board Not a pure module */
-},{"bs-css/src/Css.js":"../node_modules/bs-css/src/Css.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/block.js":"../node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","react":"../node_modules/react/index.js","bs-platform/lib/js/caml_obj.js":"../node_modules/bs-platform/lib/js/caml_obj.js","bs-platform/lib/js/caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","../../utils/CustomUtils.bs.js":"utils/CustomUtils.bs.js","../Cell/CellComponent.bs.js":"components/Cell/CellComponent.bs.js"}],"components/ControlPanel/ControlPanelComponent.bs.js":[function(require,module,exports) {
+},{"bs-css/src/Css.js":"node_modules/bs-css/src/Css.js","bs-platform/lib/js/array.js":"node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/block.js":"node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","react":"node_modules/react/index.js","bs-platform/lib/js/caml_obj.js":"node_modules/bs-platform/lib/js/caml_obj.js","bs-platform/lib/js/caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","../../utils/CustomUtils.bs.js":"src/utils/CustomUtils.bs.js","../Cell/CellComponent.bs.js":"src/components/Cell/CellComponent.bs.js"}],"src/components/ControlPanel/ControlPanelComponent.bs.js":[function(require,module,exports) {
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
@@ -52409,7 +52409,7 @@ function ControlPanelComponent(Props) {
 var make = ControlPanelComponent;
 exports.make = make;
 /* react Not a pure module */
-},{"bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","react":"../node_modules/react/index.js","../../utils/CustomUtils.bs.js":"utils/CustomUtils.bs.js"}],"components/Game/GameComponent.bs.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","react":"node_modules/react/index.js","../../utils/CustomUtils.bs.js":"src/utils/CustomUtils.bs.js"}],"src/components/Game/GameComponent.bs.js":[function(require,module,exports) {
 'use strict';
 
 var List = require("bs-platform/lib/js/list.js");
@@ -52731,7 +52731,7 @@ exports.NoGameHistory = NoGameHistory;
 exports.NoMovePossible = NoMovePossible;
 exports.make = make;
 /* initialGameState Not a pure module */
-},{"bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/block.js":"../node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","react":"../node_modules/react/index.js","bs-platform/lib/js/caml_exceptions.js":"../node_modules/bs-platform/lib/js/caml_exceptions.js","bs-platform/lib/js/caml_builtin_exceptions.js":"../node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","../../gameLogic/Game.bs.js":"gameLogic/Game.bs.js","../../gameLogic/Engine.bs.js":"gameLogic/Engine.bs.js","../../utils/CustomUtils.bs.js":"utils/CustomUtils.bs.js","../Board/BoardComponent.bs.js":"components/Board/BoardComponent.bs.js","../ControlPanel/ControlPanelComponent.bs.js":"components/ControlPanel/ControlPanelComponent.bs.js"}],"index.bs.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/list.js":"node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/block.js":"node_modules/bs-platform/lib/js/block.js","bs-platform/lib/js/curry.js":"node_modules/bs-platform/lib/js/curry.js","react":"node_modules/react/index.js","bs-platform/lib/js/caml_exceptions.js":"node_modules/bs-platform/lib/js/caml_exceptions.js","bs-platform/lib/js/caml_builtin_exceptions.js":"node_modules/bs-platform/lib/js/caml_builtin_exceptions.js","../../gameLogic/Game.bs.js":"src/gameLogic/Game.bs.js","../../gameLogic/Engine.bs.js":"src/gameLogic/Engine.bs.js","../../utils/CustomUtils.bs.js":"src/utils/CustomUtils.bs.js","../Board/BoardComponent.bs.js":"src/components/Board/BoardComponent.bs.js","../ControlPanel/ControlPanelComponent.bs.js":"src/components/ControlPanel/ControlPanelComponent.bs.js"}],"src/index.bs.js":[function(require,module,exports) {
 'use strict';
 
 var React = require("react");
@@ -52764,7 +52764,7 @@ ReactDom.render(React.createElement(GameComponent$ReasonReactStarter.make, {}), 
 exports.style = style;
 exports.makeContainer = makeContainer;
 /* style Not a pure module */
-},{"react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","./exampleComponents/ExampleStyles.bs.js":"exampleComponents/ExampleStyles.bs.js","./components/Game/GameComponent.bs.js":"components/Game/GameComponent.bs.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","react-dom":"node_modules/react-dom/index.js","./exampleComponents/ExampleStyles.bs.js":"src/exampleComponents/ExampleStyles.bs.js","./components/Game/GameComponent.bs.js":"src/components/Game/GameComponent.bs.js"}],"../../../.config/yarn/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -52792,7 +52792,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43815" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43227" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -52968,5 +52968,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.bs.js"], null)
+},{}]},{},["../../../.config/yarn/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/index.bs.js"], null)
 //# sourceMappingURL=/index.bs.4992a256.js.map
