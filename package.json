@@ -4,15 +4,13 @@
   "private": true,
   "homepage": "https://petevdp.github.io/mineswept",
   "scripts": {
-    "build": "bsb -make-world",
-    "start": "bsb -make-world -w -ws _ ",
+    "watch": "bsb -make-world -w -ws _ ",
     "clean": "bsb -clean-world",
-    "webpack": "webpack -w",
-    "webpack:production": "NODE_ENV=production webpack",
-    "server": "webpack-dev-server",
+    "server": "parcel src/index.html",
+    "build-prod": "bsb -make-world && parcel build src/index.html --public-url \"/mineswept\" --no-source-maps",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "predeploy": "yarn build && yarn webpack:production",
-    "deploy": "gh-pages -d build"
+    "predeploy": "yarn clean && yarn build-prod",
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [
     "BuckleScript",
@@ -23,7 +21,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@svgr/parcel-plugin-svgr": "^5.4.0",
     "bs-css": "^11.0.0",
+    "parcel-bundler": "^1.12.4",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "react-tooltip": "^3.11.1",
@@ -34,10 +34,6 @@
     "css-loader": "^3.2.0",
     "file-loader": "^5.0.2",
     "gh-pages": "^2.1.1",
-    "html-webpack-plugin": "^3.2.0",
-    "style-loader": "^1.0.0",
-    "webpack": "^4.0.1",
-    "webpack-cli": "^3.1.1",
-    "webpack-dev-server": "^3.1.8"
+    "style-loader": "^1.0.0"
   }
 }

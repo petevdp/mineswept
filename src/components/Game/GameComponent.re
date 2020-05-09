@@ -221,6 +221,5 @@ let make = () => {
       showOverlay
       groupMap
     />
-    <ReactToolTip />
   </React.Fragment>;
 };

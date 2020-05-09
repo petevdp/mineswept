@@ -1,14 +1,14 @@
 open CustomUtils;
 
 module FlagImage = {
-  [@bs.module "../../../assets/flag.svg"] external flag: string = "default";
+  [@bs.module "../../../assets/flag.svg"] [@react.component]
+  external make: unit => React.element = "default";
 };
 
 module MineImage = {
-  [@bs.module "../../../assets/bomb.svg"] external flag: string = "default";
+  [@bs.module "../../../assets/bomb.svg"] [@react.component]
+  external make: unit => React.element = "default";
 };
-
-Js.log(FlagImage.flag);
 
 module Styles = {
   open Css;
@@ -117,14 +117,8 @@ let make =
         Styles.GameOver.hidden,
         numAdjacentMines->string_of_int->str,
       )
-    | (Flagged, _, _, _, _, _) => (
-        Styles.flagged,
-        <img className=Styles.flag src=FlagImage.flag />,
-      )
-    | (Visible, true, _, _, _, _) => (
-        Styles.Visible.mined,
-        <img className=Styles.bomb src=MineImage.flag />,
-      )
+    | (Flagged, _, _, _, _, _) => (Styles.flagged, <FlagImage />)
+    | (Visible, true, _, _, _, _) => (Styles.Visible.mined, <MineImage />)
     | (Visible, false, _, _, _, _) => (
         Styles.Visible.empty,
         str(string_of_int(numAdjacentMines)),
